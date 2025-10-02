@@ -4,31 +4,35 @@ Une interface de menu minimaliste pour kiosque qui propose deux services princip
 BeaverPhone pour la téléphonie locale et BeaverNet.ca pour les services nuagiques.
 
 ## Aperçu
-- **React renderer** : l'interface est désormais rendue par de petits composants React (sans dépendances réseau) via des modules JavaScript dans `renderer/`.
-- **menu.html** : écran d'accueil piloté par React avec un sélecteur de langue persistant.
-- **beaverphone.html** : composeur téléphonique interactif entièrement réécrit en React.
-- **main.js / preload.js** : scripts utilisés par l'application Electron et la couche WebSocket.
-- **service de traduction local** : commutateur intégré pour passer du français à l'anglais sans connexion réseau.
+- **React + Vite** : l'interface du kiosque est fournie par une véritable application React (avec Hot Module Replacement) située dans `renderer/`.
+- **Routage unifié** : le menu principal et le composeur BeaverPhone sont servis par une seule SPA et naviguent grâce à React Router.
+- **Electron** : `main.js` charge automatiquement le serveur de dev Vite en environnement de développement et le bundle statique en production.
+- **preload.js** : conserve la passerelle WebSocket et les événements personnalisés `beaverphone:dialpad` pour la numérotation.
 
-## Lancer l'application
+## Démarrage rapide
 1. Installer les dépendances :
    ```bash
    npm install
    ```
-2. Aucune étape de build n'est nécessaire : les modules React locaux sont chargés directement dans les pages HTML.
-3. Démarrer l'application :
+2. Lancer le mode développement (Electron + Vite avec hot reload) :
+   ```bash
+   npm run dev
+   ```
+3. Produire le bundle statique pour la distribution :
+   ```bash
+   npm run build
+   ```
+4. Démarrer l'application empaquetée (nécessite un build préalable) :
    ```bash
    npm start
    ```
 
-L'application affichera le menu d'accueil où il suffit de toucher ou de cliquer sur la carte désirée.
-
 ## Langues et traduction
 - Le kiosque démarre en **français** et propose un sélecteur de langue local qui bascule instantanément l'interface en **anglais**.
-- Le service est purement client (fonctionne sur Debian, Ubuntu ou tout autre Linux sans dépendance réseau) : les traductions sont chargées depuis un dictionnaire JavaScript embarqué.
-- Pour ajouter une nouvelle langue, complétez simplement l'objet `translations` dans `menu.html` avec un nouveau code de langue et ses chaînes.
+- Les traductions sont chargées depuis un dictionnaire embarqué dans `renderer/src/routes/MenuPage.jsx`.
+- Pour ajouter une nouvelle langue, complétez simplement l'objet `translations` dans cette page et ajoutez la carte correspondante si nécessaire.
 
 ## Personnalisation
-- Ajoutez de nouvelles cartes dans `menu.html` pour offrir davantage de services.
-- Modifiez les styles intégrés pour adapter les couleurs et la typographie à votre identité visuelle.
-- Utilisez les événements personnalisés du `beaverphone.html` pour connecter la numérotation à votre logique métier.
+- Ajoutez de nouvelles cartes dans `MenuPage.jsx` ou modifiez le tableau `CARD_CONFIG` pour lier d'autres services.
+- Mettez à jour les styles globaux dans `renderer/src/styles/` pour adapter les couleurs et la typographie à votre identité visuelle.
+- Réutilisez la fonction `dispatchDialpadEvent` du `BeaverphonePage.jsx` pour connecter la numérotation à votre logique métier côté preload.
