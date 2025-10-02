@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Beaver Kiosk</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: #111;
+      color: #fff;
+    }
+    .menu {
+      display: grid;
+      gap: 2rem;
+    }
+    .card {
+      background: #222;
+      border: 2px solid #f89422;
+      border-radius: 12px;
+      padding: 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .card:hover {
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+  <div class="menu">
+    <div class="card" onclick="location.href='beaverphone.html'">📞 BeaverPhone (local)</div>
+    <div class="card" onclick="location.href='https://rgbeavernet.ca'">🌐 BeaverNet.ca (cloud)</div>
+  </div>
+</body>
+</html>
