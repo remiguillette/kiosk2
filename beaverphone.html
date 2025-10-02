@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>BeaverPhone</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #000;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .dialpad {
+      display: grid;
+      grid-template-columns: repeat(3, 80px);
+      gap: 1rem;
+    }
+    button {
+      font-size: 1.5rem;
+      padding: 1rem;
+      border-radius: 8px;
+      border: none;
+      background: #333;
+      color: #fff;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #f89422;
+    }
+  </style>
+</head>
+<body>
+  <div class="dialpad">
+    <button onclick="dial('1')">1</button>
+    <button onclick="dial('2')">2</button>
+    <button onclick="dial('3')">3</button>
+    <button onclick="dial('4')">4</button>
+    <button onclick="dial('5')">5</button>
+    <button onclick="dial('6')">6</button>
+    <button onclick="dial('7')">7</button>
+    <button onclick="dial('8')">8</button>
+    <button onclick="dial('9')">9</button>
+    <button onclick="dial('*')">*</button>
+    <button onclick="dial('0')">0</button>
+    <button onclick="dial('#')">#</button>
+  </div>
+
+  <script>
+    function dial(num) {
+      const event = new CustomEvent("beaverphone:dialpad", {
+        detail: { number: num }
+      });
+      window.dispatchEvent(event);
+    }
+  </script>
+</body>
+</html>
