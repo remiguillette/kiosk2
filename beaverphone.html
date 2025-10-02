@@ -427,12 +427,7 @@
       <div class="header-title">
         <a class="menu-return" href="menu.html" aria-label="Return to menu">
           <span class="btn-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"
-              stroke-linejoin="round">
-              <path d="M3 9l9-7 9 7"></path>
-              <path d="M9 22V12h6v10"></path>
-              <path d="M21 10v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V10"></path>
-            </svg>
+            <i data-lucide="arrow-left"></i>
           </span>
         </a>
         <span class="eyebrow">BeaverPhone</span>
@@ -455,26 +450,21 @@
         <div class="dialpad-grid" id="dialpad"></div>
 
         <div class="dialpad-actions">
-          <button type="button" class="pill-btn" id="erase-btn">Erase</button>
+          <button type="button" class="pill-btn" id="erase-btn">
+            <span class="btn-icon" aria-hidden="true">
+              <i data-lucide="delete"></i>
+            </span>
+            <span class="btn-label">Erase</span>
+          </button>
           <button type="button" class="pill-btn call-btn" id="call-btn">
             <span class="btn-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"
-                stroke-linejoin="round">
-                <path
-                  d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.82 12.82 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.82 12.82 0 0 0 2.81.7A2 2 0 0 1 22 16.92z">
-                </path>
-              </svg>
+              <i data-lucide="phone"></i>
             </span>
             <span class="btn-label">Call</span>
           </button>
           <button type="button" class="pill-btn" id="speaker-btn">
             <span class="btn-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"
-                stroke-linejoin="round">
-                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-                <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
-                <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-              </svg>
+              <i data-lucide="volume-2"></i>
             </span>
             <span class="btn-label">Speaker</span>
           </button>
@@ -483,16 +473,16 @@
         <div class="dialpad-secondary">
           <button type="button" class="pill-btn" id="hold-btn" disabled>
             <span class="btn-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"
-                stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="10" x2="10" y1="15" y2="9"></line>
-                <line x1="14" x2="14" y1="15" y2="9"></line>
-              </svg>
+              <i data-lucide="pause-circle"></i>
             </span>
             <span class="btn-label">Hold</span>
           </button>
-          <button type="button" class="pill-btn" id="clear-btn">Clear</button>
+          <button type="button" class="pill-btn" id="clear-btn">
+            <span class="btn-icon" aria-hidden="true">
+              <i data-lucide="x-circle"></i>
+            </span>
+            <span class="btn-label">Clear</span>
+          </button>
           <span></span>
         </div>
 
@@ -508,6 +498,16 @@
       </aside>
     </div>
   </div>
+
+  <script type="module">
+    import { createIcons } from "https://cdn.jsdelivr.net/npm/lucide@latest/+esm";
+
+    createIcons({
+      attrs: {
+        strokeWidth: 1.8,
+      },
+    });
+  </script>
 
   <script type="module">
     const BEAVERPHONE_DIALPAD_EVENT_KEY = "beaverphone:dialpad";
