@@ -1,6 +1,6 @@
-import { React, ReactDOM } from './shared/react-lite.js';
-
-const { createElement: h, Fragment, useEffect, useMemo, useRef, useState } = React;
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
+import '../styles/beaverphone.css';
 
 const BEAVERPHONE_DIALPAD_EVENT_KEY = 'beaverphone:dialpad';
 
@@ -65,103 +65,95 @@ function dispatchDialpadEvent(number) {
 }
 
 function Header() {
-  return h(
-    'header',
-    null,
-    h(
-      'div',
-      { className: 'header-title' },
-      h(
-        'a',
-        { className: 'menu-return', href: 'menu.html', 'aria-label': 'Return to menu' },
-        h('span', { className: 'btn-icon', 'aria-hidden': 'true' }, '←'),
-      ),
-      h('span', { className: 'eyebrow' }, 'BeaverPhone'),
-    ),
+  return (
+    <header>
+      <div className="header-title">
+        <Link className="menu-return" to="/" aria-label="Return to menu">
+          <span className="btn-icon" aria-hidden="true">
+            ←
+          </span>
+        </Link>
+        <span className="eyebrow">BeaverPhone</span>
+      </div>
+    </header>
   );
 }
 
 function DialpadKey({ label, subtext, onPress }) {
-  return h(
-    'button',
-    {
-      type: 'button',
-      className: 'dialpad-key',
-      onClick: () => onPress(label),
-      'aria-label': subtext ? `${label} ${subtext}` : label,
-    },
-    label,
-    subtext ? h('span', null, subtext) : null,
+  return (
+    <button
+      type="button"
+      className="dialpad-key"
+      onClick={() => onPress(label)}
+      aria-label={subtext ? `${label} ${subtext}` : label}
+    >
+      {label}
+      {subtext ? <span>{subtext}</span> : null}
+    </button>
   );
 }
 
 function IconButton({ label, icon, onClick, isActive, disabled = false }) {
-  const buttonProps = {
-    type: 'button',
-    className: 'pill-btn',
-    onClick,
-    disabled,
-  };
-
-  if (typeof isActive === 'boolean') {
-    buttonProps['data-active'] = String(isActive);
-    buttonProps['aria-pressed'] = String(isActive);
-  }
-
-  return h(
-    'button',
-    buttonProps,
-    h('span', { className: 'btn-icon', 'aria-hidden': 'true' }, icon),
-    h('span', { className: 'btn-label' }, label),
+  return (
+    <button
+      type="button"
+      className="pill-btn"
+      onClick={onClick}
+      data-active={typeof isActive === 'boolean' ? String(isActive) : undefined}
+      aria-pressed={typeof isActive === 'boolean' ? String(isActive) : undefined}
+      disabled={disabled}
+    >
+      <span className="btn-icon" aria-hidden="true">
+        {icon}
+      </span>
+      <span className="btn-label">{label}</span>
+    </button>
   );
 }
 
 function ExtensionCard({ contact, onSelect }) {
   const fallback = contact.name.slice(0, 1).toUpperCase();
-  return h(
-    'article',
-    {
-      className: 'extension-card',
-      onClick: () => onSelect(contact),
-      tabIndex: 0,
-      onKeyDown: (event) => {
+
+  const handleImageError = (event) => {
+    const target = event.currentTarget;
+    const parent = target.parentElement;
+    if (!parent) return;
+    target.remove();
+    parent.classList.add('avatar--fallback');
+    parent.textContent = fallback;
+  };
+
+  return (
+    <article
+      className="extension-card"
+      onClick={() => onSelect(contact)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(event) => {
         if (event.key === 'Enter' || event.key === ' ') {
           event.preventDefault();
           onSelect(contact);
         }
-      },
-    },
-    h(
-      'div',
-      { className: `avatar ${contact.image ? '' : 'avatar--fallback'}`, 'aria-hidden': 'true' },
-      contact.image
-        ? h('img', {
-            src: contact.image,
-            alt: `${contact.name} avatar`,
-            onError: (event) => {
-              const target = event.target;
-              const parent = target.parentElement;
-              target.remove();
-              if (parent) {
-                parent.classList.add('avatar--fallback');
-                parent.textContent = fallback;
-              }
-            },
-          })
-        : fallback,
-    ),
-    h(
-      'div',
-      null,
-      h('h3', null, contact.name),
-      h('div', { className: 'subtitle' }, contact.subtitle),
-      h('div', { className: 'details' }, contact.details),
-    ),
-    h('div', { className: 'extension' }, `Ext. ${contact.extension}`),
+      }}
+    >
+      <div className={`avatar ${contact.image ? '' : 'avatar--fallback'}`} aria-hidden="true">
+        {contact.image ? (
+          <img src={contact.image} alt={`${contact.name} avatar`} onError={handleImageError} />
+        ) : (
+          fallback
+        )}
+      </div>
+      <div>
+        <h3>{contact.name}</h3>
+        <div className="subtitle">{contact.subtitle}</div>
+        <div className="details">{contact.details}</div>
+      </div>
+      <div className="extension">Ext. {contact.extension}</div>
+    </article>
   );
 }
 
-function BeaverPhoneApp() {
+function BeaverphonePage() {
   const [state, setState] = useState(initialState);
   const [helperOverride, setHelperOverride] = useState(null);
   const inputRef = useRef(null);
@@ -223,6 +215,7 @@ function BeaverPhoneApp() {
   const resetDialer = () => {
     setHelperOverride(null);
     setState({ ...initialState });
+    focusComposer();
   };
 
   const toggleCall = () => {
@@ -262,7 +255,7 @@ function BeaverPhoneApp() {
     if (event.key === 'Enter') {
       event.preventDefault();
       toggleCall();
-    } else if (event.key === 'Backspace' && event.metaKey) {
+    } else if (event.key === 'Backspace' && (event.metaKey || event.ctrlKey)) {
       event.preventDefault();
       resetDialer();
     }
@@ -270,18 +263,20 @@ function BeaverPhoneApp() {
 
   const handleContactSelect = (contact) => {
     setHelperOverride(null);
-    setState({
+    setState((prev) => ({
+      ...prev,
       dialedNumber: contact.extension,
       isOnCall: true,
       isOnHold: false,
-      isSpeakerEnabled: state.isSpeakerEnabled,
-    });
+    }));
     dispatchDialpadEvent(contact.extension);
+    focusComposer();
   };
 
   useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.repeat) return;
+
       const activeElement = document.activeElement;
       if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
         return;
@@ -335,130 +330,103 @@ function BeaverPhoneApp() {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [state.isOnCall, state.dialedNumber, state.isOnHold, state.isSpeakerEnabled]);
+  }, [state.isOnCall, state.isOnHold, state.isSpeakerEnabled, state.dialedNumber]);
 
   useEffect(() => {
     focusComposer();
+    document.title = 'BeaverPhone';
   }, []);
 
-  return h(
-    Fragment,
-    null,
-    h(Header),
-    h(
-      'div',
-      { className: 'app' },
-      h(
-        'section',
-        { className: 'panel', 'aria-labelledby': 'dialpad-heading' },
-        h(
-          'div',
-          { className: 'dialpad-header' },
-          h('h2', { id: 'dialpad-heading' }, 'Dialpad'),
-          h('span', { className: 'status-pill', id: 'status-pill', 'data-active': String(state.isOnCall) }, statusLabel),
-        ),
-        h(
-          'div',
-          { className: 'composer' },
-          h('label', { htmlFor: 'composer-input' }, 'Number'),
-          h('input', {
-            id: 'composer-input',
-            ref: inputRef,
-            placeholder: 'Enter number',
-            value: state.dialedNumber,
-            onInput: handleComposerChange,
-            onKeyDown: handleComposerKeyDown,
-          }),
-        ),
-        h(
-          'div',
-          { className: 'dialpad-grid', id: 'dialpad' },
-          dialpad.map((item) => h(DialpadKey, { key: item.label, ...item, onPress: appendDigit })),
-        ),
-        h(
-          'div',
-          { className: 'dialpad-actions' },
-        h(
-          IconButton,
-          {
-            label: 'Erase',
-            icon: '⌫',
-            onClick: eraseDigit,
-          },
-        ),
-          h(
-            'button',
-            {
-              type: 'button',
-              className: 'pill-btn call-btn',
-              id: 'call-btn',
-              onClick: toggleCall,
-              'data-active': String(state.isOnCall),
-              'aria-pressed': String(state.isOnCall),
-            },
-            h('span', { className: 'btn-icon', 'aria-hidden': 'true' }, state.isOnCall ? '⛔' : '📞'),
-            h('span', { className: 'btn-label' }, callButtonLabel),
-          ),
-          h(
-            IconButton,
-            {
-              label: speakerButtonLabel,
-              icon: '🔈',
-              onClick: toggleSpeaker,
-              isActive: state.isSpeakerEnabled,
-            },
-          ),
-        ),
-        h(
-          'div',
-          { className: 'dialpad-secondary' },
-          h(
-            IconButton,
-            {
-              label: holdButtonLabel,
-              icon: '⏸',
-              onClick: toggleHold,
-              isActive: state.isOnHold,
-              disabled: !state.isOnCall,
-            },
-          ),
-        h(
-          IconButton,
-          {
-            label: 'Clear',
-            icon: '✖',
-            onClick: resetDialer,
-          },
-        ),
-          h('div'),
-        ),
-        h('p', { className: 'subtext', id: 'helper-text' }, helperText),
-      ),
-      h(
-        'section',
-        { className: 'extensions' },
-        h(
-          'header',
-          null,
-          h('h2', null, 'Saved extensions'),
-          h('p', null, 'Quick access to your most important contacts.'),
-        ),
-        h(
-          'div',
-          { className: 'extension-list', id: 'extension-list' },
-          contacts.length === 0
-            ? h('p', { className: 'empty-hint' }, 'No saved extensions yet.')
-            : contacts.map((contact) => h(ExtensionCard, { key: contact.extension, contact, onSelect: handleContactSelect })),
-        ),
-      ),
-    ),
+  return (
+    <div className="beaverphone-page">
+      <div className="beaverphone">
+        <Header />
+        <div className="app">
+          <section className="panel" aria-labelledby="dialpad-heading">
+            <div className="dialpad-header">
+              <h2 id="dialpad-heading">Dialpad</h2>
+              <span className="status-pill" data-active={String(state.isOnCall)}>
+                {statusLabel}
+              </span>
+            </div>
+
+            <div className="composer">
+              <label htmlFor="composer-input">Number</label>
+              <input
+                id="composer-input"
+                ref={inputRef}
+                placeholder="Enter number"
+                value={state.dialedNumber}
+                onChange={handleComposerChange}
+                onKeyDown={handleComposerKeyDown}
+              />
+            </div>
+
+            <div className="dialpad-grid" id="dialpad">
+              {dialpad.map((item) => (
+                <DialpadKey key={item.label} {...item} onPress={appendDigit} />
+              ))}
+            </div>
+
+            <div className="dialpad-actions">
+              <IconButton label="Erase" icon="⌫" onClick={eraseDigit} />
+              <button
+                type="button"
+                className="pill-btn call-btn"
+                id="call-btn"
+                onClick={toggleCall}
+                data-active={String(state.isOnCall)}
+                aria-pressed={String(state.isOnCall)}
+              >
+                <span className="btn-icon" aria-hidden="true">
+                  {state.isOnCall ? '⛔' : '📞'}
+                </span>
+                <span className="btn-label">{callButtonLabel}</span>
+              </button>
+              <IconButton
+                label={speakerButtonLabel}
+                icon="🔈"
+                onClick={toggleSpeaker}
+                isActive={state.isSpeakerEnabled}
+              />
+            </div>
+
+            <div className="dialpad-secondary">
+              <IconButton
+                label={holdButtonLabel}
+                icon="⏸"
+                onClick={toggleHold}
+                isActive={state.isOnHold}
+                disabled={!state.isOnCall}
+              />
+              <IconButton label="Clear" icon="✖" onClick={resetDialer} />
+              <div />
+            </div>
+
+            <p className="subtext" id="helper-text">
+              {helperText}
+            </p>
+          </section>
+
+          <section className="extensions">
+            <header>
+              <h2>Saved extensions</h2>
+              <p>Quick access to your most important contacts.</p>
+            </header>
+            <div className="extension-list" id="extension-list">
+              {contacts.length === 0 ? (
+                <p className="empty-hint">No saved extensions yet.</p>
+              ) : (
+                contacts.map((contact) => (
+                  <ExtensionCard key={contact.extension} contact={contact} onSelect={handleContactSelect} />
+                ))
+              )}
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
   );
 }
 
-function BeaverPhoneRoot() {
-  return h('div', { className: 'beaverphone' }, h(BeaverPhoneApp));
-}
-
-const container = document.getElementById('root');
-const root = ReactDOM.createRoot(container);
-root.render(h(BeaverPhoneRoot));
+export default BeaverphonePage;
