@@ -4,37 +4,263 @@
   <meta charset="UTF-8">
   <title>Beaver Kiosk</title>
   <style>
+    :root {
+      color-scheme: dark;
+      --bg-gradient: radial-gradient(circle at top, #1e1e2f, #09090f 65%);
+      --accent: #f89422;
+      --accent-soft: rgba(248, 148, 34, 0.15);
+      --card-bg: rgba(24, 24, 32, 0.9);
+      --text-main: #f2f2f7;
+      --text-muted: #c1c1d0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
     body {
-      font-family: sans-serif;
+      font-family: "Inter", "Segoe UI", sans-serif;
+      min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
-      background: #111;
-      color: #fff;
+      padding: 2rem;
+      background: var(--bg-gradient);
+      color: var(--text-main);
     }
+
+    .wrapper {
+      width: min(1040px, 100%);
+      display: grid;
+      gap: 3rem;
+      text-align: center;
+    }
+
+    .lang-toggle {
+      display: inline-flex;
+      align-self: flex-end;
+      justify-self: end;
+      gap: 0.75rem;
+      background: rgba(24, 24, 32, 0.6);
+      padding: 0.5rem 0.6rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+    }
+
+    .lang-btn {
+      appearance: none;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 0.4rem 0.9rem;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: color 150ms ease, background 150ms ease, transform 150ms ease;
+    }
+
+    .lang-btn:hover {
+      color: var(--text-main);
+      transform: translateY(-1px);
+    }
+
+    .lang-btn.active {
+      background: var(--accent);
+      color: #121219;
+      box-shadow: 0 8px 18px rgba(248, 148, 34, 0.35);
+    }
+
+    header h1 {
+      font-size: clamp(2.5rem, 5vw, 3.5rem);
+      letter-spacing: 1px;
+    }
+
+    header p {
+      margin-top: 1rem;
+      font-size: clamp(1rem, 2vw, 1.3rem);
+      color: var(--text-muted);
+      max-width: 640px;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.6;
+    }
+
     .menu {
       display: grid;
-      gap: 2rem;
+      gap: 1.8rem;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     }
+
     .card {
-      background: #222;
-      border: 2px solid #f89422;
-      border-radius: 12px;
-      padding: 2rem;
-      text-align: center;
+      position: relative;
+      overflow: hidden;
+      padding: 2.4rem 2rem;
+      border-radius: 22px;
+      background: var(--card-bg);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(14px);
+      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.4);
       cursor: pointer;
-      transition: transform 0.2s;
+      transition: transform 200ms ease, border-color 200ms ease;
     }
+
+    .card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: var(--accent-soft);
+      opacity: 0;
+      transition: opacity 200ms ease;
+      pointer-events: none;
+    }
+
     .card:hover {
-      transform: scale(1.05);
+      transform: translateY(-6px) scale(1.02);
+      border-color: rgba(248, 148, 34, 0.45);
+    }
+
+    .card:hover::after {
+      opacity: 1;
+    }
+
+    .card h2 {
+      font-size: 1.6rem;
+      margin-top: 1rem;
+      font-weight: 600;
+    }
+
+    .card p {
+      margin-top: 0.75rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .card .icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 64px;
+      height: 64px;
+      margin: 0 auto;
+      border-radius: 18px;
+      font-size: 2rem;
+      background: rgba(248, 148, 34, 0.18);
+      color: var(--accent);
+    }
+
+    footer {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    footer .highlight {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 1.5rem;
+      }
+
+      .card {
+        padding: 2rem 1.6rem;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="menu">
-    <div class="card" onclick="location.href='beaverphone.html'">📞 BeaverPhone (local)</div>
-    <div class="card" onclick="location.href='https://rgbeavernet.ca'">🌐 BeaverNet.ca (cloud)</div>
-  </div>
+  <main class="wrapper">
+    <div class="lang-toggle" role="group" aria-label="Sélecteur de langue">
+      <button type="button" class="lang-btn active" data-lang="fr" aria-pressed="true">Français</button>
+      <button type="button" class="lang-btn" data-lang="en" aria-pressed="false">English</button>
+    </div>
+    <header>
+      <h1 data-i18n="heroTitle">Bienvenue au Beaver&nbsp;Kiosk</h1>
+      <p data-i18n="heroSubtitle">
+        Prenez en main vos communications et vos services numériques en un seul endroit.
+        Choisissez une option ci-dessous pour commencer.
+      </p>
+    </header>
+
+    <section class="menu">
+      <article class="card" onclick="location.href='beaverphone.html'">
+        <div class="icon">📞</div>
+        <h2 data-i18n="beaverphoneTitle">BeaverPhone (local)</h2>
+        <p data-i18n="beaverphoneBody">Passez des appels internes ou externes en toute simplicité grâce à notre téléphone virtuel.</p>
+      </article>
+
+      <article class="card" onclick="location.href='https://rgbeavernet.ca'">
+        <div class="icon">🌐</div>
+        <h2 data-i18n="beavernetTitle">BeaverNet.ca (cloud)</h2>
+        <p data-i18n="beavernetBody">Accédez à la suite de services infonuagiques BeaverNet pour gérer vos activités en ligne.</p>
+      </article>
+    </section>
+
+    <footer>
+      <span class="highlight" data-i18n="tipLabel">Astuce :</span>
+      <span data-i18n="tipBody">Touchez l'écran ou utilisez la souris pour sélectionner un service.</span>
+    </footer>
+  </main>
+  <script>
+    const translations = {
+      fr: {
+        heroTitle: "Bienvenue au Beaver&nbsp;Kiosk",
+        heroSubtitle: "Prenez en main vos communications et vos services numériques en un seul endroit. Choisissez une option ci-dessous pour commencer.",
+        beaverphoneTitle: "BeaverPhone (local)",
+        beaverphoneBody: "Passez des appels internes ou externes en toute simplicité grâce à notre téléphone virtuel.",
+        beavernetTitle: "BeaverNet.ca (cloud)",
+        beavernetBody: "Accédez à la suite de services infonuagiques BeaverNet pour gérer vos activités en ligne.",
+        tipLabel: "Astuce :",
+        tipBody: "Touchez l'écran ou utilisez la souris pour sélectionner un service."
+      },
+      en: {
+        heroTitle: "Welcome to the Beaver Kiosk",
+        heroSubtitle: "Access your communications and digital services from one place. Choose an option below to get started.",
+        beaverphoneTitle: "BeaverPhone (local)",
+        beaverphoneBody: "Place internal or external calls with ease using our virtual phone.",
+        beavernetTitle: "BeaverNet.ca (cloud)",
+        beavernetBody: "Reach the BeaverNet cloud suite to manage your online services.",
+        tipLabel: "Tip:",
+        tipBody: "Tap the screen or use the mouse to select a service."
+      }
+    };
+
+    const langButtons = document.querySelectorAll('.lang-btn');
+
+    function setLanguage(lang) {
+      if (!translations[lang]) return;
+      document.documentElement.lang = lang;
+      document.querySelectorAll('[data-i18n]').forEach((node) => {
+        const key = node.dataset.i18n;
+        const value = translations[lang][key];
+        if (value) {
+          node.innerHTML = value;
+        }
+      });
+
+      langButtons.forEach((button) => {
+        const isActive = button.dataset.lang === lang;
+        button.classList.toggle('active', isActive);
+        button.setAttribute('aria-pressed', String(isActive));
+      });
+
+      localStorage.setItem('preferredLang', lang);
+    }
+
+    langButtons.forEach((button) => {
+      button.addEventListener('click', () => setLanguage(button.dataset.lang));
+    });
+
+    const savedLang = localStorage.getItem('preferredLang');
+    setLanguage(savedLang && translations[savedLang] ? savedLang : 'fr');
+  </script>
 </body>
 </html>
