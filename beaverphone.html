@@ -638,6 +638,67 @@
       updateUI();
     };
 
+    const isTextInput = (element) => {
+      if (!element) return false;
+      const tagName = element.tagName?.toLowerCase();
+      const editable = element.getAttribute?.("contenteditable");
+      return (
+        tagName === "input" ||
+        tagName === "textarea" ||
+        editable === "" ||
+        editable === "true"
+      );
+    };
+
+    window.addEventListener("keydown", (event) => {
+      if (event.repeat) return;
+
+      if (isTextInput(event.target)) {
+        return;
+      }
+
+      const key = event.key;
+
+      if (/^[0-9]$/.test(key) || key === "*" || key === "#") {
+        event.preventDefault();
+        appendDigit(key);
+        return;
+      }
+
+      switch (key) {
+        case "Enter":
+          event.preventDefault();
+          callBtn.click();
+          break;
+        case "Backspace":
+          event.preventDefault();
+          if (event.metaKey || event.ctrlKey) {
+            resetDialer();
+          } else {
+            eraseDigit();
+          }
+          break;
+        case "Escape":
+          event.preventDefault();
+          resetDialer();
+          break;
+        case "h":
+        case "H":
+          if (currentDialpadState.isOnCall) {
+            event.preventDefault();
+            holdBtn.click();
+          }
+          break;
+        case "s":
+        case "S":
+          event.preventDefault();
+          speakerBtn.click();
+          break;
+        default:
+          break;
+      }
+    });
+
     beaverPhoneConfig.dialpad.forEach((item) => {
       const btn = document.createElement("button");
       btn.type = "button";
