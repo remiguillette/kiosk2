@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Phone, PhoneOff } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import '../styles/beaverphone.css';
 
@@ -379,7 +380,7 @@ function BeaverphonePage() {
                 aria-pressed={String(state.isOnCall)}
               >
                 <span className="btn-icon" aria-hidden="true">
-                  {state.isOnCall ? '⛔' : '📞'}
+                  {state.isOnCall ? <PhoneOff size={16} /> : <Phone size={16} />}
                 </span>
                 <span className="btn-label">{callButtonLabel}</span>
               </button>
