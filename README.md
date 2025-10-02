@@ -4,9 +4,10 @@ Une interface de menu minimaliste pour kiosque qui propose deux services princip
 BeaverPhone pour la téléphonie locale et BeaverNet.ca pour les services nuagiques.
 
 ## Aperçu
-- **menu.html** : écran d'accueil avec un message de bienvenue et des cartes interactives.
-- **beaverphone.html** : clavier numérique basique qui déclenche des événements de numérotation.
-- **main.js / preload.js** : scripts utilisés par l'application Electron.
+- **React renderer** : l'interface est désormais rendue par de petits composants React (sans dépendances réseau) via des modules JavaScript dans `renderer/`.
+- **menu.html** : écran d'accueil piloté par React avec un sélecteur de langue persistant.
+- **beaverphone.html** : composeur téléphonique interactif entièrement réécrit en React.
+- **main.js / preload.js** : scripts utilisés par l'application Electron et la couche WebSocket.
 - **service de traduction local** : commutateur intégré pour passer du français à l'anglais sans connexion réseau.
 
 ## Lancer l'application
@@ -14,7 +15,8 @@ BeaverPhone pour la téléphonie locale et BeaverNet.ca pour les services nuagiq
    ```bash
    npm install
    ```
-2. Démarrer l'application :
+2. Aucune étape de build n'est nécessaire : les modules React locaux sont chargés directement dans les pages HTML.
+3. Démarrer l'application :
    ```bash
    npm start
    ```
