@@ -1,0 +1,17 @@
+{
+  "name": "beaverphone-kiosk",
+  "version": "1.0.0",
+  "description": "Kiosque Electron pour BeaverPhone (local) et BeaverNet.ca (cloud)",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "author": "Rémi Guillette RG Groupe",
+  "license": "MIT",
+  "dependencies": {
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "electron": "^31.0.0"
+  }
+}
