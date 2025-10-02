@@ -47,28 +47,50 @@
 
     header {
       display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .header-title {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.85rem;
     }
 
     header .eyebrow {
-      letter-spacing: 0.26em;
+      letter-spacing: 0.2em;
       text-transform: uppercase;
-      font-size: 0.76rem;
-      font-weight: 600;
-      color: var(--text-soft);
-    }
-
-    header h1 {
-      font-size: clamp(2rem, 4vw, 2.8rem);
+      font-size: clamp(1.6rem, 4vw, 2.3rem);
       font-weight: 700;
+      color: var(--accent);
     }
 
-    header p {
+    .menu-return {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.04);
       color: var(--text-muted);
-      max-width: 640px;
-      line-height: 1.6;
-      font-size: 1rem;
+      transition: color 160ms ease, border 160ms ease, background 160ms ease, transform 160ms ease;
+    }
+
+    .menu-return:hover,
+    .menu-return:focus-visible {
+      color: var(--accent);
+      border-color: var(--accent);
+      background: rgba(248, 148, 34, 0.14);
+      transform: translateY(-2px);
+      outline: none;
+    }
+
+    .menu-return svg {
+      width: 24px;
+      height: 24px;
+      stroke-width: 1.8;
     }
 
     .app {
@@ -232,7 +254,19 @@
       display: inline-flex;
       justify-content: center;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.65rem;
+    }
+
+    .btn-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .pill-btn .btn-icon svg {
+      width: 20px;
+      height: 20px;
+      stroke-width: 1.8;
     }
 
     .pill-btn[data-active="true"] {
@@ -320,16 +354,30 @@
       box-shadow: 0 12px 26px rgba(248, 148, 34, 0.18);
     }
 
-    .extension-card .badge {
-      width: 48px;
-      height: 48px;
-      border-radius: 16px;
-      background: rgba(248, 148, 34, 0.14);
+    .extension-card .avatar {
+      width: 56px;
+      height: 56px;
+      border-radius: 18px;
+      background: rgba(248, 148, 34, 0.16);
       color: var(--accent);
-      display: grid;
-      place-items: center;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       font-weight: 700;
       letter-spacing: 0.06em;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .extension-card .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .extension-card .avatar--fallback {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-main);
     }
 
     .extension-card h3 {
@@ -376,10 +424,19 @@
 <body>
   <div class="beaverphone">
     <header>
-      <span class="eyebrow">BeaverPhone</span>
-      <h1>Dial a number or choose an extension</h1>
-      <p>Connect instantly with community partners and internal contacts. Compose a number below or tap a contact to
-        begin.</p>
+      <div class="header-title">
+        <a class="menu-return" href="menu.html" aria-label="Return to menu">
+          <span class="btn-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"
+              stroke-linejoin="round">
+              <path d="M3 9l9-7 9 7"></path>
+              <path d="M9 22V12h6v10"></path>
+              <path d="M21 10v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V10"></path>
+            </svg>
+          </span>
+        </a>
+        <span class="eyebrow">BeaverPhone</span>
+      </div>
     </header>
 
     <div class="app">
@@ -399,12 +456,42 @@
 
         <div class="dialpad-actions">
           <button type="button" class="pill-btn" id="erase-btn">Erase</button>
-          <button type="button" class="pill-btn call-btn" id="call-btn">Call</button>
-          <button type="button" class="pill-btn" id="speaker-btn">Speaker</button>
+          <button type="button" class="pill-btn call-btn" id="call-btn">
+            <span class="btn-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path
+                  d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.82 12.82 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.82 12.82 0 0 0 2.81.7A2 2 0 0 1 22 16.92z">
+                </path>
+              </svg>
+            </span>
+            <span class="btn-label">Call</span>
+          </button>
+          <button type="button" class="pill-btn" id="speaker-btn">
+            <span class="btn-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"
+                stroke-linejoin="round">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+                <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+              </svg>
+            </span>
+            <span class="btn-label">Speaker</span>
+          </button>
         </div>
 
         <div class="dialpad-secondary">
-          <button type="button" class="pill-btn" id="hold-btn" disabled>Hold</button>
+          <button type="button" class="pill-btn" id="hold-btn" disabled>
+            <span class="btn-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"
+                stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="10" x2="10" y1="15" y2="9"></line>
+                <line x1="14" x2="14" y1="15" y2="9"></line>
+              </svg>
+            </span>
+            <span class="btn-label">Hold</span>
+          </button>
           <button type="button" class="pill-btn" id="clear-btn">Clear</button>
           <span></span>
         </div>
@@ -453,24 +540,28 @@
           subtitle: "Internal line",
           details: "Office 101",
           extension: "1201",
+          image: "contact/Police.png",
         },
         {
           name: "SPCA Niagara",
           subtitle: "Paws Law",
           details: "Office 3434",
           extension: "3434",
+          image: "contact/SPCA.png",
         },
         {
           name: "Mom",
           subtitle: "Mom",
           details: "Complaints Office",
           extension: "22",
+          image: null,
         },
         {
           name: "Services Ontario",
           subtitle: "Government of Ontario",
           details: "Desktop *1345",
           extension: "1345",
+          image: "contact/ontario.svg",
         },
       ],
       dialpadEventKey: BEAVERPHONE_DIALPAD_EVENT_KEY,
@@ -487,6 +578,10 @@
     const clearBtn = document.getElementById("clear-btn");
     const extensionList = document.getElementById("extension-list");
 
+    const callBtnLabel = callBtn.querySelector(".btn-label");
+    const holdBtnLabel = holdBtn.querySelector(".btn-label");
+    const speakerBtnLabel = speakerBtn.querySelector(".btn-label");
+
     const dispatchDialpadEvent = (number) => {
       const event = new CustomEvent(beaverPhoneConfig.dialpadEventKey, {
         detail: { number },
@@ -497,10 +592,15 @@
     const updateUI = () => {
       composerInput.value = currentDialpadState.dialedNumber;
       callBtn.dataset.active = currentDialpadState.isOnCall;
-      callBtn.textContent = currentDialpadState.isOnCall ? "End" : "Call";
+      callBtn.setAttribute("aria-pressed", currentDialpadState.isOnCall);
+      callBtnLabel.textContent = currentDialpadState.isOnCall ? "End" : "Call";
       holdBtn.disabled = !currentDialpadState.isOnCall;
       holdBtn.dataset.active = currentDialpadState.isOnHold;
+      holdBtn.setAttribute("aria-pressed", currentDialpadState.isOnHold);
+      holdBtnLabel.textContent = currentDialpadState.isOnHold ? "Resume" : "Hold";
       speakerBtn.dataset.active = currentDialpadState.isSpeakerEnabled;
+      speakerBtn.setAttribute("aria-pressed", currentDialpadState.isSpeakerEnabled);
+      speakerBtnLabel.textContent = currentDialpadState.isSpeakerEnabled ? "Mute" : "Speaker";
 
       if (currentDialpadState.isOnCall) {
         statusPill.dataset.active = "true";
@@ -602,15 +702,47 @@
     beaverPhoneConfig.contacts.forEach((contact) => {
       const card = document.createElement("article");
       card.className = "extension-card";
-      card.innerHTML = `
-        <div class="badge">${contact.extension.slice(0, 2)}</div>
-        <div>
-          <h3>${contact.name}</h3>
-          <div class="subtitle">${contact.subtitle}</div>
-          <div class="details">${contact.details}</div>
-        </div>
-        <div class="extension">Ext. ${contact.extension}</div>
-      `;
+
+      const avatar = document.createElement("div");
+      avatar.className = "avatar";
+      avatar.setAttribute("aria-hidden", "true");
+
+      if (contact.image) {
+        const img = document.createElement("img");
+        img.src = contact.image;
+        img.alt = `${contact.name} avatar`;
+        img.addEventListener("error", () => {
+          img.remove();
+          avatar.classList.add("avatar--fallback");
+          avatar.textContent = contact.name.slice(0, 1).toUpperCase();
+        });
+        avatar.appendChild(img);
+      } else {
+        avatar.classList.add("avatar--fallback");
+        avatar.textContent = contact.name.slice(0, 1).toUpperCase();
+      }
+
+      const info = document.createElement("div");
+      const nameEl = document.createElement("h3");
+      nameEl.textContent = contact.name;
+      const subtitleEl = document.createElement("div");
+      subtitleEl.className = "subtitle";
+      subtitleEl.textContent = contact.subtitle;
+      const detailsEl = document.createElement("div");
+      detailsEl.className = "details";
+      detailsEl.textContent = contact.details;
+      info.appendChild(nameEl);
+      info.appendChild(subtitleEl);
+      info.appendChild(detailsEl);
+
+      const extension = document.createElement("div");
+      extension.className = "extension";
+      extension.textContent = `Ext. ${contact.extension}`;
+
+      card.appendChild(avatar);
+      card.appendChild(info);
+      card.appendChild(extension);
+
       card.addEventListener("click", () => {
         currentDialpadState.dialedNumber = contact.extension;
         currentDialpadState.isOnCall = true;
