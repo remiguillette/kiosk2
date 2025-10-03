@@ -1,3 +1,4 @@
+console.log("✅ preload loaded")
 const log = require("electron-log");
 
 // Logger combiné terminal + fichier electron-log
