@@ -1,6 +1,6 @@
 const log = require("electron-log");
-const WebSocket = require("ws");
 
+// Logger combiné terminal + fichier electron-log
 const logger = {
   info: (...args) => {
     log.info("[BeaverPhone]", ...args);
@@ -20,30 +20,32 @@ let ws;
 
 function connectWS() {
   logger.info("Opening WebSocket connection to Termux gateway");
+
+  // Utilise l’API WebSocket native
   ws = new WebSocket("ws://192.168.1.60:5001");
 
-  ws.on("open", () => {
+  ws.onopen = () => {
     logger.info("Connected to local Termux WS");
-  });
+  };
 
-  ws.on("close", () => {
+  ws.onclose = () => {
     logger.warn("WS closed, reconnecting in 5s…");
     setTimeout(connectWS, 5000);
-  });
+  };
 
-  ws.on("error", (err) => {
+  ws.onerror = (err) => {
     logger.error("WS error:", err.message);
-  });
+  };
 
-  ws.on("message", (msg) => {
-    const text = msg.toString();
+  ws.onmessage = (msg) => {
+    const text = msg.data;
     try {
       const data = JSON.parse(text);
       logger.info("JSON response received", data);
     } catch (err) {
       logger.warn("Raw response received", text);
     }
-  });
+  };
 }
 
 function sendPayload(action, data = {}) {
@@ -56,6 +58,7 @@ function sendPayload(action, data = {}) {
   }
 }
 
+// Keep-alive ping toutes les 30s
 setInterval(() => {
   if (ws && ws.readyState === WebSocket.OPEN) {
     ws.send(JSON.stringify({ type: "ping" }));
@@ -65,6 +68,7 @@ setInterval(() => {
 
 connectWS();
 
+// Gérer les événements du dialpad
 window.addEventListener("DOMContentLoaded", () => {
   window.addEventListener("beaverphone:dialpad", (event) => {
     const { action, number } = event.detail;
