@@ -1,3 +1,4 @@
+try {
 console.log("✅ preload loaded")
 const log = require("electron-log");
 
@@ -94,3 +95,6 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
+  } catch (err) {
+  console.error("❌ preload.js crashed:", err);
+}
