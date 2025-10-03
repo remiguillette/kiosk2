@@ -39,16 +39,6 @@ createIcons({ icons });
 
 document.body.append('<i data-lucide="arrow-big-left-dash"></i>');
 
-Erase
-svg location /icon/arrow-big-left-dash.svg
-
-code
-import { createIcons, icons } from 'lucide';
-
-createIcons({ icons });
-
-document.body.append('<i data-lucide="arrow-big-left-dash"></i>');
-
 Call
 svg location /icon/phone.svg
 
