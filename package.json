@@ -9,6 +9,7 @@
   "author": "Rémi Guillette RG Groupe",
   "license": "MIT",
   "dependencies": {
+    "electron-log": "^5.4.3",
     "ws": "^8.18.0"
   },
   "devDependencies": {
