@@ -1,6 +1,7 @@
 try {
 console.log("✅ preload loaded")
-const log = require("electron-log");
+const log = require("electron-log/renderer");
+
 
 // Logger combiné terminal + fichier electron-log
 const logger = {
