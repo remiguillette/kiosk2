@@ -1,94 +1,109 @@
-#List of icons and their versions code
+<h1>Icon inventory</h1>
 
-#Menu
+<p>
+  This document lists each icon bundled with the kiosk along with its source file
+  and the corresponding Lucide identifier used by the JavaScript helpers. Every
+  entry contains an HTML link to the asset, a small preview, and the snippet used
+  to inject the icon at runtime.
+</p>
 
-Phone
-svg location /icon/phone.svg
+<h2>Menu</h2>
 
-code
-import { createIcons, icons } from 'lucide';
+<h3>Phone</h3>
+<p>
+  <a href="./phone.svg">phone.svg</a><br />
+  <img src="./phone.svg" alt="Phone icon" width="48" height="48" />
+</p>
+<pre><code>import { createIcons, icons } from 'lucide';
 
 createIcons({ icons });
 
 document.body.append('<i data-lucide="phone"></i>');
+</code></pre>
 
-Beavernet
-svg location /icon/beaver.png
+<h3>Beavernet</h3>
+<p>
+  <a href="./beaver.png">beaver.png</a><br />
+  <img src="./beaver.png" alt="Beavernet logo" width="48" />
+</p>
 
-#Beaverphone
+<h2>Beaverphone</h2>
 
-Return menu
-svg location /icon/house.svg
-
-code
-import { createIcons, icons } from 'lucide';
+<h3>Return menu</h3>
+<p>
+  <a href="./house.svg">house.svg</a><br />
+  <img src="./house.svg" alt="House icon" width="48" height="48" />
+</p>
+<pre><code>import { createIcons, icons } from 'lucide';
 
 createIcons({ icons });
 
-document.body.append('<i data-lucide="house"></i>');  
+document.body.append('<i data-lucide="house"></i>');
+</code></pre>
 
-#Dialpad
+<h2>Dialpad</h2>
 
-Erase
-svg location /icon/arrow-big-left-dash.svg
-
-code
-import { createIcons, icons } from 'lucide';
+<h3>Erase</h3>
+<p>
+  <a href="./arrow-big-left-dash.svg">arrow-big-left-dash.svg</a><br />
+  <img src="./arrow-big-left-dash.svg" alt="Backspace icon" width="48" height="48" />
+</p>
+<pre><code>import { createIcons, icons } from 'lucide';
 
 createIcons({ icons });
 
 document.body.append('<i data-lucide="arrow-big-left-dash"></i>');
+</code></pre>
 
-Call
-svg location /icon/phone.svg
-
-code
-import { createIcons, icons } from 'lucide';
+<h3>Call</h3>
+<p>
+  <a href="./phone.svg">phone.svg</a><br />
+  <img src="./phone.svg" alt="Phone icon" width="48" height="48" />
+</p>
+<pre><code>import { createIcons, icons } from 'lucide';
 
 createIcons({ icons });
 
 document.body.append('<i data-lucide="phone"></i>');
+</code></pre>
 
-Speaker
-svg location /icon/volume-2.svg
-
-code
-import { createIcons, icons } from 'lucide';
-
-createIcons({ icons });
-
-document.body.append('<i data-lucide="volume-2"></i>');
-
-Speaker
-svg location /icon/volume-2.svg
-
-code
-import { createIcons, icons } from 'lucide';
+<h3>Speaker</h3>
+<p>
+  <a href="./volume-2.svg">volume-2.svg</a><br />
+  <img src="./volume-2.svg" alt="Speaker icon" width="48" height="48" />
+</p>
+<pre><code>import { createIcons, icons } from 'lucide';
 
 createIcons({ icons });
 
 document.body.append('<i data-lucide="volume-2"></i>');
+</code></pre>
 
-Hold
-svg location /icon/circle-pause.svg
-
-code
-import { createIcons, icons } from 'lucide';
-
-createIcons({ icons });
-
-document.body.append('<i data-lucide="circle-pause"></i>'); 
-
-#websocket status animation
-
-code
-import { createIcons, icons } from 'lucide';
+<h3>Hold</h3>
+<p>
+  <a href="./circle-pause.svg">circle-pause.svg</a><br />
+  <img src="./circle-pause.svg" alt="Circle pause icon" width="48" height="48" />
+</p>
+<pre><code>import { createIcons, icons } from 'lucide';
 
 createIcons({ icons });
 
-document.body.append('<i data-lucide="chevrons-left-right-ellipsis"></i>');  
+document.body.append('<i data-lucide="circle-pause"></i>');
+</code></pre>
 
-<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-pause-icon lucide-circle-pause"><circle cx="12" cy="12" r="10"/><line x1="10" x2="10" y1="15" y2="9"/><line x1="14" x2="14" y1="15" y2="9"/></svg>
+<h2>Websocket status animation</h2>
+
+<h3>Activity indicator</h3>
+<p>
+  <a href="./chevrons-left-right-ellipsis.svg">chevrons-left-right-ellipsis.svg</a><br />
+  <img src="./chevrons-left-right-ellipsis.svg" alt="Chevrons ellipsis icon" width="48" height="48" />
+</p>
+<pre><code>import { createIcons, icons } from 'lucide';
+
+createIcons({ icons });
+
+document.body.append('<i data-lucide="chevrons-left-right-ellipsis"></i>');
+</code></pre>
 
 
 
