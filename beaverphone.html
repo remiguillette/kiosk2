@@ -134,6 +134,14 @@
       margin-bottom: 1.8rem;
     }
 
+    .status-cluster {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
     .dialpad-header h2 {
       font-size: 1.35rem;
       font-weight: 600;
@@ -150,6 +158,65 @@
       color: var(--text-muted);
       background: rgba(255, 255, 255, 0.02);
       transition: border 160ms ease, color 160ms ease;
+    }
+
+    .status-pill .status-text {
+      line-height: 1;
+    }
+
+    .ws-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.35rem 0.75rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      background: rgba(255, 255, 255, 0.02);
+      transition: border 160ms ease, color 160ms ease, background 160ms ease;
+    }
+
+    .ws-indicator .ws-icon {
+      display: inline-flex;
+      width: 18px;
+      height: 18px;
+    }
+
+    .ws-indicator .ws-icon svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    @keyframes wsPulse {
+      0% {
+        transform: translateX(-2px);
+        opacity: 0.6;
+      }
+      50% {
+        transform: translateX(2px);
+        opacity: 1;
+      }
+      100% {
+        transform: translateX(-2px);
+        opacity: 0.6;
+      }
+    }
+
+    .ws-indicator[data-state="connecting"] .ws-icon {
+      animation: wsPulse 1.4s ease-in-out infinite;
+    }
+
+    .ws-indicator[data-state="connected"] {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(248, 148, 34, 0.12);
+    }
+
+    .ws-indicator[data-state="disconnected"] {
+      border-color: rgba(255, 95, 95, 0.6);
+      color: #ff8a8a;
+      background: rgba(255, 95, 95, 0.12);
     }
 
     .status-pill[data-active="true"] {
@@ -372,7 +439,9 @@
     .extension-card .avatar img {
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      object-fit: contain;
+      padding: 0.4rem;
+      box-sizing: border-box;
     }
 
     .extension-card .avatar--fallback {
@@ -443,7 +512,24 @@
       <section class="panel" aria-labelledby="dialpad-heading">
         <div class="dialpad-header">
           <h2 id="dialpad-heading">Dialpad</h2>
-          <span class="status-pill" id="status-pill" data-active="false">Ready</span>
+          <div class="status-cluster">
+            <span class="ws-indicator" id="ws-indicator" data-state="connecting">
+              <span class="ws-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                  stroke-linejoin="round">
+                  <path d="M12 12h.01"></path>
+                  <path d="M16 12h.01"></path>
+                  <path d="m17 7 5 5-5 5"></path>
+                  <path d="m7 7-5 5 5 5"></path>
+                  <path d="M8 12h.01"></path>
+                </svg>
+              </span>
+              <span class="ws-label">Connecting…</span>
+            </span>
+            <span class="status-pill" id="status-pill" data-active="false">
+              <span class="status-text">Ready</span>
+            </span>
+          </div>
         </div>
 
         <div class="composer">
@@ -455,7 +541,18 @@
         <div class="dialpad-grid" id="dialpad"></div>
 
         <div class="dialpad-actions">
-          <button type="button" class="pill-btn" id="erase-btn">Erase</button>
+          <button type="button" class="pill-btn" id="erase-btn">
+            <span class="btn-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path
+                  d="M13 9a1 1 0 0 1-1-1V5.061a1 1 0 0 0-1.811-.75l-6.835 6.836a1.207 1.207 0 0 0 0 1.707l6.835 6.835a1 1 0 0 0 1.811-.75V16a1 1 0 0 1 1-1h2a1 1 0 0 0 1-1v-4a1 1 0 0 0-1-1z">
+                </path>
+                <path d="M20 9v6"></path>
+              </svg>
+            </span>
+            <span class="btn-label">Erase</span>
+          </button>
           <button type="button" class="pill-btn call-btn" id="call-btn">
             <span class="btn-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"
@@ -546,9 +643,18 @@
   const clearBtn = document.getElementById("clear-btn");
   const extensionList = document.getElementById("extension-list");
 
+  const statusText = statusPill.querySelector(".status-text");
+  const wsIndicator = document.getElementById("ws-indicator");
+  const wsLabel = wsIndicator.querySelector(".ws-label");
   const callBtnLabel = callBtn.querySelector(".btn-label");
   const holdBtnLabel = holdBtn.querySelector(".btn-label");
   const speakerBtnLabel = speakerBtn.querySelector(".btn-label");
+
+  const setWsIndicator = (state, label) => {
+    if (!wsIndicator || !wsLabel) return;
+    wsIndicator.dataset.state = state;
+    wsLabel.textContent = label;
+  };
 
   // 🔹 Dispatcher d’événements enrichi avec "action"
   const dispatchDialpadEvent = (action, number = undefined) => {
@@ -570,17 +676,17 @@
 
     if (currentDialpadState.isOnCall) {
       statusPill.dataset.active = "true";
-      statusPill.textContent = currentDialpadState.isOnHold ? "On Hold" : "On Call";
+      statusText.textContent = currentDialpadState.isOnHold ? "On Hold" : "On Call";
       helperText.textContent = currentDialpadState.isOnHold
         ? "Call is on hold. Tap Hold to resume."
         : "You are connected. Use Hold or Speaker as needed.";
     } else if (currentDialpadState.dialedNumber.length > 0) {
       statusPill.dataset.active = "false";
-      statusPill.textContent = "Ready";
+      statusText.textContent = "Ready";
       helperText.textContent = "Press Call to connect or erase to edit the number.";
     } else {
       statusPill.dataset.active = "false";
-      statusPill.textContent = "Ready";
+      statusText.textContent = "Ready";
       helperText.textContent = "Tap digits or choose a contact to start dialing.";
     }
   };
@@ -672,6 +778,23 @@
     } else if (event.key === "Backspace" && event.metaKey) {
       resetDialer();
       dispatchDialpadEvent("clear");
+    }
+  });
+
+  window.addEventListener("beaverphone:ws-status", (event) => {
+    const { status } = event.detail || {};
+
+    switch (status) {
+      case "connected":
+        setWsIndicator("connected", "Connected");
+        break;
+      case "disconnected":
+        setWsIndicator("disconnected", "Offline");
+        break;
+      case "connecting":
+      default:
+        setWsIndicator("connecting", "Connecting…");
+        break;
     }
   });
 
