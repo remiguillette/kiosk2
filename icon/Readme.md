@@ -89,7 +89,7 @@ createIcons({ icons });
 
 document.body.append('<i data-lucide="circle-pause"></i>'); 
 
-websocket status animation
+#websocket status animation
 
 code
 import { createIcons, icons } from 'lucide';
