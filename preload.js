@@ -1,82 +1,61 @@
-try {
-console.log("✅ preload loaded")
-const log = require("electron-log/renderer");
-
-
-// Logger combiné terminal + fichier electron-log
-const logger = {
-  info: (...args) => {
-    log.info("[BeaverPhone]", ...args);
-    console.log("[BeaverPhone]", ...args);
-  },
-  warn: (...args) => {
-    log.warn("[BeaverPhone]", ...args);
-    console.warn("[BeaverPhone]", ...args);
-  },
-  error: (...args) => {
-    log.error("[BeaverPhone]", ...args);
-    console.error("[BeaverPhone]", ...args);
-  }
-};
+console.log("✅ preload loaded");
 
 let ws;
 
 function connectWS() {
-  logger.info("Opening WebSocket connection to Termux gateway");
+  console.log("[BeaverPhone] Ouverture connexion WS → ws://192.168.1.60:5001");
 
-  // Utilise l’API WebSocket native
-  ws = new WebSocket("ws://192.168.1.60:5001");
+  try {
+    ws = new WebSocket("ws://192.168.1.60:5001");
 
-  ws.onopen = () => {
-    logger.info("Connected to local Termux WS");
-  };
+    ws.onopen = () => {
+      console.log("[BeaverPhone] ✅ Connecté au WS local Termux");
+    };
 
-  ws.onclose = () => {
-    logger.warn("WS closed, reconnecting in 5s…");
-    setTimeout(connectWS, 5000);
-  };
+    ws.onclose = () => {
+      console.warn("[BeaverPhone] ⚠️ WS fermé, reconnexion dans 5s…");
+      setTimeout(connectWS, 5000);
+    };
 
-  ws.onerror = (err) => {
-    logger.error("WS error:", err.message);
-  };
+    ws.onerror = (err) => {
+      console.error("[BeaverPhone] ❌ Erreur WS:", err.message || err);
+    };
 
-  ws.onmessage = (msg) => {
-    const text = msg.data;
-    try {
-      const data = JSON.parse(text);
-      logger.info("JSON response received", data);
-    } catch (err) {
-      logger.warn("Raw response received", text);
-    }
-  };
+    ws.onmessage = (msg) => {
+      console.log("[BeaverPhone] 📩 Reçu:", msg.data);
+    };
+
+  } catch (err) {
+    console.error("[BeaverPhone] ❌ Exception lors de la connexion:", err);
+  }
 }
 
 function sendPayload(action, data = {}) {
   if (ws && ws.readyState === WebSocket.OPEN) {
     const payload = { type: action, ...data };
     ws.send(JSON.stringify(payload));
-    logger.info("Sent payload", payload);
+    console.log("[BeaverPhone] 📤 Envoyé:", payload);
   } else {
-    logger.warn("WS not ready for action", action);
+    console.warn("[BeaverPhone] ⚠️ Impossible d’envoyer, WS pas prêt");
   }
 }
 
-// Keep-alive ping toutes les 30s
+// Ping keep-alive toutes les 30 secondes
 setInterval(() => {
   if (ws && ws.readyState === WebSocket.OPEN) {
     ws.send(JSON.stringify({ type: "ping" }));
-    logger.info("Sent keep-alive ping");
+    console.log("[BeaverPhone] 🔄 Ping envoyé");
   }
 }, 30000);
 
 connectWS();
 
-// Gérer les événements du dialpad
+// Capture des événements du dialpad
 window.addEventListener("DOMContentLoaded", () => {
   window.addEventListener("beaverphone:dialpad", (event) => {
-    const { action, number } = event.detail;
+    const { action, number } = event.detail || {};
 
-    logger.info("Dialpad event received", { action, number });
+    console.log("[BeaverPhone] 🎛️ Événement dialpad reçu:", { action, number });
 
     switch (action) {
       case "dial":
@@ -92,10 +71,8 @@ window.addEventListener("DOMContentLoaded", () => {
         sendPayload("clear");
         break;
       default:
-        logger.warn("Unknown dialpad action", action);
+        console.warn("[BeaverPhone] ❓ Action inconnue:", action);
     }
   });
 });
-  } catch (err) {
-  console.error("❌ preload.js crashed:", err);
-}
+
