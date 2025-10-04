@@ -1,8 +1,13 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 
+let win;
+
+const menuPath = path.join(__dirname, 'page', 'menu.html');
+const menuUrl = `file://${menuPath.replace(/\\/g, '/')}`;
+
 function createWindow() {
-  const win = new BrowserWindow({
+  win = new BrowserWindow({
     kiosk: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
@@ -10,9 +15,6 @@ function createWindow() {
       nodeIntegration: false,
     }
   });
-
-  const menuPath = path.join(__dirname, 'page', 'menu.html');
-  const menuUrl = `file://${menuPath.replace(/\\/g, '/')}`;
 
   // Démarrer sur le menu local
   win.loadFile(menuPath);
@@ -54,7 +56,9 @@ function createWindow() {
           boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
         });
         btn.addEventListener('click', () => {
-          window.location.href = MENU_URL;
+          if (window.electronAPI?.goHome) {
+            window.electronAPI.goHome();
+          }
         });
         document.body.appendChild(btn);
       }
@@ -65,6 +69,12 @@ function createWindow() {
     });
   });
 }
+
+ipcMain.on('go-home', () => {
+  if (win) {
+    win.loadFile(menuPath);
+  }
+});
 
 app.whenReady().then(createWindow);
 
