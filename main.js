@@ -12,7 +12,7 @@ function createWindow() {
   });
 
   // Démarrer sur le menu local
-  win.loadFile('menu.html');
+  win.loadFile(path.join(__dirname, 'page', 'beaverphone.html'));
 }
 
 app.whenReady().then(createWindow);
