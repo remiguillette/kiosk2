@@ -1,3 +1,9 @@
+const { contextBridge, ipcRenderer } = require('electron');
+
+contextBridge.exposeInMainWorld('electronAPI', {
+  goHome: () => ipcRenderer.send('go-home'),
+});
+
 console.log("✅ preload loaded");
 
 const WS_STATUS_EVENT_KEY = "beaverphone:ws-status";
