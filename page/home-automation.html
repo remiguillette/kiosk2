@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title data-i18n="pageTitle">Domotique - Beaver Kiosk</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: radial-gradient(circle at top right, #1b2333, #090c14 60%);
+      --panel: rgba(18, 20, 28, 0.88);
+      --panel-border: rgba(255, 255, 255, 0.08);
+      --accent: #4cc2ff;
+      --accent-soft: rgba(76, 194, 255, 0.16);
+      --positive: #47d17b;
+      --warning: #f1b04c;
+      --text-main: #f3f6ff;
+      --text-muted: #a9b5d9;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Inter", "Segoe UI", sans-serif;
+      min-height: 100vh;
+      padding: 2.4rem;
+      background: var(--bg);
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+    }
+
+    main {
+      width: min(1160px, 100%);
+      display: grid;
+      gap: 2.6rem;
+    }
+
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.8rem;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .hero {
+      display: flex;
+      gap: 1.6rem;
+      align-items: center;
+    }
+
+    .hero-icon {
+      width: 72px;
+      height: 72px;
+      border-radius: 20px;
+      background: var(--accent-soft);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 14px 40px rgba(76, 194, 255, 0.25);
+    }
+
+    .hero-icon img {
+      width: 40px;
+      height: 40px;
+    }
+
+    .hero-text h1 {
+      font-size: clamp(2.1rem, 4vw, 2.8rem);
+      font-weight: 700;
+    }
+
+    .hero-text p {
+      margin-top: 0.6rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      max-width: 520px;
+      font-size: 1.05rem;
+    }
+
+    .lang-toggle {
+      display: inline-flex;
+      background: rgba(18, 20, 28, 0.7);
+      border-radius: 999px;
+      padding: 0.45rem 0.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(12px);
+      gap: 0.6rem;
+      align-self: flex-start;
+    }
+
+    .lang-btn {
+      appearance: none;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 0.35rem 0.9rem;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: color 150ms ease, background 150ms ease, transform 150ms ease;
+    }
+
+    .lang-btn:hover {
+      color: var(--text-main);
+      transform: translateY(-1px);
+    }
+
+    .lang-btn.active {
+      background: var(--accent);
+      color: #021622;
+      box-shadow: 0 10px 24px rgba(76, 194, 255, 0.35);
+    }
+
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.6rem;
+    }
+
+    .status-card {
+      background: var(--panel);
+      border-radius: 20px;
+      border: 1px solid var(--panel-border);
+      padding: 1.6rem;
+      display: grid;
+      gap: 0.75rem;
+      box-shadow: 0 16px 38px rgba(0, 0, 0, 0.4);
+    }
+
+    .status-card .label {
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+    }
+
+    .status-card .value {
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+
+    .status-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 0.35rem 0.7rem;
+      border-radius: 999px;
+      background: rgba(71, 209, 123, 0.16);
+      color: var(--positive);
+      width: fit-content;
+    }
+
+    .status-chip::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--positive);
+    }
+
+    .device-section {
+      display: grid;
+      gap: 1.6rem;
+    }
+
+    .section-title {
+      font-size: 1.4rem;
+      font-weight: 600;
+    }
+
+    .device-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.4rem;
+    }
+
+    .device-card {
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 18px;
+      padding: 1.4rem;
+      display: grid;
+      gap: 0.6rem;
+      box-shadow: 0 16px 32px rgba(0, 0, 0, 0.35);
+    }
+
+    .device-card h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+
+    .device-card p {
+      color: var(--text-muted);
+      line-height: 1.4;
+      font-size: 0.98rem;
+    }
+
+    .device-metrics {
+      margin-top: 0.4rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+    }
+
+    .metric-chip {
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 10px;
+      padding: 0.35rem 0.6rem;
+      font-size: 0.85rem;
+      color: var(--text-main);
+    }
+
+    footer {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      text-align: center;
+    }
+
+    @media (max-width: 720px) {
+      body {
+        padding: 1.8rem;
+      }
+
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .hero {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div class="hero">
+        <span class="hero-icon">
+          <img src="../icon/house.svg" alt="" aria-hidden="true" />
+        </span>
+        <div class="hero-text">
+          <h1 data-i18n="heroTitle">Tableau de bord domotique</h1>
+          <p data-i18n="heroSubtitle">
+            Visualisez rapidement l'état de votre maison connectée. Les données sont synchronisées en temps réel avec le réseau BeaverNet.
+          </p>
+        </div>
+      </div>
+      <div class="lang-toggle" role="group" aria-label="Sélecteur de langue">
+        <button type="button" class="lang-btn active" data-lang="fr" aria-pressed="true">Français</button>
+        <button type="button" class="lang-btn" data-lang="en" aria-pressed="false">English</button>
+      </div>
+    </header>
+
+    <section class="status-grid">
+      <article class="status-card">
+        <span class="label" data-i18n="systemStatusLabel">État du système</span>
+        <span class="status-chip" data-i18n="systemOnline">En ligne</span>
+        <span class="value" data-i18n="systemStatusDetail">Tous les contrôleurs répondent</span>
+      </article>
+      <article class="status-card">
+        <span class="label" data-i18n="energyUsageLabel">Consommation actuelle</span>
+        <span class="value" data-i18n="energyUsageValue">2,3 kWh</span>
+        <span class="label" data-i18n="energyUpdatedLabel">Mise à jour il y a 5 minutes</span>
+      </article>
+      <article class="status-card">
+        <span class="label" data-i18n="climateLabel">Climat intérieur</span>
+        <div class="device-metrics">
+          <span class="metric-chip" data-i18n="climateTemp">Température : 20,5 °C</span>
+          <span class="metric-chip" data-i18n="climateHumidity">Humidité : 45 %</span>
+        </div>
+        <span class="label" data-i18n="climateUpdatedLabel">Actualisé en direct</span>
+      </article>
+    </section>
+
+    <section class="device-section">
+      <h2 class="section-title" data-i18n="zoneHeading">Zones contrôlées</h2>
+      <div class="device-grid">
+        <article class="device-card">
+          <h2 data-i18n="livingRoomTitle">Salon</h2>
+          <p data-i18n="livingRoomDesc">Éclairage principal et bandeau lumineux d'ambiance.</p>
+          <div class="device-metrics">
+            <span class="metric-chip" data-i18n="livingRoomStatus">Éclairage : allumé</span>
+            <span class="metric-chip" data-i18n="livingRoomScene">Scène : Soirée</span>
+          </div>
+        </article>
+        <article class="device-card">
+          <h2 data-i18n="kitchenTitle">Cuisine</h2>
+          <p data-i18n="kitchenDesc">Plan de travail, prises intelligentes et détecteur de fumée.</p>
+          <div class="device-metrics">
+            <span class="metric-chip" data-i18n="kitchenStatus">Éclairage : éteint</span>
+            <span class="metric-chip" data-i18n="kitchenAppliance">Prises : 1 actif</span>
+          </div>
+        </article>
+        <article class="device-card">
+          <h2 data-i18n="bedroomTitle">Chambre</h2>
+          <p data-i18n="bedroomDesc">Contrôle de la lampe de chevet et du thermostat local.</p>
+          <div class="device-metrics">
+            <span class="metric-chip" data-i18n="bedroomStatus">Éclairage : tamisé</span>
+            <span class="metric-chip" data-i18n="bedroomSetpoint">Consigne : 21 °C</span>
+          </div>
+        </article>
+        <article class="device-card">
+          <h2 data-i18n="garageTitle">Garage</h2>
+          <p data-i18n="garageDesc">Porte sectionnelle, lumière automatique et capteur de présence.</p>
+          <div class="device-metrics">
+            <span class="metric-chip" data-i18n="garageStatus">Porte : fermée</span>
+            <span class="metric-chip" data-i18n="garageLight">Lumière : auto</span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="device-section">
+      <h2 class="section-title" data-i18n="sensorHeading">Capteurs en direct</h2>
+      <div class="device-grid">
+        <article class="device-card">
+          <h2 data-i18n="thermostatTitle">Thermostat central</h2>
+          <p data-i18n="thermostatDesc">Suit la consommation énergétique et ajuste la température.</p>
+          <div class="device-metrics">
+            <span class="metric-chip" data-i18n="thermostatMode">Mode : Confort</span>
+            <span class="metric-chip" data-i18n="thermostatAmbient">Ambiante : 20 °C</span>
+          </div>
+        </article>
+        <article class="device-card">
+          <h2 data-i18n="securityTitle">Sécurité</h2>
+          <p data-i18n="securityDesc">Capteurs de mouvement, contacts de portes et caméras.</p>
+          <div class="device-metrics">
+            <span class="metric-chip" data-i18n="securityStatus">État : Armé</span>
+            <span class="metric-chip" data-i18n="securityAlert">Alertes : aucune</span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <footer data-i18n="footerNote">Utilisez le bouton Menu pour revenir aux autres services.</footer>
+  </main>
+
+  <script>
+    const translations = {
+      fr: {
+        pageTitle: "Domotique - Beaver Kiosk",
+        heroTitle: "Tableau de bord domotique",
+        heroSubtitle: "Visualisez rapidement l'état de votre maison connectée. Les données sont synchronisées en temps réel avec le réseau BeaverNet.",
+        systemStatusLabel: "État du système",
+        systemOnline: "En ligne",
+        systemStatusDetail: "Tous les contrôleurs répondent",
+        energyUsageLabel: "Consommation actuelle",
+        energyUsageValue: "2,3 kWh",
+        energyUpdatedLabel: "Mise à jour il y a 5 minutes",
+        climateLabel: "Climat intérieur",
+        climateTemp: "Température : 20,5 °C",
+        climateHumidity: "Humidité : 45 %",
+        climateUpdatedLabel: "Actualisé en direct",
+        zoneHeading: "Zones contrôlées",
+        livingRoomTitle: "Salon",
+        livingRoomDesc: "Éclairage principal et bandeau lumineux d'ambiance.",
+        livingRoomStatus: "Éclairage : allumé",
+        livingRoomScene: "Scène : Soirée",
+        kitchenTitle: "Cuisine",
+        kitchenDesc: "Plan de travail, prises intelligentes et détecteur de fumée.",
+        kitchenStatus: "Éclairage : éteint",
+        kitchenAppliance: "Prises : 1 actif",
+        bedroomTitle: "Chambre",
+        bedroomDesc: "Contrôle de la lampe de chevet et du thermostat local.",
+        bedroomStatus: "Éclairage : tamisé",
+        bedroomSetpoint: "Consigne : 21 °C",
+        garageTitle: "Garage",
+        garageDesc: "Porte sectionnelle, lumière automatique et capteur de présence.",
+        garageStatus: "Porte : fermée",
+        garageLight: "Lumière : auto",
+        sensorHeading: "Capteurs en direct",
+        thermostatTitle: "Thermostat central",
+        thermostatDesc: "Suit la consommation énergétique et ajuste la température.",
+        thermostatMode: "Mode : Confort",
+        thermostatAmbient: "Ambiante : 20 °C",
+        securityTitle: "Sécurité",
+        securityDesc: "Capteurs de mouvement, contacts de portes et caméras.",
+        securityStatus: "État : Armé",
+        securityAlert: "Alertes : aucune",
+        footerNote: "Utilisez le bouton Menu pour revenir aux autres services."
+      },
+      en: {
+        pageTitle: "Home Automation - Beaver Kiosk",
+        heroTitle: "Home automation dashboard",
+        heroSubtitle: "Get a quick overview of your connected home. Data synchronises in real time with the BeaverNet network.",
+        systemStatusLabel: "System status",
+        systemOnline: "Online",
+        systemStatusDetail: "All controllers responding",
+        energyUsageLabel: "Current consumption",
+        energyUsageValue: "2.3 kWh",
+        energyUpdatedLabel: "Updated 5 minutes ago",
+        climateLabel: "Indoor climate",
+        climateTemp: "Temperature: 20.5 °C",
+        climateHumidity: "Humidity: 45%",
+        climateUpdatedLabel: "Live refresh",
+        zoneHeading: "Controlled zones",
+        livingRoomTitle: "Living room",
+        livingRoomDesc: "Main lighting and ambient LED strip.",
+        livingRoomStatus: "Lighting: on",
+        livingRoomScene: "Scene: Evening",
+        kitchenTitle: "Kitchen",
+        kitchenDesc: "Counter lights, smart outlets and smoke detector.",
+        kitchenStatus: "Lighting: off",
+        kitchenAppliance: "Outlets: 1 active",
+        bedroomTitle: "Bedroom",
+        bedroomDesc: "Bedside lamp and local thermostat control.",
+        bedroomStatus: "Lighting: dimmed",
+        bedroomSetpoint: "Set point: 21 °C",
+        garageTitle: "Garage",
+        garageDesc: "Overhead door, auto light and presence sensor.",
+        garageStatus: "Door: closed",
+        garageLight: "Light: auto",
+        sensorHeading: "Live sensors",
+        thermostatTitle: "Central thermostat",
+        thermostatDesc: "Tracks energy use and adjusts the temperature.",
+        thermostatMode: "Mode: Comfort",
+        thermostatAmbient: "Ambient: 20 °C",
+        securityTitle: "Security",
+        securityDesc: "Motion sensors, door contacts and cameras.",
+        securityStatus: "Status: Armed",
+        securityAlert: "Alerts: none",
+        footerNote: "Use the Menu button to return to other services."
+      }
+    };
+
+    const langButtons = document.querySelectorAll('.lang-btn');
+
+    function setLanguage(lang) {
+      if (!translations[lang]) return;
+      document.documentElement.lang = lang;
+
+      document.querySelectorAll('[data-i18n]').forEach((node) => {
+        const key = node.dataset.i18n;
+        const value = translations[lang][key];
+        if (value) {
+          if (node.tagName === 'TITLE') {
+            document.title = value;
+          } else {
+            node.innerHTML = value;
+          }
+        }
+      });
+
+      langButtons.forEach((button) => {
+        const isActive = button.dataset.lang === lang;
+        button.classList.toggle('active', isActive);
+        button.setAttribute('aria-pressed', String(isActive));
+      });
+
+      localStorage.setItem('preferredLang', lang);
+    }
+
+    langButtons.forEach((button) => {
+      button.addEventListener('click', () => setLanguage(button.dataset.lang));
+    });
+
+    const savedLang = localStorage.getItem('preferredLang');
+    setLanguage(savedLang && translations[savedLang] ? savedLang : 'fr');
+  </script>
+</body>
+</html>
