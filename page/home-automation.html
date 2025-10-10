@@ -145,6 +145,19 @@
       font-weight: 600;
     }
 
+    .label--sub {
+      text-transform: none;
+      letter-spacing: normal;
+    }
+
+    .status-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
     .status-chip {
       display: inline-flex;
       align-items: center;
@@ -153,9 +166,10 @@
       font-weight: 600;
       padding: 0.35rem 0.7rem;
       border-radius: 999px;
-      background: rgba(71, 209, 123, 0.16);
-      color: var(--positive);
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-main);
       width: fit-content;
+      transition: background 150ms ease, color 150ms ease;
     }
 
     .status-chip::before {
@@ -163,7 +177,28 @@
       width: 8px;
       height: 8px;
       border-radius: 999px;
-      background: var(--positive);
+      background: currentColor;
+      opacity: 0.8;
+    }
+
+    .status-chip--success {
+      background: rgba(71, 209, 123, 0.16);
+      color: var(--positive);
+    }
+
+    .status-chip--warning {
+      background: rgba(241, 176, 76, 0.18);
+      color: var(--warning);
+    }
+
+    .status-chip--danger {
+      background: rgba(255, 107, 107, 0.18);
+      color: #ff7b7b;
+    }
+
+    .status-chip--neutral {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-main);
     }
 
     .device-section {
@@ -264,13 +299,23 @@
     <section class="status-grid">
       <article class="status-card">
         <span class="label" data-i18n="systemStatusLabel">État du système</span>
-        <span class="status-chip" data-i18n="systemOnline">En ligne</span>
-        <span class="value" data-i18n="systemStatusDetail">Tous les contrôleurs répondent</span>
+        <div class="status-row">
+          <span data-i18n="systemWifiLabel">Wi-Fi domestique</span>
+          <span class="status-chip status-chip--warning" id="wifiStatusChip">--</span>
+        </div>
+        <div class="status-row">
+          <span data-i18n="systemWsLabel">Serveur WebSocket</span>
+          <span class="status-chip status-chip--warning" id="wsStatusChip">--</span>
+        </div>
       </article>
       <article class="status-card">
         <span class="label" data-i18n="energyUsageLabel">Consommation actuelle</span>
         <span class="value" data-i18n="energyUsageValue">2,3 kWh</span>
-        <span class="label" data-i18n="energyUpdatedLabel">Mise à jour il y a 5 minutes</span>
+        <div class="status-row">
+          <span class="label label--sub" data-i18n="energyBatteryLabel">Batterie du système</span>
+          <span class="status-chip status-chip--neutral" id="batteryStatusChip">--</span>
+        </div>
+        <span class="label" id="energyUpdatedLabel" data-i18n="energyUpdatedPending">En attente des données de la batterie</span>
       </article>
       <article class="status-card">
         <span class="label" data-i18n="climateLabel">Climat intérieur</span>
@@ -352,11 +397,14 @@
         heroTitle: "Tableau de bord domotique",
         heroSubtitle: "Visualisez rapidement l'état de votre maison connectée. Les données sont synchronisées en temps réel avec le réseau BeaverNet.",
         systemStatusLabel: "État du système",
-        systemOnline: "En ligne",
-        systemStatusDetail: "Tous les contrôleurs répondent",
+        systemWifiLabel: "Wi-Fi domestique",
+        systemWsLabel: "Serveur WebSocket",
         energyUsageLabel: "Consommation actuelle",
         energyUsageValue: "2,3 kWh",
-        energyUpdatedLabel: "Mise à jour il y a 5 minutes",
+        energyBatteryLabel: "Batterie du système",
+        energyUpdatedPending: "En attente des données de la batterie",
+        energyUpdatedAt: "Actualisé à {time}",
+        energyUpdatedError: "Échec de lecture à {time}",
         climateLabel: "Climat intérieur",
         climateTemp: "Température : 20,5 °C",
         climateHumidity: "Humidité : 45 %",
@@ -394,11 +442,14 @@
         heroTitle: "Home automation dashboard",
         heroSubtitle: "Get a quick overview of your connected home. Data synchronises in real time with the BeaverNet network.",
         systemStatusLabel: "System status",
-        systemOnline: "Online",
-        systemStatusDetail: "All controllers responding",
+        systemWifiLabel: "Home Wi-Fi",
+        systemWsLabel: "WebSocket server",
         energyUsageLabel: "Current consumption",
         energyUsageValue: "2.3 kWh",
-        energyUpdatedLabel: "Updated 5 minutes ago",
+        energyBatteryLabel: "System battery",
+        energyUpdatedPending: "Waiting for battery data",
+        energyUpdatedAt: "Updated at {time}",
+        energyUpdatedError: "Read error at {time}",
         climateLabel: "Indoor climate",
         climateTemp: "Temperature: 20.5 °C",
         climateHumidity: "Humidity: 45%",
@@ -433,11 +484,66 @@
       }
     };
 
+    const statusTranslations = {
+      fr: {
+        statusOnline: "Connecté",
+        statusOffline: "Hors ligne",
+        statusConnecting: "Connexion…",
+        statusDisconnected: "Déconnecté",
+        statusUnavailable: "Indisponible",
+        batteryStatusCharging: "En charge",
+        batteryStatusDischarging: "En décharge",
+        batteryStatusFull: "Chargée",
+        batteryStatusNotCharging: "Repos",
+        batteryStatusUnknown: "État inconnu",
+        batteryStatusEmpty: "Vide",
+        batteryStatusError: "Lecture impossible",
+        batteryStatusMissing: "Aucun capteur",
+        batteryAwaiting: "Lecture en cours…",
+      },
+      en: {
+        statusOnline: "Online",
+        statusOffline: "Offline",
+        statusConnecting: "Connecting…",
+        statusDisconnected: "Disconnected",
+        statusUnavailable: "Unavailable",
+        batteryStatusCharging: "Charging",
+        batteryStatusDischarging: "Discharging",
+        batteryStatusFull: "Full",
+        batteryStatusNotCharging: "Idle",
+        batteryStatusUnknown: "Unknown",
+        batteryStatusEmpty: "Empty",
+        batteryStatusError: "Read failed",
+        batteryStatusMissing: "No sensor",
+        batteryAwaiting: "Reading…",
+      }
+    };
+
+    const WIFI_ONLINE_STATES = ["online"];
+    const wsChip = document.getElementById('wsStatusChip');
+    const wifiChip = document.getElementById('wifiStatusChip');
+    const batteryChip = document.getElementById('batteryStatusChip');
+    const energyUpdatedLabel = document.getElementById('energyUpdatedLabel');
+
+    const state = {
+      wifi: navigator.onLine ? 'online' : 'offline',
+      ws: 'connecting',
+      battery: {
+        capacity: null,
+        status: null,
+        timestamp: null,
+        error: null,
+      },
+    };
+
+    let currentLang = 'fr';
+
     const langButtons = document.querySelectorAll('.lang-btn');
 
     function setLanguage(lang) {
       if (!translations[lang]) return;
       document.documentElement.lang = lang;
+      currentLang = lang;
 
       document.querySelectorAll('[data-i18n]').forEach((node) => {
         const key = node.dataset.i18n;
@@ -458,6 +564,7 @@
       });
 
       localStorage.setItem('preferredLang', lang);
+      renderDynamicStatus();
     }
 
     langButtons.forEach((button) => {
@@ -466,6 +573,149 @@
 
     const savedLang = localStorage.getItem('preferredLang');
     setLanguage(savedLang && translations[savedLang] ? savedLang : 'fr');
+
+    function translateStatus(key) {
+      const bundle = statusTranslations[currentLang] || statusTranslations.fr;
+      return bundle[key] || key;
+    }
+
+    function setChipState(chip, variant) {
+      chip.classList.remove('status-chip--success', 'status-chip--warning', 'status-chip--danger', 'status-chip--neutral');
+      chip.classList.add(`status-chip--${variant}`);
+    }
+
+    function renderWifiStatus() {
+      const online = WIFI_ONLINE_STATES.includes(state.wifi);
+      wifiChip.textContent = online ? translateStatus('statusOnline') : translateStatus('statusOffline');
+      setChipState(wifiChip, online ? 'success' : 'danger');
+    }
+
+    function renderWsStatus() {
+      let textKey = 'statusUnavailable';
+      let variant = 'warning';
+
+      switch (state.ws) {
+        case 'connected':
+          textKey = 'statusOnline';
+          variant = 'success';
+          break;
+        case 'connecting':
+          textKey = 'statusConnecting';
+          variant = 'warning';
+          break;
+        case 'disconnected':
+        default:
+          textKey = state.ws === 'disconnected' ? 'statusDisconnected' : 'statusUnavailable';
+          variant = 'danger';
+          break;
+      }
+
+      wsChip.textContent = translateStatus(textKey);
+      setChipState(wsChip, variant);
+    }
+
+    function normalizeBatteryStatus(status) {
+      if (!status) return 'batteryStatusUnknown';
+      const normalized = status.toLowerCase().replace(/_/g, ' ').trim();
+
+      if (normalized.includes('charging') && normalized.includes('full')) {
+        return 'batteryStatusFull';
+      }
+
+      switch (normalized) {
+        case 'charging':
+          return 'batteryStatusCharging';
+        case 'discharging':
+          return 'batteryStatusDischarging';
+        case 'full':
+          return 'batteryStatusFull';
+        case 'not charging':
+          return 'batteryStatusNotCharging';
+        case 'unknown':
+          return 'batteryStatusUnknown';
+        case 'empty':
+          return 'batteryStatusEmpty';
+        case 'not present':
+          return 'batteryStatusMissing';
+        default:
+          return 'batteryStatusUnknown';
+      }
+    }
+
+    function renderBatteryStatus() {
+      if (state.battery.error) {
+        batteryChip.textContent = translateStatus('batteryStatusError');
+        setChipState(batteryChip, 'danger');
+        if (state.battery.timestamp) {
+          energyUpdatedLabel.textContent = formatUpdateLabel('energyUpdatedError', state.battery.timestamp);
+        }
+        return;
+      }
+
+      if (typeof state.battery.capacity === 'number' && state.battery.status) {
+        const key = normalizeBatteryStatus(state.battery.status);
+        const statusText = translateStatus(key);
+        batteryChip.textContent = `${state.battery.capacity}% • ${statusText}`;
+        setChipState(batteryChip, 'success');
+        if (state.battery.timestamp) {
+          energyUpdatedLabel.textContent = formatUpdateLabel('energyUpdatedAt', state.battery.timestamp);
+        }
+        return;
+      }
+
+      batteryChip.textContent = translateStatus('batteryAwaiting');
+      setChipState(batteryChip, 'neutral');
+      energyUpdatedLabel.textContent = translations[currentLang].energyUpdatedPending;
+    }
+
+    function formatUpdateLabel(key, timestamp) {
+      const template = translations[currentLang][key] || translations.fr[key];
+      const formatter = new Intl.DateTimeFormat(currentLang === 'fr' ? 'fr-FR' : 'en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+      const time = formatter.format(new Date(timestamp));
+      return template.replace('{time}', time);
+    }
+
+    function renderDynamicStatus() {
+      renderWifiStatus();
+      renderWsStatus();
+      renderBatteryStatus();
+    }
+
+    window.addEventListener('online', () => {
+      state.wifi = 'online';
+      renderWifiStatus();
+    });
+
+    window.addEventListener('offline', () => {
+      state.wifi = 'offline';
+      renderWifiStatus();
+    });
+
+    window.addEventListener('beaverphone:ws-status', (event) => {
+      const detail = event.detail || {};
+      state.ws = detail.status || 'disconnected';
+      renderWsStatus();
+    });
+
+    if (window.electronAPI?.onPowerStatus) {
+      window.electronAPI.onPowerStatus((detail = {}) => {
+        state.battery.capacity = typeof detail.capacity === 'number' ? detail.capacity : null;
+        state.battery.status = detail.status || null;
+        state.battery.timestamp = detail.timestamp || null;
+        state.battery.error = detail.error || null;
+        renderBatteryStatus();
+      });
+    } else {
+      state.battery.error = 'unavailable';
+      batteryChip.textContent = translateStatus('batteryStatusError');
+      setChipState(batteryChip, 'danger');
+      energyUpdatedLabel.textContent = translations[currentLang].energyUpdatedPending;
+    }
+
+    renderDynamicStatus();
   </script>
 </body>
 </html>

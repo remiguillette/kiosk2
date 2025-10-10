@@ -1,21 +1,44 @@
 const { contextBridge, ipcRenderer } = require('electron');
+const fs = require('fs');
 
-contextBridge.exposeInMainWorld('electronAPI', {
-  goHome: () => ipcRenderer.send('go-home'),
+const WS_STATUS_EVENT_KEY = "beaverphone:ws-status";
+const POWER_STATUS_EVENT_KEY = "beaver:power-status";
+const BATTERY_BASE_PATH = "/sys/class/power_supply/battery";
+const BATTERY_POLL_INTERVAL = 10000;
+
+const subscribeToRendererEvent = (eventKey, callback) => {
+  if (typeof callback !== "function") {
+    return () => {};
+  }
+
+  const handler = (event) => callback(event.detail);
+  window.addEventListener(eventKey, handler);
+  return () => window.removeEventListener(eventKey, handler);
+};
+
+contextBridge.exposeInMainWorld("electronAPI", {
+  goHome: () => ipcRenderer.send("go-home"),
+  onPowerStatus: (callback) => subscribeToRendererEvent(POWER_STATUS_EVENT_KEY, callback),
 });
 
 console.log("✅ preload loaded");
 
-const WS_STATUS_EVENT_KEY = "beaverphone:ws-status";
-
 let ws;
 
-const emitWsStatus = (status, extra = {}) => {
+const emitCustomEvent = (key, detail) => {
   window.dispatchEvent(
-    new CustomEvent(WS_STATUS_EVENT_KEY, {
-      detail: { status, ...extra },
+    new CustomEvent(key, {
+      detail,
     })
   );
+};
+
+const emitWsStatus = (status, extra = {}) => {
+  emitCustomEvent(WS_STATUS_EVENT_KEY, { status, ...extra });
+};
+
+const emitPowerStatus = (payload) => {
+  emitCustomEvent(POWER_STATUS_EVENT_KEY, payload);
 };
 
 function connectWS() {
@@ -70,6 +93,49 @@ setInterval(() => {
 }, 30000);
 
 connectWS();
+
+let lastBatteryError;
+
+function readBatteryInfo() {
+  try {
+    const capacityRaw = fs.readFileSync(`${BATTERY_BASE_PATH}/capacity`, "utf8").trim();
+    const status = fs.readFileSync(`${BATTERY_BASE_PATH}/status`, "utf8").trim();
+    const capacity = Number(capacityRaw);
+
+    if (Number.isNaN(capacity)) {
+      throw new Error(`Invalid capacity value: ${capacityRaw}`);
+    }
+
+    return { capacity, status };
+  } catch (error) {
+    return { error: error.message };
+  }
+}
+
+function publishBatteryInfo() {
+  const info = readBatteryInfo();
+  const timestamp = Date.now();
+
+  if (info.error) {
+    if (lastBatteryError !== info.error) {
+      console.warn("[BeaverOS] ⚠️ Impossible de lire l'état de la batterie:", info.error);
+      lastBatteryError = info.error;
+    }
+
+    emitPowerStatus({ error: info.error, timestamp });
+    return;
+  }
+
+  if (lastBatteryError) {
+    console.info("[BeaverOS] ✅ Lecture de la batterie restaurée");
+  }
+
+  lastBatteryError = null;
+  emitPowerStatus({ ...info, timestamp });
+}
+
+publishBatteryInfo();
+setInterval(publishBatteryInfo, BATTERY_POLL_INTERVAL);
 
 // Capture des événements du dialpad
 window.addEventListener("DOMContentLoaded", () => {

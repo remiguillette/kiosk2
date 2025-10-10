@@ -43,7 +43,7 @@ function createWindow() {
       if (!existing) {
         const btn = document.createElement('button');
         btn.id = 'backToMenu';
-        btn.textContent = '\\u2b65 Back Menu';
+        btn.textContent = '\\ud83c\\udfe0 Menu';
         Object.assign(btn.style, {
           position: 'fixed',
           bottom: '20px',
