@@ -167,6 +167,12 @@
       width: fit-content;
     }
 
+    .status-message {
+      color: var(--text-muted);
+      font-weight: 500;
+      font-size: 0.95rem;
+    }
+
     .status-chip--success {
       background: rgba(71,209,123,0.16);
       color: #47d17b;
@@ -223,7 +229,11 @@
           <span class="label">Serveur WebSocket</span>
           <div class="status-row">
             <span>État :</span>
-            <span class="status-chip status-chip--success">Connecté</span>
+            <span class="status-chip status-chip--danger" id="wsChip">Déconnecté</span>
+          </div>
+          <div class="status-row">
+            <span>Dernier message :</span>
+            <span class="status-message" id="wsInfo">Aucun signal</span>
           </div>
         </article>
         <article class="status-card">
@@ -288,6 +298,83 @@
 
     <footer>Utilisez le bouton menu pour revenir aux autres services.</footer>
   </main>
+  <script>
+    (function () {
+      const wsChip = document.getElementById('wsChip');
+      const infoLabel = document.getElementById('wsInfo');
+
+      if (!wsChip) {
+        return;
+      }
+
+      let ws;
+      let reconnectTimer;
+
+      const setWsStatus = (connected) => {
+        if (!wsChip) {
+          return;
+        }
+
+        wsChip.textContent = connected ? 'Connecté' : 'Déconnecté';
+        wsChip.classList.toggle('status-chip--success', connected);
+        wsChip.classList.toggle('status-chip--danger', !connected);
+      };
+
+      const setWsInfo = (message) => {
+        if (!infoLabel) {
+          return;
+        }
+
+        infoLabel.textContent = message || 'Aucun signal';
+      };
+
+      const scheduleReconnect = () => {
+        clearTimeout(reconnectTimer);
+        reconnectTimer = setTimeout(connect, 5000);
+      };
+
+      const connect = () => {
+        try {
+          if (ws?.readyState === WebSocket.OPEN) {
+            ws.close(1000, 'Reconnecting');
+          }
+
+          ws = new WebSocket('ws://localhost:8080');
+
+          ws.addEventListener('open', () => {
+            console.log('✅ WebSocket connecté');
+            setWsStatus(true);
+            setWsInfo('Connexion établie');
+          });
+
+          ws.addEventListener('close', () => {
+            console.warn('⚠️ WebSocket fermé');
+            setWsStatus(false);
+            scheduleReconnect();
+          });
+
+          ws.addEventListener('error', (error) => {
+            console.error('❌ Erreur WebSocket', error);
+            setWsStatus(false);
+            ws.close();
+          });
+
+          ws.addEventListener('message', (event) => {
+            const data = typeof event.data === 'string' ? event.data : '[objet binaire]';
+            setWsInfo(data);
+          });
+        } catch (error) {
+          console.error('Erreur d\'initialisation WebSocket', error);
+          setWsStatus(false);
+          scheduleReconnect();
+        }
+      };
+
+      setWsStatus(false);
+      setWsInfo('Connexion…');
+      connect();
+    })();
+  </script>
   <script>
     (function () {
       const chip = document.querySelector('#batteryChip');
