@@ -230,7 +230,7 @@
           <span class="label">Batterie du système</span>
           <div class="status-row">
             <span>Charge :</span>
-            <span class="status-chip">92 % – En charge</span>
+            <span class="status-chip status-chip--danger" id="batteryChip">--</span>
           </div>
         </article>
       </div>
@@ -288,5 +288,65 @@
 
     <footer>Utilisez le bouton menu pour revenir aux autres services.</footer>
   </main>
+  <script>
+    (function () {
+      const chip = document.querySelector('#batteryChip');
+
+      if (!chip) {
+        return;
+      }
+
+      chip.setAttribute('role', 'status');
+      chip.setAttribute('aria-live', 'polite');
+
+      const setChipState = (text, { success } = { success: false }) => {
+        chip.textContent = text;
+
+        chip.classList.toggle('status-chip--success', Boolean(success));
+        chip.classList.toggle('status-chip--danger', !success);
+      };
+
+      const formatStatus = (data) => {
+        if (!data) {
+          return null;
+        }
+
+        const capacity = Number.parseInt(data.capacity, 10);
+
+        if (!Number.isFinite(capacity)) {
+          return null;
+        }
+
+        const status = data.status ? ` – ${data.status}` : '';
+        return `${capacity}%${status}`;
+      };
+
+      const updateBatteryStatus = async () => {
+        try {
+          const payload = await window.electronAPI.getBatteryLevel();
+          const label = formatStatus(payload);
+
+          if (!label) {
+            setChipState('Lecture impossible');
+            return;
+          }
+
+          setChipState(label, { success: true });
+        } catch (error) {
+          console.error('Unable to read battery level', error);
+          setChipState('Erreur de lecture');
+        }
+      };
+
+      if (!window.electronAPI?.getBatteryLevel) {
+        console.warn('Electron API not available');
+        setChipState('Electron API indisponible');
+        return;
+      }
+
+      updateBatteryStatus();
+      setInterval(updateBatteryStatus, 10000);
+    })();
+  </script>
 </body>
 </html>
