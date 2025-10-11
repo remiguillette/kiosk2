@@ -28,39 +28,64 @@ function createWindow() {
     return { action: 'deny' };
   });
 
-  // Injecter un bouton de retour lorsque la page n'est pas le menu
+  // Injecter un bouton de retour uniquement pour les pages distantes (ex: BeaverNet)
   win.webContents.on('did-finish-load', () => {
     const script = `(() => {
       const MENU_URL = ${JSON.stringify(menuUrl)};
       const existing = document.getElementById('backToMenu');
-      const onMenu = window.location.href === MENU_URL;
+      const isLocal = window.location.protocol === 'file:';
+      const onMenu = isLocal && window.location.href === MENU_URL;
 
-      if (onMenu) {
+      if (isLocal || onMenu) {
         if (existing) existing.remove();
         return;
       }
 
       if (!existing) {
         const btn = document.createElement('button');
+        btn.type = 'button';
         btn.id = 'backToMenu';
-        btn.textContent = '\\ud83c\\udfe0 Menu';
+        btn.setAttribute('aria-label', 'Return to menu');
+
         Object.assign(btn.style, {
           position: 'fixed',
-          bottom: '20px',
-          right: '20px',
+          top: '20px',
+          left: '20px',
           zIndex: 9999,
-          background: '#f89422',
-          color: 'white',
-          fontWeight: 'bold',
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '0.5rem',
+          background: 'rgba(9, 12, 20, 0.85)',
+          color: '#f2f2f7',
+          fontWeight: '600',
+          fontSize: '15px',
           padding: '10px 16px',
-          border: 'none',
-          borderRadius: '12px',
+          border: '1px solid rgba(255, 255, 255, 0.18)',
+          borderRadius: '14px',
           cursor: 'pointer',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
+          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.35)',
+          backdropFilter: 'blur(12px)'
         });
+
+        const icon = document.createElement('span');
+        icon.setAttribute('aria-hidden', 'true');
+        icon.textContent = '\\ud83c\\udfe0';
+        Object.assign(icon.style, {
+          fontSize: '1.1rem',
+          lineHeight: '1'
+        });
+
+        const text = document.createElement('span');
+        text.textContent = 'Menu';
+
+        btn.appendChild(icon);
+        btn.appendChild(text);
+
         btn.addEventListener('click', () => {
           if (window.electronAPI?.goHome) {
             window.electronAPI.goHome();
+          } else {
+            window.location.href = MENU_URL;
           }
         });
         document.body.appendChild(btn);

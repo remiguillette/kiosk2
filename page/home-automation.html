@@ -47,6 +47,43 @@
       align-items: flex-start;
     }
 
+    .header-layout {
+      display: flex;
+      align-items: center;
+      gap: 1.4rem;
+      flex-wrap: wrap;
+    }
+
+    .menu-return {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background: rgba(12, 16, 24, 0.75);
+      color: var(--text-muted);
+      transition: color 160ms ease, border 160ms ease, background 160ms ease, transform 160ms ease;
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(12px);
+    }
+
+    .menu-return:hover,
+    .menu-return:focus-visible {
+      color: var(--accent);
+      border-color: rgba(76, 194, 255, 0.5);
+      background: rgba(76, 194, 255, 0.14);
+      transform: translateY(-2px);
+      outline: none;
+    }
+
+    .menu-return svg {
+      width: 24px;
+      height: 24px;
+      stroke-width: 1.8;
+    }
+
     .hero {
       display: flex;
       gap: 1.6rem;
@@ -269,6 +306,10 @@
         align-items: flex-start;
       }
 
+      .header-layout {
+        width: 100%;
+      }
+
       .hero {
         flex-direction: column;
         align-items: flex-start;
@@ -279,15 +320,26 @@
 <body>
   <main>
     <header>
-      <div class="hero">
-        <span class="hero-icon">
-          <img src="../icon/house.svg" alt="" aria-hidden="true" />
-        </span>
-        <div class="hero-text">
-          <h1 data-i18n="heroTitle">Tableau de bord domotique</h1>
-          <p data-i18n="heroSubtitle">
-            Visualisez rapidement l'état de votre maison connectée. Les données sont synchronisées en temps réel avec le réseau BeaverNet.
-          </p>
+      <div class="header-layout">
+        <a class="menu-return" href="menu.html" aria-label="Return to menu">
+          <span aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 9l9-7 9 7"></path>
+              <path d="M9 22V12h6v10"></path>
+              <path d="M21 10v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V10"></path>
+            </svg>
+          </span>
+        </a>
+        <div class="hero">
+          <span class="hero-icon">
+            <img src="../icon/house.svg" alt="" aria-hidden="true" />
+          </span>
+          <div class="hero-text">
+            <h1 data-i18n="heroTitle">Tableau de bord domotique</h1>
+            <p data-i18n="heroSubtitle">
+              Visualisez rapidement l'état de votre maison connectée. Les données sont synchronisées en temps réel avec le réseau BeaverNet.
+            </p>
+          </div>
         </div>
       </div>
       <div class="lang-toggle" role="group" aria-label="Sélecteur de langue">
