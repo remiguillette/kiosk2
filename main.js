@@ -1,5 +1,8 @@
 const { app, BrowserWindow, ipcMain, globalShortcut } = require('electron');
+const fs = require('fs');
 const path = require('path');
+
+const BATTERY_BASE_PATH = '/sys/class/power_supply/battery';
 
 let win;
 const ZOOM_STEP = 0.5;
@@ -118,6 +121,23 @@ function registerZoomShortcuts() {
     globalShortcut.register(accelerator, () => adjustZoom(delta));
   });
 }
+
+ipcMain.handle('getBatteryLevel', async () => {
+  try {
+    const capacityRaw = fs.readFileSync(path.join(BATTERY_BASE_PATH, 'capacity'), 'utf8').trim();
+    const statusRaw = fs.readFileSync(path.join(BATTERY_BASE_PATH, 'status'), 'utf8').trim();
+    const capacity = Number.parseInt(capacityRaw, 10);
+
+    if (Number.isNaN(capacity)) {
+      throw new Error(`Invalid capacity value: ${capacityRaw}`);
+    }
+
+    return { capacity, status: statusRaw };
+  } catch (error) {
+    console.error('Error reading battery information:', error);
+    return null;
+  }
+});
 
 ipcMain.on('go-home', () => {
   if (win) {
