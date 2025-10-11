@@ -1,57 +1,51 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <title data-i18n="pageTitle">Domotique - Beaver Kiosk</title>
+  <meta charset="UTF-8" />
+  <title>BeaverHome - Domotique</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     :root {
       color-scheme: dark;
-      --bg: radial-gradient(circle at top right, #1b2333, #090c14 60%);
-      --panel: rgba(18, 20, 28, 0.88);
-      --panel-border: rgba(255, 255, 255, 0.08);
-      --accent: #4cc2ff;
-      --accent-soft: rgba(76, 194, 255, 0.16);
-      --positive: #47d17b;
-      --warning: #f1b04c;
-      --text-main: #f3f6ff;
-      --text-muted: #a9b5d9;
+      --bg: #060608;
+      --panel: #0f1018;
+      --panel-glow: rgba(248, 148, 34, 0.12);
+      --border: rgba(255, 255, 255, 0.08);
+      --text-main: #ffffff;
+      --text-muted: rgba(255, 255, 255, 0.64);
+      --text-soft: rgba(255, 255, 255, 0.42);
+      --accent: #f89422;
+      --accent-strong: #ff9f33;
+      --font: "Inter", "Segoe UI", sans-serif;
+      --shadow: 0 28px 40px rgba(0, 0, 0, 0.45);
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: "Inter", "Segoe UI", sans-serif;
       min-height: 100vh;
-      padding: 2.4rem;
-      background: var(--bg);
-      color: var(--text-main);
       display: flex;
       justify-content: center;
+      align-items: flex-start;
+      font-family: var(--font);
+      background:
+        radial-gradient(circle at 15% 20%, rgba(248, 148, 34, 0.12), transparent 55%),
+        radial-gradient(circle at 85% 10%, rgba(248, 148, 34, 0.08), transparent 50%),
+        var(--bg);
+      color: var(--text-main);
+      padding: 3.5rem 2rem;
     }
 
     main {
-      width: min(1160px, 100%);
+      width: min(1200px, 100%);
       display: grid;
       gap: 2.6rem;
     }
 
     header {
       display: flex;
-      flex-wrap: wrap;
-      gap: 1.8rem;
-      justify-content: space-between;
-      align-items: flex-start;
-    }
-
-    .header-layout {
-      display: flex;
       align-items: center;
-      gap: 1.4rem;
-      flex-wrap: wrap;
+      gap: 1rem;
     }
 
     .menu-return {
@@ -61,19 +55,17 @@
       width: 48px;
       height: 48px;
       border-radius: 16px;
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      background: rgba(12, 16, 24, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.04);
       color: var(--text-muted);
       transition: color 160ms ease, border 160ms ease, background 160ms ease, transform 160ms ease;
-      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
-      backdrop-filter: blur(12px);
     }
 
     .menu-return:hover,
     .menu-return:focus-visible {
       color: var(--accent);
-      border-color: rgba(76, 194, 255, 0.5);
-      background: rgba(76, 194, 255, 0.14);
+      border-color: var(--accent);
+      background: rgba(248, 148, 34, 0.14);
       transform: translateY(-2px);
       outline: none;
     }
@@ -84,113 +76,80 @@
       stroke-width: 1.8;
     }
 
-    .hero {
-      display: flex;
-      gap: 1.6rem;
-      align-items: center;
-    }
-
-    .hero-icon {
-      width: 72px;
-      height: 72px;
-      border-radius: 20px;
-      background: var(--accent-soft);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 14px 40px rgba(76, 194, 255, 0.25);
-    }
-
-    .hero-icon img {
-      width: 40px;
-      height: 40px;
-    }
-
-    .hero-text h1 {
-      font-size: clamp(2.1rem, 4vw, 2.8rem);
-      font-weight: 700;
-    }
-
-    .hero-text p {
-      margin-top: 0.6rem;
-      color: var(--text-muted);
-      line-height: 1.6;
-      max-width: 520px;
-      font-size: 1.05rem;
-    }
-
-    .lang-toggle {
-      display: inline-flex;
-      background: rgba(18, 20, 28, 0.7);
-      border-radius: 999px;
-      padding: 0.45rem 0.5rem;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      backdrop-filter: blur(12px);
-      gap: 0.6rem;
-      align-self: flex-start;
-    }
-
-    .lang-btn {
-      appearance: none;
-      border: none;
-      background: transparent;
-      color: var(--text-muted);
-      font-size: 0.95rem;
-      font-weight: 600;
-      padding: 0.35rem 0.9rem;
-      border-radius: 999px;
-      cursor: pointer;
-      transition: color 150ms ease, background 150ms ease, transform 150ms ease;
-    }
-
-    .lang-btn:hover {
-      color: var(--text-main);
-      transform: translateY(-1px);
-    }
-
-    .lang-btn.active {
-      background: var(--accent);
-      color: #021622;
-      box-shadow: 0 10px 24px rgba(76, 194, 255, 0.35);
-    }
-
-    .status-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 1.6rem;
-    }
-
-    .status-card {
-      background: var(--panel);
-      border-radius: 20px;
-      border: 1px solid var(--panel-border);
-      padding: 1.6rem;
-      display: grid;
-      gap: 0.75rem;
-      box-shadow: 0 16px 38px rgba(0, 0, 0, 0.4);
-    }
-
-    .status-card .label {
-      font-size: 0.95rem;
+    .eyebrow {
+      letter-spacing: 0.15em;
       text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--text-muted);
+      font-size: clamp(1.6rem, 4vw, 2.3rem);
+      font-weight: 700;
+      color: var(--accent);
     }
 
-    .status-card .value {
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 26px;
+      padding: 2.2rem;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
+    }
+
+    .panel::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: var(--panel-glow);
+      opacity: 0;
+      transition: opacity 180ms ease;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .panel:hover::after { opacity: 1; }
+
+    h2.section-title {
       font-size: 1.5rem;
       font-weight: 600;
+      margin-bottom: 1.2rem;
     }
 
-    .label--sub {
-      text-transform: none;
-      letter-spacing: normal;
+    .status-grid,
+    .device-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.6rem;
+    }
+
+    .status-card,
+    .device-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 22px;
+      padding: 1.6rem;
+      display: grid;
+      gap: 0.8rem;
+      transition: border 150ms ease, transform 150ms ease, box-shadow 150ms ease;
+    }
+
+    .status-card:hover,
+    .device-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 26px rgba(248,148,34,0.18);
+    }
+
+    .label {
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-soft);
     }
 
     .status-row {
       display: flex;
-      align-items: center;
       justify-content: space-between;
+      align-items: center;
       gap: 1rem;
       flex-wrap: wrap;
     }
@@ -203,571 +162,131 @@
       font-weight: 600;
       padding: 0.35rem 0.7rem;
       border-radius: 999px;
-      background: rgba(255, 255, 255, 0.08);
+      background: rgba(255,255,255,0.06);
       color: var(--text-main);
       width: fit-content;
-      transition: background 150ms ease, color 150ms ease;
-    }
-
-    .status-chip::before {
-      content: "";
-      width: 8px;
-      height: 8px;
-      border-radius: 999px;
-      background: currentColor;
-      opacity: 0.8;
     }
 
     .status-chip--success {
-      background: rgba(71, 209, 123, 0.16);
-      color: var(--positive);
-    }
-
-    .status-chip--warning {
-      background: rgba(241, 176, 76, 0.18);
-      color: var(--warning);
+      background: rgba(71,209,123,0.16);
+      color: #47d17b;
     }
 
     .status-chip--danger {
-      background: rgba(255, 107, 107, 0.18);
+      background: rgba(255,107,107,0.18);
       color: #ff7b7b;
     }
 
-    .status-chip--neutral {
-      background: rgba(255, 255, 255, 0.08);
-      color: var(--text-main);
-    }
-
-    .device-section {
-      display: grid;
-      gap: 1.6rem;
-    }
-
-    .section-title {
-      font-size: 1.4rem;
-      font-weight: 600;
-    }
-
-    .device-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 1.4rem;
-    }
-
-    .device-card {
-      background: var(--panel);
-      border: 1px solid var(--panel-border);
-      border-radius: 18px;
-      padding: 1.4rem;
-      display: grid;
-      gap: 0.6rem;
-      box-shadow: 0 16px 32px rgba(0, 0, 0, 0.35);
-    }
-
-    .device-card h2 {
-      font-size: 1.25rem;
-      font-weight: 600;
-    }
-
-    .device-card p {
-      color: var(--text-muted);
-      line-height: 1.4;
-      font-size: 0.98rem;
-    }
-
-    .device-metrics {
-      margin-top: 0.4rem;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.6rem;
-    }
-
     .metric-chip {
-      background: rgba(255, 255, 255, 0.06);
+      background: rgba(255,255,255,0.05);
       border-radius: 10px;
-      padding: 0.35rem 0.6rem;
-      font-size: 0.85rem;
+      padding: 0.4rem 0.7rem;
+      font-size: 0.9rem;
       color: var(--text-main);
     }
 
     footer {
-      color: var(--text-muted);
-      font-size: 0.95rem;
+      color: var(--text-soft);
       text-align: center;
+      font-size: 0.9rem;
+      margin-top: 1.4rem;
     }
 
-    @media (max-width: 720px) {
-      body {
-        padding: 1.8rem;
-      }
-
-      header {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
-      .header-layout {
-        width: 100%;
-      }
-
-      .hero {
-        flex-direction: column;
-        align-items: flex-start;
-      }
+    @media (max-width: 960px) {
+      body { padding: 2rem 1.4rem; }
     }
   </style>
 </head>
 <body>
   <main>
     <header>
-      <div class="header-layout">
-        <a class="menu-return" href="menu.html" aria-label="Return to menu">
-          <span aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M3 9l9-7 9 7"></path>
-              <path d="M9 22V12h6v10"></path>
-              <path d="M21 10v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V10"></path>
-            </svg>
-          </span>
-        </a>
-        <div class="hero">
-          <span class="hero-icon">
-            <img src="../icon/house.svg" alt="" aria-hidden="true" />
-          </span>
-          <div class="hero-text">
-            <h1 data-i18n="heroTitle">Tableau de bord domotique</h1>
-            <p data-i18n="heroSubtitle">
-              Visualisez rapidement l'état de votre maison connectée. Les données sont synchronisées en temps réel avec le réseau BeaverNet.
-            </p>
-          </div>
-        </div>
-      </div>
-      <div class="lang-toggle" role="group" aria-label="Sélecteur de langue">
-        <button type="button" class="lang-btn active" data-lang="fr" aria-pressed="true">Français</button>
-        <button type="button" class="lang-btn" data-lang="en" aria-pressed="false">English</button>
-      </div>
+      <a class="menu-return" href="menu.html" aria-label="Retour au menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M15 18l-6-6 6-6" />
+        </svg>
+      </a>
+      <span class="eyebrow">BeaverHome</span>
     </header>
 
-    <section class="status-grid">
-      <article class="status-card">
-        <span class="label" data-i18n="systemStatusLabel">État du système</span>
-        <div class="status-row">
-          <span data-i18n="systemWifiLabel">Wi-Fi domestique</span>
-          <span class="status-chip status-chip--warning" id="wifiStatusChip">--</span>
-        </div>
-        <div class="status-row">
-          <span data-i18n="systemWsLabel">Serveur WebSocket</span>
-          <span class="status-chip status-chip--warning" id="wsStatusChip">--</span>
-        </div>
-      </article>
-      <article class="status-card">
-        <span class="label" data-i18n="energyUsageLabel">Consommation actuelle</span>
-        <span class="value" data-i18n="energyUsageValue">2,3 kWh</span>
-        <div class="status-row">
-          <span class="label label--sub" data-i18n="energyBatteryLabel">Batterie du système</span>
-          <span class="status-chip status-chip--neutral" id="batteryStatusChip">--</span>
-        </div>
-        <span class="label" id="energyUpdatedLabel" data-i18n="energyUpdatedPending">En attente des données de la batterie</span>
-      </article>
-      <article class="status-card">
-        <span class="label" data-i18n="climateLabel">Climat intérieur</span>
-        <div class="device-metrics">
-          <span class="metric-chip" data-i18n="climateTemp">Température : 20,5 °C</span>
-          <span class="metric-chip" data-i18n="climateHumidity">Humidité : 45 %</span>
-        </div>
-        <span class="label" data-i18n="climateUpdatedLabel">Actualisé en direct</span>
-      </article>
-    </section>
-
-    <section class="device-section">
-      <h2 class="section-title" data-i18n="zoneHeading">Zones contrôlées</h2>
-      <div class="device-grid">
-        <article class="device-card">
-          <h2 data-i18n="livingRoomTitle">Salon</h2>
-          <p data-i18n="livingRoomDesc">Éclairage principal et bandeau lumineux d'ambiance.</p>
-          <div class="device-metrics">
-            <span class="metric-chip" data-i18n="livingRoomStatus">Éclairage : allumé</span>
-            <span class="metric-chip" data-i18n="livingRoomScene">Scène : Soirée</span>
+    <!-- === SYSTEM STATUS PANEL === -->
+    <section class="panel">
+      <h2 class="section-title">État du système</h2>
+      <div class="status-grid">
+        <article class="status-card">
+          <span class="label">Wi-Fi domestique</span>
+          <div class="status-row">
+            <span>État :</span>
+            <span class="status-chip status-chip--success">Connecté</span>
           </div>
         </article>
-        <article class="device-card">
-          <h2 data-i18n="kitchenTitle">Cuisine</h2>
-          <p data-i18n="kitchenDesc">Plan de travail, prises intelligentes et détecteur de fumée.</p>
-          <div class="device-metrics">
-            <span class="metric-chip" data-i18n="kitchenStatus">Éclairage : éteint</span>
-            <span class="metric-chip" data-i18n="kitchenAppliance">Prises : 1 actif</span>
+        <article class="status-card">
+          <span class="label">Serveur WebSocket</span>
+          <div class="status-row">
+            <span>État :</span>
+            <span class="status-chip status-chip--success">Connecté</span>
           </div>
         </article>
-        <article class="device-card">
-          <h2 data-i18n="bedroomTitle">Chambre</h2>
-          <p data-i18n="bedroomDesc">Contrôle de la lampe de chevet et du thermostat local.</p>
-          <div class="device-metrics">
-            <span class="metric-chip" data-i18n="bedroomStatus">Éclairage : tamisé</span>
-            <span class="metric-chip" data-i18n="bedroomSetpoint">Consigne : 21 °C</span>
-          </div>
-        </article>
-        <article class="device-card">
-          <h2 data-i18n="garageTitle">Garage</h2>
-          <p data-i18n="garageDesc">Porte sectionnelle, lumière automatique et capteur de présence.</p>
-          <div class="device-metrics">
-            <span class="metric-chip" data-i18n="garageStatus">Porte : fermée</span>
-            <span class="metric-chip" data-i18n="garageLight">Lumière : auto</span>
+        <article class="status-card">
+          <span class="label">Batterie du système</span>
+          <div class="status-row">
+            <span>Charge :</span>
+            <span class="status-chip">92 % – En charge</span>
           </div>
         </article>
       </div>
     </section>
 
-    <section class="device-section">
-      <h2 class="section-title" data-i18n="sensorHeading">Capteurs en direct</h2>
+    <!-- === CONTROLLED ZONES === -->
+    <section class="panel">
+      <h2 class="section-title">Zones contrôlées</h2>
       <div class="device-grid">
         <article class="device-card">
-          <h2 data-i18n="thermostatTitle">Thermostat central</h2>
-          <p data-i18n="thermostatDesc">Suit la consommation énergétique et ajuste la température.</p>
-          <div class="device-metrics">
-            <span class="metric-chip" data-i18n="thermostatMode">Mode : Confort</span>
-            <span class="metric-chip" data-i18n="thermostatAmbient">Ambiante : 20 °C</span>
-          </div>
+          <h3>Salon</h3>
+          <p>Éclairage principal et bandeau lumineux d’ambiance.</p>
+          <div class="metric-chip">Éclairage : allumé</div>
+          <div class="metric-chip">Scène : Soirée</div>
         </article>
         <article class="device-card">
-          <h2 data-i18n="securityTitle">Sécurité</h2>
-          <p data-i18n="securityDesc">Capteurs de mouvement, contacts de portes et caméras.</p>
-          <div class="device-metrics">
-            <span class="metric-chip" data-i18n="securityStatus">État : Armé</span>
-            <span class="metric-chip" data-i18n="securityAlert">Alertes : aucune</span>
-          </div>
+          <h3>Cuisine</h3>
+          <p>Plan de travail, prises intelligentes et détecteur de fumée.</p>
+          <div class="metric-chip">Éclairage : éteint</div>
+          <div class="metric-chip">Prises : 1 actif</div>
+        </article>
+        <article class="device-card">
+          <h3>Chambre</h3>
+          <p>Lampe de chevet et thermostat local.</p>
+          <div class="metric-chip">Éclairage : tamisé</div>
+          <div class="metric-chip">Consigne : 21 °C</div>
+        </article>
+        <article class="device-card">
+          <h3>Garage</h3>
+          <p>Porte sectionnelle, lumière automatique et capteur de présence.</p>
+          <div class="metric-chip">Porte : fermée</div>
+          <div class="metric-chip">Lumière : auto</div>
         </article>
       </div>
     </section>
 
-    <footer data-i18n="footerNote">Utilisez le bouton Menu pour revenir aux autres services.</footer>
+    <!-- === LIVE SENSORS === -->
+    <section class="panel">
+      <h2 class="section-title">Capteurs en direct</h2>
+      <div class="device-grid">
+        <article class="device-card">
+          <h3>Thermostat central</h3>
+          <p>Suit la consommation énergétique et ajuste la température.</p>
+          <div class="metric-chip">Mode : Confort</div>
+          <div class="metric-chip">Ambiante : 20 °C</div>
+        </article>
+        <article class="device-card">
+          <h3>Sécurité</h3>
+          <p>Capteurs de mouvement, contacts de portes et caméras.</p>
+          <div class="metric-chip">État : Armé</div>
+          <div class="metric-chip">Alertes : Aucune</div>
+        </article>
+      </div>
+    </section>
+
+    <footer>Utilisez le bouton menu pour revenir aux autres services.</footer>
   </main>
-
-  <script>
-    const translations = {
-      fr: {
-        pageTitle: "Domotique - Beaver Kiosk",
-        heroTitle: "Tableau de bord domotique",
-        heroSubtitle: "Visualisez rapidement l'état de votre maison connectée. Les données sont synchronisées en temps réel avec le réseau BeaverNet.",
-        systemStatusLabel: "État du système",
-        systemWifiLabel: "Wi-Fi domestique",
-        systemWsLabel: "Serveur WebSocket",
-        energyUsageLabel: "Consommation actuelle",
-        energyUsageValue: "2,3 kWh",
-        energyBatteryLabel: "Batterie du système",
-        energyUpdatedPending: "En attente des données de la batterie",
-        energyUpdatedAt: "Actualisé à {time}",
-        energyUpdatedError: "Échec de lecture à {time}",
-        climateLabel: "Climat intérieur",
-        climateTemp: "Température : 20,5 °C",
-        climateHumidity: "Humidité : 45 %",
-        climateUpdatedLabel: "Actualisé en direct",
-        zoneHeading: "Zones contrôlées",
-        livingRoomTitle: "Salon",
-        livingRoomDesc: "Éclairage principal et bandeau lumineux d'ambiance.",
-        livingRoomStatus: "Éclairage : allumé",
-        livingRoomScene: "Scène : Soirée",
-        kitchenTitle: "Cuisine",
-        kitchenDesc: "Plan de travail, prises intelligentes et détecteur de fumée.",
-        kitchenStatus: "Éclairage : éteint",
-        kitchenAppliance: "Prises : 1 actif",
-        bedroomTitle: "Chambre",
-        bedroomDesc: "Contrôle de la lampe de chevet et du thermostat local.",
-        bedroomStatus: "Éclairage : tamisé",
-        bedroomSetpoint: "Consigne : 21 °C",
-        garageTitle: "Garage",
-        garageDesc: "Porte sectionnelle, lumière automatique et capteur de présence.",
-        garageStatus: "Porte : fermée",
-        garageLight: "Lumière : auto",
-        sensorHeading: "Capteurs en direct",
-        thermostatTitle: "Thermostat central",
-        thermostatDesc: "Suit la consommation énergétique et ajuste la température.",
-        thermostatMode: "Mode : Confort",
-        thermostatAmbient: "Ambiante : 20 °C",
-        securityTitle: "Sécurité",
-        securityDesc: "Capteurs de mouvement, contacts de portes et caméras.",
-        securityStatus: "État : Armé",
-        securityAlert: "Alertes : aucune",
-        footerNote: "Utilisez le bouton Menu pour revenir aux autres services."
-      },
-      en: {
-        pageTitle: "Home Automation - Beaver Kiosk",
-        heroTitle: "Home automation dashboard",
-        heroSubtitle: "Get a quick overview of your connected home. Data synchronises in real time with the BeaverNet network.",
-        systemStatusLabel: "System status",
-        systemWifiLabel: "Home Wi-Fi",
-        systemWsLabel: "WebSocket server",
-        energyUsageLabel: "Current consumption",
-        energyUsageValue: "2.3 kWh",
-        energyBatteryLabel: "System battery",
-        energyUpdatedPending: "Waiting for battery data",
-        energyUpdatedAt: "Updated at {time}",
-        energyUpdatedError: "Read error at {time}",
-        climateLabel: "Indoor climate",
-        climateTemp: "Temperature: 20.5 °C",
-        climateHumidity: "Humidity: 45%",
-        climateUpdatedLabel: "Live refresh",
-        zoneHeading: "Controlled zones",
-        livingRoomTitle: "Living room",
-        livingRoomDesc: "Main lighting and ambient LED strip.",
-        livingRoomStatus: "Lighting: on",
-        livingRoomScene: "Scene: Evening",
-        kitchenTitle: "Kitchen",
-        kitchenDesc: "Counter lights, smart outlets and smoke detector.",
-        kitchenStatus: "Lighting: off",
-        kitchenAppliance: "Outlets: 1 active",
-        bedroomTitle: "Bedroom",
-        bedroomDesc: "Bedside lamp and local thermostat control.",
-        bedroomStatus: "Lighting: dimmed",
-        bedroomSetpoint: "Set point: 21 °C",
-        garageTitle: "Garage",
-        garageDesc: "Overhead door, auto light and presence sensor.",
-        garageStatus: "Door: closed",
-        garageLight: "Light: auto",
-        sensorHeading: "Live sensors",
-        thermostatTitle: "Central thermostat",
-        thermostatDesc: "Tracks energy use and adjusts the temperature.",
-        thermostatMode: "Mode: Comfort",
-        thermostatAmbient: "Ambient: 20 °C",
-        securityTitle: "Security",
-        securityDesc: "Motion sensors, door contacts and cameras.",
-        securityStatus: "Status: Armed",
-        securityAlert: "Alerts: none",
-        footerNote: "Use the Menu button to return to other services."
-      }
-    };
-
-    const statusTranslations = {
-      fr: {
-        statusOnline: "Connecté",
-        statusOffline: "Hors ligne",
-        statusConnecting: "Connexion…",
-        statusDisconnected: "Déconnecté",
-        statusUnavailable: "Indisponible",
-        batteryStatusCharging: "En charge",
-        batteryStatusDischarging: "En décharge",
-        batteryStatusFull: "Chargée",
-        batteryStatusNotCharging: "Repos",
-        batteryStatusUnknown: "État inconnu",
-        batteryStatusEmpty: "Vide",
-        batteryStatusError: "Lecture impossible",
-        batteryStatusMissing: "Aucun capteur",
-        batteryAwaiting: "Lecture en cours…",
-      },
-      en: {
-        statusOnline: "Online",
-        statusOffline: "Offline",
-        statusConnecting: "Connecting…",
-        statusDisconnected: "Disconnected",
-        statusUnavailable: "Unavailable",
-        batteryStatusCharging: "Charging",
-        batteryStatusDischarging: "Discharging",
-        batteryStatusFull: "Full",
-        batteryStatusNotCharging: "Idle",
-        batteryStatusUnknown: "Unknown",
-        batteryStatusEmpty: "Empty",
-        batteryStatusError: "Read failed",
-        batteryStatusMissing: "No sensor",
-        batteryAwaiting: "Reading…",
-      }
-    };
-
-    const WIFI_ONLINE_STATES = ["online"];
-    const wsChip = document.getElementById('wsStatusChip');
-    const wifiChip = document.getElementById('wifiStatusChip');
-    const batteryChip = document.getElementById('batteryStatusChip');
-    const energyUpdatedLabel = document.getElementById('energyUpdatedLabel');
-
-    const state = {
-      wifi: navigator.onLine ? 'online' : 'offline',
-      ws: 'connecting',
-      battery: {
-        capacity: null,
-        status: null,
-        timestamp: null,
-        error: null,
-      },
-    };
-
-    let currentLang = 'fr';
-
-    const langButtons = document.querySelectorAll('.lang-btn');
-
-    function setLanguage(lang) {
-      if (!translations[lang]) return;
-      document.documentElement.lang = lang;
-      currentLang = lang;
-
-      document.querySelectorAll('[data-i18n]').forEach((node) => {
-        const key = node.dataset.i18n;
-        const value = translations[lang][key];
-        if (value) {
-          if (node.tagName === 'TITLE') {
-            document.title = value;
-          } else {
-            node.innerHTML = value;
-          }
-        }
-      });
-
-      langButtons.forEach((button) => {
-        const isActive = button.dataset.lang === lang;
-        button.classList.toggle('active', isActive);
-        button.setAttribute('aria-pressed', String(isActive));
-      });
-
-      localStorage.setItem('preferredLang', lang);
-      renderDynamicStatus();
-    }
-
-    langButtons.forEach((button) => {
-      button.addEventListener('click', () => setLanguage(button.dataset.lang));
-    });
-
-    const savedLang = localStorage.getItem('preferredLang');
-    setLanguage(savedLang && translations[savedLang] ? savedLang : 'fr');
-
-    function translateStatus(key) {
-      const bundle = statusTranslations[currentLang] || statusTranslations.fr;
-      return bundle[key] || key;
-    }
-
-    function setChipState(chip, variant) {
-      chip.classList.remove('status-chip--success', 'status-chip--warning', 'status-chip--danger', 'status-chip--neutral');
-      chip.classList.add(`status-chip--${variant}`);
-    }
-
-    function renderWifiStatus() {
-      const online = WIFI_ONLINE_STATES.includes(state.wifi);
-      wifiChip.textContent = online ? translateStatus('statusOnline') : translateStatus('statusOffline');
-      setChipState(wifiChip, online ? 'success' : 'danger');
-    }
-
-    function renderWsStatus() {
-      let textKey = 'statusUnavailable';
-      let variant = 'warning';
-
-      switch (state.ws) {
-        case 'connected':
-          textKey = 'statusOnline';
-          variant = 'success';
-          break;
-        case 'connecting':
-          textKey = 'statusConnecting';
-          variant = 'warning';
-          break;
-        case 'disconnected':
-        default:
-          textKey = state.ws === 'disconnected' ? 'statusDisconnected' : 'statusUnavailable';
-          variant = 'danger';
-          break;
-      }
-
-      wsChip.textContent = translateStatus(textKey);
-      setChipState(wsChip, variant);
-    }
-
-    function normalizeBatteryStatus(status) {
-      if (!status) return 'batteryStatusUnknown';
-      const normalized = status.toLowerCase().replace(/_/g, ' ').trim();
-
-      if (normalized.includes('charging') && normalized.includes('full')) {
-        return 'batteryStatusFull';
-      }
-
-      switch (normalized) {
-        case 'charging':
-          return 'batteryStatusCharging';
-        case 'discharging':
-          return 'batteryStatusDischarging';
-        case 'full':
-          return 'batteryStatusFull';
-        case 'not charging':
-          return 'batteryStatusNotCharging';
-        case 'unknown':
-          return 'batteryStatusUnknown';
-        case 'empty':
-          return 'batteryStatusEmpty';
-        case 'not present':
-          return 'batteryStatusMissing';
-        default:
-          return 'batteryStatusUnknown';
-      }
-    }
-
-    function renderBatteryStatus() {
-      if (state.battery.error) {
-        batteryChip.textContent = translateStatus('batteryStatusError');
-        setChipState(batteryChip, 'danger');
-        if (state.battery.timestamp) {
-          energyUpdatedLabel.textContent = formatUpdateLabel('energyUpdatedError', state.battery.timestamp);
-        }
-        return;
-      }
-
-      if (typeof state.battery.capacity === 'number' && state.battery.status) {
-        const key = normalizeBatteryStatus(state.battery.status);
-        const statusText = translateStatus(key);
-        batteryChip.textContent = `${state.battery.capacity}% • ${statusText}`;
-        setChipState(batteryChip, 'success');
-        if (state.battery.timestamp) {
-          energyUpdatedLabel.textContent = formatUpdateLabel('energyUpdatedAt', state.battery.timestamp);
-        }
-        return;
-      }
-
-      batteryChip.textContent = translateStatus('batteryAwaiting');
-      setChipState(batteryChip, 'neutral');
-      energyUpdatedLabel.textContent = translations[currentLang].energyUpdatedPending;
-    }
-
-    function formatUpdateLabel(key, timestamp) {
-      const template = translations[currentLang][key] || translations.fr[key];
-      const formatter = new Intl.DateTimeFormat(currentLang === 'fr' ? 'fr-FR' : 'en-US', {
-        hour: '2-digit',
-        minute: '2-digit',
-      });
-      const time = formatter.format(new Date(timestamp));
-      return template.replace('{time}', time);
-    }
-
-    function renderDynamicStatus() {
-      renderWifiStatus();
-      renderWsStatus();
-      renderBatteryStatus();
-    }
-
-    window.addEventListener('online', () => {
-      state.wifi = 'online';
-      renderWifiStatus();
-    });
-
-    window.addEventListener('offline', () => {
-      state.wifi = 'offline';
-      renderWifiStatus();
-    });
-
-    window.addEventListener('beaverphone:ws-status', (event) => {
-      const detail = event.detail || {};
-      state.ws = detail.status || 'disconnected';
-      renderWsStatus();
-    });
-
-    if (window.electronAPI?.onPowerStatus) {
-      window.electronAPI.onPowerStatus((detail = {}) => {
-        state.battery.capacity = typeof detail.capacity === 'number' ? detail.capacity : null;
-        state.battery.status = detail.status || null;
-        state.battery.timestamp = detail.timestamp || null;
-        state.battery.error = detail.error || null;
-        renderBatteryStatus();
-      });
-    } else {
-      state.battery.error = 'unavailable';
-      batteryChip.textContent = translateStatus('batteryStatusError');
-      setChipState(batteryChip, 'danger');
-      energyUpdatedLabel.textContent = translations[currentLang].energyUpdatedPending;
-    }
-
-    renderDynamicStatus();
-  </script>
 </body>
 </html>
