@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>BeaverAlarm - Sécurité domestique</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #060608;
+      --panel: #0f1018;
+      --panel-glow: rgba(248, 148, 34, 0.12);
+      --border: rgba(255, 255, 255, 0.08);
+      --text-main: #ffffff;
+      --text-muted: rgba(255, 255, 255, 0.68);
+      --text-soft: rgba(255, 255, 255, 0.42);
+      --accent: #f89422;
+      --accent-strong: #ff9f33;
+      --success: #47d17b;
+      --danger: #ff7b7b;
+      --shadow: 0 28px 40px rgba(0, 0, 0, 0.45);
+      --font: "Inter", "Segoe UI", sans-serif;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      font-family: var(--font);
+      background:
+        radial-gradient(circle at 15% 20%, rgba(248, 148, 34, 0.12), transparent 55%),
+        radial-gradient(circle at 85% 10%, rgba(248, 148, 34, 0.08), transparent 50%),
+        var(--bg);
+      color: var(--text-main);
+      padding: 3.5rem 2rem;
+    }
+
+    main {
+      width: min(1200px, 100%);
+      display: flex;
+      flex-direction: column;
+      gap: 2.4rem;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .menu-return {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-muted);
+      transition: color 160ms ease, border 160ms ease, background 160ms ease, transform 160ms ease;
+    }
+
+    .menu-return:hover,
+    .menu-return:focus-visible {
+      color: var(--accent);
+      border-color: var(--accent);
+      background: rgba(248, 148, 34, 0.14);
+      transform: translateY(-2px);
+      outline: none;
+    }
+
+    .menu-return svg {
+      width: 24px;
+      height: 24px;
+      stroke-width: 1.8;
+    }
+
+    .lang-toggle {
+      display: inline-flex;
+      justify-self: flex-end;
+      gap: 0.75rem;
+      background: rgba(24, 24, 32, 0.65);
+      padding: 0.5rem 0.6rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+    }
+
+    .lang-btn {
+      appearance: none;
+      border: none;
+      background: transparent;
+      color: var(--text-soft);
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 0.4rem 0.9rem;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: color 150ms ease, background 150ms ease, transform 150ms ease;
+    }
+
+    .lang-btn:hover {
+      color: var(--text-main);
+      transform: translateY(-1px);
+    }
+
+    .lang-btn.active {
+      background: var(--accent);
+      color: #121219;
+      box-shadow: 0 8px 18px rgba(248, 148, 34, 0.35);
+    }
+
+    .hero {
+      display: grid;
+      gap: 0.8rem;
+    }
+
+    .eyebrow {
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    .hero h1 {
+      font-size: clamp(2.2rem, 4vw, 3rem);
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .hero p {
+      max-width: 720px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      font-size: 1.05rem;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 26px;
+      padding: 2.2rem;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
+      display: grid;
+      gap: 1.4rem;
+    }
+
+    .panel::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: var(--panel-glow);
+      opacity: 0;
+      transition: opacity 180ms ease;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .panel:hover::after {
+      opacity: 1;
+    }
+
+    .status-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .status-header h2 {
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+
+    .status-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 0.4rem 0.9rem;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-main);
+    }
+
+    .status-chip--disarmed {
+      background: rgba(71, 209, 123, 0.16);
+      color: var(--success);
+    }
+
+    .status-chip--armedStay {
+      background: rgba(248, 148, 34, 0.18);
+      color: var(--accent-strong);
+    }
+
+    .status-chip--armedAway {
+      background: rgba(255, 107, 107, 0.18);
+      color: var(--danger);
+    }
+
+    .status-message {
+      color: var(--text-muted);
+      font-size: 1rem;
+      min-height: 1.5rem;
+      transition: color 200ms ease;
+    }
+
+    .status-message--success {
+      color: var(--success);
+    }
+
+    .status-message--warning {
+      color: var(--accent-strong);
+    }
+
+    .status-message--alert {
+      color: var(--danger);
+    }
+
+    .layout-grid {
+      display: grid;
+      gap: 2rem;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+
+    .keypad-panel {
+      align-content: start;
+    }
+
+    .code-display {
+      font-size: 2rem;
+      letter-spacing: 0.4rem;
+      font-weight: 600;
+      text-align: center;
+      padding: 0.8rem 1rem;
+      border-radius: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .keypad-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(56px, 1fr));
+      gap: 0.75rem;
+    }
+
+    .key,
+    .keypad-bottom button,
+    .action-btn {
+      appearance: none;
+      border: none;
+      border-radius: 16px;
+      font-weight: 600;
+      font-size: 1.05rem;
+      padding: 0.9rem;
+      cursor: pointer;
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      transition: transform 160ms ease, background 160ms ease, border 160ms ease, box-shadow 160ms ease;
+    }
+
+    .key:hover,
+    .keypad-bottom button:hover,
+    .action-btn:hover,
+    .key:focus-visible,
+    .keypad-bottom button:focus-visible,
+    .action-btn:focus-visible {
+      transform: translateY(-2px);
+      border-color: var(--accent);
+      background: rgba(248, 148, 34, 0.16);
+      outline: none;
+      box-shadow: 0 10px 24px rgba(248, 148, 34, 0.18);
+    }
+
+    .keypad-bottom {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 0.75rem;
+    }
+
+    .action-row {
+      display: grid;
+      gap: 0.75rem;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    }
+
+    .action-btn--stay {
+      background: rgba(248, 148, 34, 0.16);
+      border-color: rgba(248, 148, 34, 0.4);
+    }
+
+    .action-btn--away {
+      background: rgba(255, 107, 107, 0.16);
+      border-color: rgba(255, 107, 107, 0.38);
+    }
+
+    .action-btn--disarm {
+      background: rgba(71, 209, 123, 0.16);
+      border-color: rgba(71, 209, 123, 0.38);
+      color: var(--success);
+    }
+
+    .zones-panel {
+      align-content: start;
+    }
+
+    .zones-hint {
+      color: var(--text-soft);
+      font-size: 0.95rem;
+    }
+
+    .zone-list {
+      display: grid;
+      gap: 0.9rem;
+    }
+
+    .zone {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 1rem 1.2rem;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--text-main);
+      cursor: pointer;
+      transition: transform 160ms ease, border 160ms ease, background 160ms ease, box-shadow 160ms ease;
+    }
+
+    .zone:hover,
+    .zone:focus-visible {
+      transform: translateY(-2px);
+      border-color: var(--accent);
+      background: rgba(248, 148, 34, 0.14);
+      outline: none;
+      box-shadow: 0 10px 24px rgba(248, 148, 34, 0.16);
+    }
+
+    .zone--open {
+      border-color: rgba(255, 107, 107, 0.55);
+      background: rgba(255, 107, 107, 0.12);
+    }
+
+    .zone-left {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-weight: 600;
+    }
+
+    .zone-indicator {
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      background: rgba(71, 209, 123, 0.65);
+      box-shadow: 0 0 0 4px rgba(71, 209, 123, 0.14);
+    }
+
+    .zone-indicator--open {
+      background: rgba(255, 107, 107, 0.9);
+      box-shadow: 0 0 0 4px rgba(255, 107, 107, 0.2);
+    }
+
+    .zone-state {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .log-panel {
+      align-content: start;
+    }
+
+    .log-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 0.8rem;
+    }
+
+    .log-list li {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.8rem 1rem;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      font-size: 0.95rem;
+    }
+
+    .log-time {
+      color: var(--text-soft);
+      font-feature-settings: "tnum" 1, "lnum" 1;
+      min-width: 64px;
+    }
+
+    .log-message {
+      flex: 1;
+      text-align: right;
+      color: var(--text-muted);
+    }
+
+    .empty-log {
+      color: var(--text-soft);
+      font-size: 0.95rem;
+    }
+
+    @media (max-width: 960px) {
+      body {
+        padding: 2rem 1.4rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <a class="menu-return" href="menu.html" aria-label="Retour au menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M15 18l-6-6 6-6" />
+        </svg>
+      </a>
+      <div class="lang-toggle" role="group" aria-label="Sélecteur de langue">
+        <button type="button" class="lang-btn active" data-lang="fr" aria-pressed="true">Français</button>
+        <button type="button" class="lang-btn" data-lang="en" aria-pressed="false">English</button>
+      </div>
+    </header>
+
+    <section class="hero">
+      <span class="eyebrow" data-i18n="header.brand">BeaverAlarm</span>
+      <h1 data-i18n="hero.title">Pilotez votre sécurité domestique</h1>
+      <p data-i18n="hero.subtitle">Simulez un panneau d’alarme connecté, entraînez-vous à armer et désarmer le système et vérifiez l’état des zones surveillées.</p>
+    </section>
+
+    <section class="panel status-panel">
+      <div class="status-header">
+        <h2 data-i18n="status.heading">État du système</h2>
+        <span id="statusChip" class="status-chip status-chip--disarmed">Désarmée</span>
+      </div>
+      <p id="statusMessage" class="status-message" data-message-key="status.message.disarmed" role="status" aria-live="polite">Système prêt à être armé.</p>
+    </section>
+
+    <section class="layout-grid">
+      <article class="panel keypad-panel">
+        <h2 data-i18n="keypad.heading">Clavier numérique</h2>
+        <div class="code-display" id="codeDisplay">----</div>
+        <div class="keypad-grid">
+          <button type="button" class="key" data-digit="1">1</button>
+          <button type="button" class="key" data-digit="2">2</button>
+          <button type="button" class="key" data-digit="3">3</button>
+          <button type="button" class="key" data-digit="4">4</button>
+          <button type="button" class="key" data-digit="5">5</button>
+          <button type="button" class="key" data-digit="6">6</button>
+          <button type="button" class="key" data-digit="7">7</button>
+          <button type="button" class="key" data-digit="8">8</button>
+          <button type="button" class="key" data-digit="9">9</button>
+        </div>
+        <div class="keypad-bottom">
+          <button type="button" data-action="clear" data-i18n="keypad.clear">Effacer</button>
+          <button type="button" data-digit="0">0</button>
+        </div>
+        <div class="action-row">
+          <button type="button" class="action-btn action-btn--stay" data-action="armStay" data-i18n="keypad.armStay">Armement présence</button>
+          <button type="button" class="action-btn action-btn--away" data-action="armAway" data-i18n="keypad.armAway">Armement absence</button>
+          <button type="button" class="action-btn action-btn--disarm" data-action="disarm" data-i18n="keypad.disarm">Désarmer</button>
+        </div>
+      </article>
+
+      <article class="panel zones-panel">
+        <h2 data-i18n="zones.heading">Zones surveillées</h2>
+        <p class="zones-hint" data-i18n="zones.toggleHint">Touchez une zone pour simuler son état.</p>
+        <div id="zoneList" class="zone-list"></div>
+      </article>
+
+      <article class="panel log-panel">
+        <h2 data-i18n="log.heading">Historique des événements</h2>
+        <p id="logEmpty" class="empty-log" data-i18n="log.empty">Aucun événement pour le moment.</p>
+        <ul id="logList" class="log-list"></ul>
+      </article>
+    </section>
+  </main>
+  <script>
+    (function () {
+      const translations = {
+        fr: {
+          meta: { title: "BeaverAlarm - Sécurité domestique" },
+          header: { brand: "BeaverAlarm" },
+          hero: {
+            title: "Pilotez votre sécurité domestique",
+            subtitle: "Simulez un panneau d’alarme connecté, entraînez-vous à armer et désarmer le système et vérifiez l’état des zones surveillées."
+          },
+          status: {
+            heading: "État du système",
+            chip: {
+              disarmed: "Désarmée",
+              armedStay: "Armée (présence)",
+              armedAway: "Armée (absence)"
+            },
+            message: {
+              disarmed: "Système prêt à être armé.",
+              armedStay: "Surveillance périmétrique active.",
+              armedAway: "Toutes les zones sont surveillées.",
+              zoneOpened: "Alerte : une zone est ouverte.",
+              zoneClosed: "Zone refermée.",
+              blocked: "Armement impossible : zones ouvertes.",
+              codePrompt: "Entrez un code à 4 chiffres.",
+              codeError: "Code invalide."
+            }
+          },
+          keypad: {
+            heading: "Clavier numérique",
+            clear: "Effacer",
+            armStay: "Armement présence",
+            armAway: "Armement absence",
+            disarm: "Désarmer"
+          },
+          zones: {
+            heading: "Zones surveillées",
+            toggleHint: "Touchez une zone pour simuler son état.",
+            statusClosed: "Sécurisée",
+            statusOpen: "Ouverte",
+            list: {
+              livingRoom: "Salon",
+              frontDoor: "Porte principale",
+              garage: "Garage",
+              basement: "Sous-sol"
+            }
+          },
+          log: {
+            heading: "Historique des événements",
+            empty: "Aucun événement pour le moment.",
+            armedStay: "Système armé (présence).",
+            armedAway: "Système armé (absence).",
+            disarmed: "Système désarmé.",
+            zoneOpened: "Zone ouverte : {{zone}}.",
+            zoneClosed: "Zone sécurisée : {{zone}}."
+          }
+        },
+        en: {
+          meta: { title: "BeaverAlarm - Home security" },
+          header: { brand: "BeaverAlarm" },
+          hero: {
+            title: "Control your home security",
+            subtitle: "Simulate a connected alarm keypad, practice arming and disarming, and monitor the state of each zone."
+          },
+          status: {
+            heading: "System status",
+            chip: {
+              disarmed: "Disarmed",
+              armedStay: "Armed (stay)",
+              armedAway: "Armed (away)"
+            },
+            message: {
+              disarmed: "System ready to arm.",
+              armedStay: "Perimeter sensors are active.",
+              armedAway: "All zones are being monitored.",
+              zoneOpened: "Alert: a zone is open.",
+              zoneClosed: "Zone restored.",
+              blocked: "Unable to arm: zones are open.",
+              codePrompt: "Enter a 4-digit code.",
+              codeError: "Invalid code."
+            }
+          },
+          keypad: {
+            heading: "Keypad",
+            clear: "Clear",
+            armStay: "Arm stay",
+            armAway: "Arm away",
+            disarm: "Disarm"
+          },
+          zones: {
+            heading: "Monitored zones",
+            toggleHint: "Tap a zone to simulate its state.",
+            statusClosed: "Secured",
+            statusOpen: "Open",
+            list: {
+              livingRoom: "Living room",
+              frontDoor: "Front door",
+              garage: "Garage",
+              basement: "Basement"
+            }
+          },
+          log: {
+            heading: "Event history",
+            empty: "No events yet.",
+            armedStay: "System armed (stay).",
+            armedAway: "System armed (away).",
+            disarmed: "System disarmed.",
+            zoneOpened: "Zone opened: {{zone}}.",
+            zoneClosed: "Zone restored: {{zone}}."
+          }
+        }
+      };
+
+      const state = {
+        lang: "fr",
+        systemState: "disarmed",
+        inputBuffer: "",
+        zones: [
+          { key: "livingRoom", open: false },
+          { key: "frontDoor", open: false },
+          { key: "garage", open: false },
+          { key: "basement", open: false }
+        ],
+        log: []
+      };
+
+      const validCode = "1234";
+      const maxCodeLength = 6;
+      let flashTimer;
+
+      const langButtons = document.querySelectorAll('.lang-btn');
+      const statusChip = document.getElementById('statusChip');
+      const statusMessage = document.getElementById('statusMessage');
+      const codeDisplay = document.getElementById('codeDisplay');
+      const zoneList = document.getElementById('zoneList');
+      const logEmpty = document.getElementById('logEmpty');
+      const logList = document.getElementById('logList');
+      const clearButton = document.querySelector('[data-action="clear"]');
+      const armStayButton = document.querySelector('[data-action="armStay"]');
+      const armAwayButton = document.querySelector('[data-action="armAway"]');
+      const disarmButton = document.querySelector('[data-action="disarm"]');
+
+      if (!statusMessage.dataset.messageKey) {
+        statusMessage.dataset.messageKey = 'status.message.disarmed';
+      }
+
+      function translate(key) {
+        if (!key) {
+          return '';
+        }
+
+        return key.split('.').reduce((acc, part) => {
+          if (acc && Object.prototype.hasOwnProperty.call(acc, part)) {
+            return acc[part];
+          }
+          return undefined;
+        }, translations[state.lang]) ?? '';
+      }
+
+      function formatWithPlaceholders(template, replacements = {}) {
+        return (template || '').replace(/\{\{(\w+)\}\}/g, (_, token) => {
+          return Object.prototype.hasOwnProperty.call(replacements, token) ? replacements[token] : '';
+        });
+      }
+
+      function applyStaticTranslations() {
+        document.querySelectorAll('[data-i18n]').forEach((node) => {
+          const key = node.dataset.i18n;
+          const value = translate(key);
+
+          if (value) {
+            node.innerHTML = value;
+          }
+        });
+
+        document.title = translate('meta.title') || document.title;
+      }
+
+      function setLanguage(lang) {
+        if (!translations[lang]) {
+          return;
+        }
+
+        state.lang = lang;
+        document.documentElement.lang = lang;
+
+        langButtons.forEach((button) => {
+          const isActive = button.dataset.lang === lang;
+          button.classList.toggle('active', isActive);
+          button.setAttribute('aria-pressed', String(isActive));
+        });
+
+        applyStaticTranslations();
+        updateStatusChip();
+        refreshStatusMessage();
+        renderZones();
+        renderLog();
+
+        try {
+          localStorage.setItem('preferredLang', lang);
+        } catch (error) {
+          console.warn('Unable to persist language preference', error);
+        }
+      }
+
+      function updateStatusChip() {
+        const label = translate(`status.chip.${state.systemState}`);
+        statusChip.textContent = label || '';
+        statusChip.className = 'status-chip';
+        statusChip.classList.add(`status-chip--${state.systemState}`);
+      }
+
+      function setStatusMessageKey(key) {
+        statusMessage.dataset.messageKey = key;
+        refreshStatusMessage();
+      }
+
+      function refreshStatusMessage() {
+        const key = statusMessage.dataset.messageKey || `status.message.${state.systemState}`;
+        statusMessage.textContent = translate(key);
+      }
+
+      function flashStatus(type) {
+        clearTimeout(flashTimer);
+        statusMessage.classList.remove('status-message--success', 'status-message--warning', 'status-message--alert');
+
+        if (type) {
+          statusMessage.classList.add(`status-message--${type}`);
+          flashTimer = setTimeout(() => {
+            statusMessage.classList.remove('status-message--success', 'status-message--warning', 'status-message--alert');
+          }, 1500);
+        }
+      }
+
+      function updateSystemState(nextState) {
+        state.systemState = nextState;
+        updateStatusChip();
+        setStatusMessageKey(`status.message.${nextState}`);
+        flashStatus('success');
+      }
+
+      function updateCodeDisplay() {
+        codeDisplay.textContent = state.inputBuffer ? '•'.repeat(state.inputBuffer.length) : '----';
+      }
+
+      function appendDigit(digit) {
+        if (state.inputBuffer.length >= maxCodeLength) {
+          return;
+        }
+
+        state.inputBuffer += digit;
+        updateCodeDisplay();
+      }
+
+      function clearInput() {
+        state.inputBuffer = '';
+        updateCodeDisplay();
+      }
+
+      function requireValidCode() {
+        if (state.inputBuffer.length !== 4) {
+          setStatusMessageKey('status.message.codePrompt');
+          flashStatus('warning');
+          return false;
+        }
+
+        if (state.inputBuffer !== validCode) {
+          setStatusMessageKey('status.message.codeError');
+          flashStatus('alert');
+          return false;
+        }
+
+        return true;
+      }
+
+      function handleArm(mode) {
+        if (!requireValidCode()) {
+          return;
+        }
+
+        if (state.zones.some((zone) => zone.open)) {
+          setStatusMessageKey('status.message.blocked');
+          flashStatus('alert');
+          return;
+        }
+
+        updateSystemState(mode);
+        clearInput();
+        addLog('armed', { mode });
+      }
+
+      function handleDisarm() {
+        if (!requireValidCode()) {
+          return;
+        }
+
+        updateSystemState('disarmed');
+        clearInput();
+        addLog('disarmed');
+      }
+
+      function toggleZone(zone) {
+        zone.open = !zone.open;
+        renderZones();
+        addLog('zone', { zoneKey: zone.key, open: zone.open });
+        setStatusMessageKey(zone.open ? 'status.message.zoneOpened' : 'status.message.zoneClosed');
+        flashStatus(zone.open ? 'alert' : 'success');
+      }
+
+      function createZoneButtons() {
+        zoneList.innerHTML = '';
+
+        state.zones.forEach((zone) => {
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = 'zone';
+          button.dataset.zoneKey = zone.key;
+          button.setAttribute('aria-pressed', 'false');
+
+          const left = document.createElement('span');
+          left.className = 'zone-left';
+
+          const indicator = document.createElement('span');
+          indicator.className = 'zone-indicator';
+          indicator.setAttribute('aria-hidden', 'true');
+
+          const name = document.createElement('span');
+          name.className = 'zone-name';
+
+          left.append(indicator, name);
+
+          const status = document.createElement('span');
+          status.className = 'zone-state';
+
+          button.append(left, status);
+
+          button.addEventListener('click', () => toggleZone(zone));
+
+          zone.element = button;
+          zone.nameNode = name;
+          zone.stateNode = status;
+          zone.indicatorNode = indicator;
+
+          zoneList.appendChild(button);
+        });
+
+        renderZones();
+      }
+
+      function renderZones() {
+        state.zones.forEach((zone) => {
+          const zoneName = translate(`zones.list.${zone.key}`);
+          const stateLabel = translate(zone.open ? 'zones.statusOpen' : 'zones.statusClosed');
+
+          if (zone.nameNode) {
+            zone.nameNode.textContent = zoneName;
+          }
+
+          if (zone.stateNode) {
+            zone.stateNode.textContent = stateLabel;
+          }
+
+          if (zone.indicatorNode) {
+            zone.indicatorNode.classList.toggle('zone-indicator--open', zone.open);
+          }
+
+          if (zone.element) {
+            zone.element.classList.toggle('zone--open', zone.open);
+            zone.element.setAttribute('aria-pressed', zone.open ? 'true' : 'false');
+          }
+        });
+      }
+
+      function addLog(type, payload = {}) {
+        state.log.unshift({ type, payload, timestamp: Date.now() });
+        if (state.log.length > 12) {
+          state.log.length = 12;
+        }
+        renderLog();
+      }
+
+      function renderLog() {
+        logList.innerHTML = '';
+
+        if (!state.log.length) {
+          logEmpty.hidden = false;
+          return;
+        }
+
+        logEmpty.hidden = true;
+
+        state.log.forEach((event) => {
+          const item = document.createElement('li');
+          const time = document.createElement('span');
+          time.className = 'log-time';
+          time.textContent = formatTime(event.timestamp);
+
+          const message = document.createElement('span');
+          message.className = 'log-message';
+          message.textContent = formatLog(event);
+
+          item.append(time, message);
+          logList.appendChild(item);
+        });
+      }
+
+      function formatTime(timestamp) {
+        try {
+          return new Intl.DateTimeFormat(state.lang, { hour: '2-digit', minute: '2-digit' }).format(new Date(timestamp));
+        } catch (error) {
+          const date = new Date(timestamp);
+          return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+        }
+      }
+
+      function formatLog(event) {
+        switch (event.type) {
+          case 'armed': {
+            const key = event.payload.mode === 'armedStay' ? 'log.armedStay' : 'log.armedAway';
+            return translate(key);
+          }
+          case 'disarmed':
+            return translate('log.disarmed');
+          case 'zone': {
+            const zoneName = translate(`zones.list.${event.payload.zoneKey}`);
+            const key = event.payload.open ? 'log.zoneOpened' : 'log.zoneClosed';
+            return formatWithPlaceholders(translate(key), { zone: zoneName });
+          }
+          default:
+            return '';
+        }
+      }
+
+      function handleLanguageButtons() {
+        langButtons.forEach((button) => {
+          button.addEventListener('click', () => setLanguage(button.dataset.lang));
+        });
+      }
+
+      function handleDigits() {
+        document.querySelectorAll('[data-digit]').forEach((button) => {
+          button.addEventListener('click', () => appendDigit(button.dataset.digit));
+        });
+      }
+
+      function handleActions() {
+        clearButton?.addEventListener('click', () => {
+          clearInput();
+          setStatusMessageKey(`status.message.${state.systemState}`);
+        });
+
+        armStayButton?.addEventListener('click', () => handleArm('armedStay'));
+        armAwayButton?.addEventListener('click', () => handleArm('armedAway'));
+        disarmButton?.addEventListener('click', handleDisarm);
+      }
+
+      function initialize() {
+        handleLanguageButtons();
+        handleDigits();
+        handleActions();
+        createZoneButtons();
+        updateStatusChip();
+        updateCodeDisplay();
+
+        const savedLang = (() => {
+          try {
+            return localStorage.getItem('preferredLang');
+          } catch (error) {
+            return null;
+          }
+        })();
+
+        setLanguage(savedLang && translations[savedLang] ? savedLang : 'fr');
+      }
+
+      initialize();
+    })();
+  </script>
+</body>
+</html>
