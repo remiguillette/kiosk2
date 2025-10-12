@@ -1,13 +1,171 @@
-const { app, BrowserWindow, ipcMain, globalShortcut } = require('electron');
+const { app, BrowserWindow, ipcMain, globalShortcut, session } = require('electron');
 const fs = require('fs');
 const path = require('path');
 
 const BATTERY_BASE_PATH = '/sys/class/power_supply/battery';
+const COOKIE_STORE_FILENAME = 'session-cookies.json';
 
 let win;
 const ZOOM_STEP = 0.5;
 const MIN_ZOOM_LEVEL = -5;
 const MAX_ZOOM_LEVEL = 5;
+
+let cookieStorePath;
+let cookiePersistTimer;
+
+function getCookieStorePath() {
+  if (!cookieStorePath) {
+    cookieStorePath = path.join(app.getPath('userData'), COOKIE_STORE_FILENAME);
+  }
+
+  return cookieStorePath;
+}
+
+function normalizeCookieUrl(cookie) {
+  const domain = cookie.domain?.startsWith('.') ? cookie.domain.slice(1) : cookie.domain;
+  const host = domain && domain.length > 0 ? domain : 'localhost';
+  const protocol = cookie.secure ? 'https://' : 'http://';
+  const cookiePath = cookie.path && cookie.path.length > 0 ? cookie.path : '/';
+
+  return `${protocol}${host}${cookiePath}`;
+}
+
+function serializeCookie(cookie) {
+  const serialized = {
+    url: normalizeCookieUrl(cookie),
+    name: cookie.name,
+    value: cookie.value,
+    domain: cookie.domain,
+    path: cookie.path,
+    secure: cookie.secure,
+    httpOnly: cookie.httpOnly,
+    sameSite: cookie.sameSite,
+  };
+
+  if (typeof cookie.expirationDate === 'number') {
+    serialized.expirationDate = cookie.expirationDate;
+  }
+
+  if (typeof cookie.priority === 'string') {
+    serialized.priority = cookie.priority;
+  }
+
+  return serialized;
+}
+
+async function persistCookies(electronSession) {
+  try {
+    const cookies = await electronSession.cookies.get({});
+    const serializedCookies = cookies.map(serializeCookie);
+
+    await fs.promises.writeFile(
+      getCookieStorePath(),
+      JSON.stringify(serializedCookies, null, 2),
+      'utf8',
+    );
+  } catch (error) {
+    console.error('Error while persisting cookies:', error);
+  }
+}
+
+function scheduleCookiePersist(electronSession) {
+  if (cookiePersistTimer) {
+    clearTimeout(cookiePersistTimer);
+  }
+
+  cookiePersistTimer = setTimeout(() => {
+    persistCookies(electronSession).catch((error) => {
+      console.error('Error during scheduled cookie persist:', error);
+    });
+  }, 300);
+}
+
+async function restoreCookies(electronSession) {
+  try {
+    const raw = await fs.promises.readFile(getCookieStorePath(), 'utf8');
+    const storedCookies = JSON.parse(raw);
+
+    for (const cookie of storedCookies) {
+      const {
+        url,
+        name,
+        value,
+        domain,
+        path: cookiePath,
+        secure,
+        httpOnly,
+        sameSite,
+        expirationDate,
+        priority,
+      } = cookie;
+
+      if (!url || !name) {
+        continue;
+      }
+
+      const details = {
+        url,
+        name,
+        value,
+      };
+
+      if (typeof domain === 'string' && domain.length > 0) {
+        details.domain = domain;
+      }
+
+      if (typeof cookiePath === 'string' && cookiePath.length > 0) {
+        details.path = cookiePath;
+      }
+
+      if (typeof secure === 'boolean') {
+        details.secure = secure;
+      }
+
+      if (typeof httpOnly === 'boolean') {
+        details.httpOnly = httpOnly;
+      }
+
+      if (typeof sameSite === 'string' && sameSite.length > 0) {
+        details.sameSite = sameSite;
+      }
+
+      if (typeof expirationDate === 'number') {
+        details.expirationDate = expirationDate;
+      }
+
+      if (typeof priority === 'string' && priority.length > 0) {
+        details.priority = priority;
+      }
+
+      try {
+        await electronSession.cookies.set(details);
+      } catch (error) {
+        console.error('Failed to restore cookie:', { name, domain, path: cookiePath }, error);
+      }
+    }
+  } catch (error) {
+    if (error.code !== 'ENOENT') {
+      console.error('Error while restoring cookies:', error);
+    }
+  }
+}
+
+async function initializeSessionPersistence() {
+  const currentSession = session.defaultSession;
+
+  if (!currentSession) {
+    return;
+  }
+
+  await restoreCookies(currentSession);
+
+  currentSession.cookies.on('changed', () => {
+    scheduleCookiePersist(currentSession);
+  });
+
+  // Ensure we capture the initial state as soon as possible.
+  scheduleCookiePersist(currentSession);
+}
 
 const menuPath = path.join(__dirname, 'page', 'menu.html');
 const menuUrl = `file://${menuPath.replace(/\\/g, '/')}`;
@@ -145,7 +303,8 @@ ipcMain.on('go-home', () => {
   }
 });
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+  await initializeSessionPersistence();
   createWindow();
   registerZoomShortcuts();
 });
@@ -156,4 +315,15 @@ app.on('window-all-closed', () => {
 
 app.on('will-quit', () => {
   globalShortcut.unregisterAll();
+});
+
+app.on('before-quit', () => {
+  const currentSession = session.defaultSession;
+  if (currentSession) {
+    if (cookiePersistTimer) {
+      clearTimeout(cookiePersistTimer);
+      cookiePersistTimer = null;
+    }
+    persistCookies(currentSession);
+  }
 });
