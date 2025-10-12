@@ -108,7 +108,7 @@
       background: var(--panel);
       border: 1px solid var(--border);
       border-radius: 26px;
-      padding: 2.2rem;
+      padding: 1.95rem;
       box-shadow: var(--shadow);
       position: relative;
       overflow: hidden;
@@ -233,7 +233,7 @@
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid rgba(255, 255, 255, 0.07);
       border-radius: 20px;
-      padding: 1.2rem 1.4rem;
+      padding: 1.05rem 1.25rem;
       display: flex;
       flex-direction: column;
       gap: 0.45rem;
@@ -252,7 +252,7 @@
       background: transparent;
       border: none;
       color: inherit;
-      font-size: clamp(1.8rem, 4vw, 2.4rem);
+      font-size: clamp(1.65rem, 3.6vw, 2.2rem);
       font-weight: 600;
       letter-spacing: 0.1em;
       outline: none;
@@ -266,7 +266,7 @@
     .dialpad-grid {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 1rem;
+      gap: 0.85rem;
     }
 
     .dialpad-key {
@@ -275,8 +275,8 @@
       border-radius: 22px;
       background: rgba(255, 255, 255, 0.03);
       color: inherit;
-      padding: 1.1rem 0;
-      font-size: 1.75rem;
+      padding: 0.95rem 0;
+      font-size: 1.6rem;
       font-weight: 600;
       text-align: center;
       cursor: pointer;
@@ -286,11 +286,11 @@
 
     .dialpad-key span {
       display: block;
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       font-weight: 500;
       letter-spacing: 0.25em;
       color: var(--text-soft);
-      margin-top: 0.35rem;
+      margin-top: 0.3rem;
     }
 
     .dialpad-key:active,
@@ -302,9 +302,9 @@
 
     .dialpad-actions,
     .dialpad-secondary {
-      margin-top: 1.6rem;
+      margin-top: 1.4rem;
       display: flex;
-      gap: 1rem;
+      gap: 0.9rem;
       align-items: stretch;
       justify-content: center;
       flex-wrap: nowrap;
@@ -333,7 +333,7 @@
 
     .dialpad-actions > *,
     .dialpad-secondary > * {
-      flex: 0 0 clamp(160px, 30%, 240px);
+      flex: 0 0 clamp(150px, 28%, 220px);
       scroll-snap-align: center;
     }
 
@@ -347,7 +347,7 @@
       background: rgba(255, 255, 255, 0.02);
       color: var(--text-muted);
       font-weight: 600;
-      padding: 0.9rem 1.2rem;
+      padding: 0.8rem 1.1rem;
       border-radius: 999px;
       cursor: pointer;
       transition: border 160ms ease, color 160ms ease, background 160ms ease, box-shadow 160ms ease;
@@ -364,8 +364,8 @@
     }
 
     .pill-btn .btn-icon svg {
-      width: 20px;
-      height: 20px;
+      width: 18px;
+      height: 18px;
       stroke-width: 1.8;
     }
 
@@ -383,8 +383,8 @@
 
     .call-btn {
       border-radius: 26px;
-      font-size: 1.1rem;
-      padding-block: 1.1rem;
+      font-size: 1.05rem;
+      padding-block: 1rem;
       background: linear-gradient(135deg, rgba(248, 148, 34, 0.95), rgba(248, 148, 34, 0.65));
       color: #121212;
       border: none;
@@ -411,7 +411,7 @@
     .extensions {
       display: flex;
       flex-direction: column;
-      gap: 1.5rem;
+      gap: 1.3rem;
     }
 
     .extensions header {
@@ -432,18 +432,18 @@
 
     .extension-list {
       display: grid;
-      gap: 1rem;
+      gap: 0.85rem;
     }
 
     .extension-card {
       border: 1px solid rgba(255, 255, 255, 0.06);
       border-radius: 20px;
       background: rgba(255, 255, 255, 0.03);
-      padding: 1.35rem 1.4rem;
+      padding: 1.15rem 1.25rem;
       display: grid;
       grid-template-columns: auto 1fr auto;
       align-items: center;
-      gap: 1.4rem;
+      gap: 1.1rem;
       cursor: pointer;
       transition: transform 160ms ease, border 160ms ease, box-shadow 160ms ease;
     }
@@ -455,9 +455,9 @@
     }
 
     .extension-card .avatar {
-      width: 56px;
-      height: 56px;
-      border-radius: 18px;
+      width: 50px;
+      height: 50px;
+      border-radius: 16px;
       background: rgba(248, 148, 34, 0.16);
       color: var(--accent);
       display: inline-flex;
@@ -483,20 +483,20 @@
     }
 
     .extension-card h3 {
-      font-size: 1.05rem;
+      font-size: 1rem;
       font-weight: 600;
-      margin-bottom: 0.2rem;
+      margin-bottom: 0.15rem;
     }
 
     .extension-card .subtitle {
       color: var(--text-muted);
-      font-size: 0.9rem;
+      font-size: 0.86rem;
     }
 
     .extension-card .details {
       color: var(--text-soft);
-      font-size: 0.82rem;
-      margin-top: 0.4rem;
+      font-size: 0.78rem;
+      margin-top: 0.35rem;
     }
 
     .extension-card .extension {
