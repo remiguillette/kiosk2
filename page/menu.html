@@ -85,61 +85,57 @@
       color: var(--text-main);
     }
 
-    /* === GRID MENU ADAPTATIF === */
+    /* === GRILLE DE STYLE ANDROID === */
     .menu {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
       gap: 1.8rem;
       justify-items: center;
     }
 
-    /* Ajustement des cartes */
-    .card {
-      width: 100%;
-      max-width: 260px;
-      background: var(--card-bg);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 20px;
-      padding: 2rem 1.5rem;
-      text-align: center;
-      backdrop-filter: blur(12px);
-      transition: transform 0.2s ease, border-color 0.2s ease;
+    .app-tile {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+      color: var(--text-main);
+      text-decoration: none;
       cursor: pointer;
     }
 
-    .card:hover {
-      transform: translateY(-6px);
-      border-color: var(--accent);
-    }
-
-    .icon {
-      width: 64px;
-      height: 64px;
-      margin: 0 auto 1rem;
+    .app-icon {
+      width: 96px;
+      height: 96px;
+      border-radius: 22px;
+      background: linear-gradient(145deg, rgba(248, 148, 34, 0.15), rgba(24, 24, 32, 0.9));
+      box-shadow: 0 16px 28px rgba(0, 0, 0, 0.45);
       display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba(248, 148, 34, 0.18);
-      border-radius: 18px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
-    .icon img {
-      width: 42px;
-      height: 42px;
+    .app-icon img,
+    .app-icon span {
+      width: 48px;
+      height: 48px;
       object-fit: contain;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
-    .card h2 {
-      font-size: 1.4rem;
-      margin-top: 0.5rem;
-      font-weight: 600;
+    .app-tile:hover .app-icon,
+    .app-tile:focus-visible .app-icon {
+      transform: translateY(-6px);
+      box-shadow: 0 22px 32px rgba(248, 148, 34, 0.35);
     }
 
-    .card p {
-      margin-top: 0.6rem;
-      color: var(--text-muted);
+    .app-label {
       font-size: 0.95rem;
-      line-height: 1.4;
+      font-weight: 600;
+      text-align: center;
+      letter-spacing: 0.01em;
     }
 
     /* === FOOTER === */
@@ -156,52 +152,16 @@
 
     /* === RESPONSIVE BREAKPOINTS === */
     @media (max-width: 1100px) {
-      .menu {
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: 1.5rem;
-      }
-    }
-
-    @media (max-width: 900px) {
-      .menu {
-        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      }
-
       header {
         flex-direction: row;
         justify-content: space-between;
-      }
-
-      .card {
-        max-width: 230px;
-        padding: 1.75rem 1.25rem;
       }
     }
 
     @media (max-width: 720px) {
       /* Pour ton écran domotique en horizontal */
-      .menu {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 1.2rem;
-      }
-
-      .card {
-        max-width: none;
-        padding: 1.5rem 1rem;
-        border-radius: 16px;
-      }
-
       header h1 {
         font-size: 1.8rem;
-      }
-
-      .icon {
-        width: 48px;
-        height: 48px;
-      }
-
-      .card h2 {
-        font-size: 1.1rem;
       }
     }
 
@@ -224,9 +184,6 @@
         padding: 0.3rem 0.4rem;
       }
 
-      .menu {
-        grid-template-columns: 1fr;
-      }
     }
   </style>
 </head>
@@ -241,35 +198,30 @@
     </header>
 
     <section class="menu">
-      <article class="card" onclick="location.href='beaverphone.html'">
-        <div class="icon"><img src="../icon/phone.svg" alt="Phone icon" /></div>
-        <h2 data-i18n="beaverphoneTitle">BeaverPhone</h2>
-        <p data-i18n="beaverphoneBody"></p>
-      </article>
+      <a class="app-tile" href="beaverphone.html">
+        <span class="app-icon"><img src="../icon/phone.svg" alt="Phone icon" /></span>
+        <span class="app-label" data-i18n="beaverphoneTitle">BeaverPhone</span>
+      </a>
 
-      <article class="card" onclick="location.href='home-automation.html'">
-        <div class="icon"><img src="../icon/house.svg" alt="Home icon" /></div>
-        <h2 data-i18n="homeAutomationTitle">Domotique</h2>
-        <p data-i18n="homeAutomationBody"></p>
-      </article>
+      <a class="app-tile" href="home-automation.html">
+        <span class="app-icon"><img src="../icon/house.svg" alt="Home icon" /></span>
+        <span class="app-label" data-i18n="homeAutomationTitle">Domotique</span>
+      </a>
 
-      <article class="card" onclick="location.href='beaveralarm.html'">
-        <div class="icon"><img src="../icon/alarm.svg" alt="Alarm icon" /></div>
-        <h2 data-i18n="beaveralarmTitle">BeaverAlarm</h2>
-        <p data-i18n="beaveralarmBody"></p>
-      </article>
+      <a class="app-tile" href="beaveralarm.html">
+        <span class="app-icon"><img src="../icon/alarm.svg" alt="Alarm icon" /></span>
+        <span class="app-label" data-i18n="beaveralarmTitle">BeaverAlarm</span>
+      </a>
 
-      <article class="card" onclick="location.href='http://192.168.1.76:8000'">
-        <div class="icon"><span style="font-size: 1.8rem;">📄</span></div>
-        <h2 data-i18n="beaverdocTitle">BeaverDoc Paperless</h2>
-        <p data-i18n="beaverdocBody"></p>
-      </article>
+      <a class="app-tile" href="http://192.168.1.76:8000">
+        <span class="app-icon"><span aria-hidden="true" style="font-size: 2rem;">📄</span></span>
+        <span class="app-label" data-i18n="beaverdocTitle">BeaverDoc Paperless</span>
+      </a>
 
-      <article class="card" onclick="location.href='https://rgbeavernet.ca'">
-        <div class="icon"><img src="../icon/beaver.png" alt="Beaver logo" /></div>
-        <h2 data-i18n="beavernetTitle">BeaverNet.ca</h2>
-        <p data-i18n="beavernetBody"></p>
-      </article>
+      <a class="app-tile" href="https://rgbeavernet.ca">
+        <span class="app-icon"><img src="../icon/beaver.png" alt="Beaver logo" /></span>
+        <span class="app-label" data-i18n="beavernetTitle">BeaverNet.ca</span>
+      </a>
     </section>
 
     <footer>
@@ -287,7 +239,6 @@
         beaveralarmTitle: "BeaverAlarm",
         beaverdocTitle: "BeaverDoc Paperless",
         beavernetTitle: "BeaverNet.ca",
-        beaverdocBody: "Gérez vos documents numérisés localement.",
       },
       en: {
         heroTitle: "Welcome to the Beaver Kiosk",
@@ -296,7 +247,6 @@
         beaveralarmTitle: "BeaverAlarm",
         beaverdocTitle: "BeaverDoc Paperless",
         beavernetTitle: "BeaverNet.ca",
-        beaverdocBody: "Manage your scanned documents locally.",
       },
     };
 
