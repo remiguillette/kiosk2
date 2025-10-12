@@ -296,9 +296,33 @@
     }
 
     .action-row {
-      display: grid;
+      display: flex;
       gap: 0.75rem;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      justify-content: center;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      padding-bottom: 0.4rem;
+      scroll-snap-type: x proximity;
+      scrollbar-width: thin;
+    }
+
+    .action-row::-webkit-scrollbar {
+      height: 8px;
+    }
+
+    .action-row::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 999px;
+    }
+
+    .action-row::-webkit-scrollbar-thumb {
+      background: rgba(248, 148, 34, 0.45);
+      border-radius: 999px;
+    }
+
+    .action-row > * {
+      flex: 0 0 clamp(160px, 30%, 220px);
+      scroll-snap-align: center;
     }
 
     .action-btn--stay {
@@ -445,16 +469,7 @@
       }
 
       header {
-        flex-direction: column;
-        align-items: stretch;
-      }
-
-      .menu-return {
-        align-self: flex-start;
-      }
-
-      .lang-toggle {
-        align-self: flex-start;
+        gap: 0.75rem;
       }
 
       .status-header {
@@ -467,7 +482,7 @@
       }
 
       .action-row {
-        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        justify-content: flex-start;
       }
     }
 
@@ -489,6 +504,10 @@
       .keypad-bottom button,
       .action-btn {
         padding: 0.75rem;
+      }
+
+      .action-row > * {
+        flex-basis: min(220px, 80vw);
       }
 
       .zone {
