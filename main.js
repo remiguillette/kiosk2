@@ -1,6 +1,7 @@
 const { app, BrowserWindow, ipcMain, globalShortcut, session } = require('electron');
 const fs = require('fs');
 const path = require('path');
+const WebSocket = require('ws');
 
 const BATTERY_BASE_PATH = '/sys/class/power_supply/battery';
 const COOKIE_STORE_FILENAME = 'session-cookies.json';
@@ -12,6 +13,57 @@ const MAX_ZOOM_LEVEL = 5;
 
 let cookieStorePath;
 let cookiePersistTimer;
+let remoteUiServer;
+
+const REMOTE_UI_PORT = 6001;
+
+function startRemoteUiServer() {
+  if (remoteUiServer) {
+    return remoteUiServer;
+  }
+
+  remoteUiServer = new WebSocket.Server({ port: REMOTE_UI_PORT });
+
+  remoteUiServer.on('listening', () => {
+    console.log(`Remote UI WebSocket listening on ws://0.0.0.0:${REMOTE_UI_PORT}`);
+  });
+
+  remoteUiServer.on('connection', (socket, request) => {
+    const { remoteAddress, remotePort } = request.socket;
+    console.log('Remote UI client connected', {
+      remoteAddress,
+      remotePort,
+    });
+
+    socket.on('message', (data) => {
+      const payload = data instanceof Buffer ? data.toString('utf8') : String(data);
+      console.log('Remote UI message received', { payload });
+
+      remoteUiServer.clients.forEach((client) => {
+        if (client !== socket && client.readyState === WebSocket.OPEN) {
+          client.send(payload);
+        }
+      });
+    });
+
+    socket.on('close', (code, reason) => {
+      console.log('Remote UI client disconnected', {
+        code,
+        reason: typeof reason === 'string' ? reason : reason?.toString(),
+      });
+    });
+
+    socket.on('error', (error) => {
+      console.error('Remote UI socket error', error);
+    });
+  });
+
+  remoteUiServer.on('error', (error) => {
+    console.error('Remote UI server error', error);
+  });
+
+  return remoteUiServer;
+}
 
 function getCookieStorePath() {
   if (!cookieStorePath) {
@@ -305,6 +357,7 @@ ipcMain.on('go-home', () => {
 
 app.whenReady().then(async () => {
   await initializeSessionPersistence();
+  startRemoteUiServer();
   createWindow();
   registerZoomShortcuts();
 });
@@ -315,6 +368,11 @@ app.on('window-all-closed', () => {
 
 app.on('will-quit', () => {
   globalShortcut.unregisterAll();
+
+  if (remoteUiServer) {
+    remoteUiServer.close();
+    remoteUiServer = null;
+  }
 });
 
 app.on('before-quit', () => {
