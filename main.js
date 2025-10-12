@@ -48,16 +48,33 @@ function resolveContentPath(requestUrl) {
 
   const normalizedPath = path
     .normalize(relativePath)
-    .replace(/^([/\\])+/, '')
-    .replace(/^(\.\.([/\\]|$))+/, '');
+    .replace(/^([/\\])+/, '');
 
-  const filePath = path.resolve(CONTENT_ROOT, normalizedPath);
-
-  if (!filePath.startsWith(CONTENT_ROOT)) {
+  if (/^(?:\.\.(?:[/\\]|$))/.test(normalizedPath)) {
     return null;
   }
 
-  if (!path.extname(filePath)) {
+  const [firstSegment, ...otherSegments] = normalizedPath.split(/[/\\]+/);
+
+  let baseDir = CONTENT_ROOT;
+  let safeRelativePath = normalizedPath;
+
+  if (firstSegment === 'icon') {
+    baseDir = path.join(__dirname, 'icon');
+    safeRelativePath = otherSegments.join(path.sep);
+
+    if (!safeRelativePath) {
+      return null;
+    }
+  }
+
+  const filePath = path.resolve(baseDir, safeRelativePath);
+
+  if (!filePath.startsWith(baseDir)) {
+    return null;
+  }
+
+  if (baseDir === CONTENT_ROOT && !path.extname(filePath)) {
     return `${filePath}.html`;
   }
 
