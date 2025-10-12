@@ -14,148 +14,123 @@ const MAX_ZOOM_LEVEL = 5;
 
 let cookieStorePath;
 let cookiePersistTimer;
-let backendServer;
-let lastRemoteEvents = [];
-let remoteUiStatus = {
-  state: 'idle',
-  updatedAt: null,
-  port: 5000,
+let contentServer;
+
+const CONTENT_SERVER_PORT = Number.parseInt(process.env.PORT, 10) || 5000;
+const CONTENT_ROOT = path.join(__dirname, 'page');
+
+const MIME_TYPES = {
+  '.css': 'text/css',
+  '.html': 'text/html',
+  '.js': 'application/javascript',
+  '.json': 'application/json',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.svg': 'image/svg+xml',
+  '.ico': 'image/x-icon',
 };
 
-const BACKEND_SERVER_PORT = 5000;
-
-function recordRemoteEvent(event) {
-  const entry = {
-    ...event,
-    timestamp: new Date().toISOString(),
-  };
-
-  lastRemoteEvents = [...lastRemoteEvents.slice(-24), entry];
+function getMimeType(filePath) {
+  const extension = path.extname(filePath).toLowerCase();
+  return MIME_TYPES[extension] || 'application/octet-stream';
 }
 
-function updateRemoteUiStatus(patch) {
-  remoteUiStatus = {
-    ...remoteUiStatus,
-    ...patch,
-    updatedAt: new Date().toISOString(),
-  };
-}
+function resolveContentPath(requestUrl) {
+  const url = new URL(requestUrl, `http://localhost:${CONTENT_SERVER_PORT}`);
+  let relativePath = decodeURIComponent(url.pathname);
 
-function readJsonBody(req) {
-  return new Promise((resolve, reject) => {
-    const chunks = [];
-
-    req.on('data', (chunk) => {
-      chunks.push(chunk);
-    });
-
-    req.on('end', () => {
-      if (chunks.length === 0) {
-        resolve(null);
-        return;
-      }
-
-      try {
-        const raw = Buffer.concat(chunks).toString('utf8');
-        resolve(raw.length > 0 ? JSON.parse(raw) : null);
-      } catch (error) {
-        reject(error);
-      }
-    });
-
-    req.on('error', (error) => {
-      reject(error);
-    });
-  });
-}
-
-function sendJson(res, statusCode, payload) {
-  res.writeHead(statusCode, {
-    'Content-Type': 'application/json',
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type',
-  });
-  res.end(JSON.stringify(payload));
-}
-
-function startBackendServer() {
-  if (backendServer) {
-    return backendServer;
+  if (!relativePath || relativePath === '/') {
+    relativePath = 'menu.html';
+  } else if (relativePath.endsWith('/')) {
+    relativePath = `${relativePath}index.html`;
   }
 
-  backendServer = http.createServer(async (req, res) => {
-    const { method, url } = req;
-    const requestUrl = new URL(url, `http://localhost:${BACKEND_SERVER_PORT}`);
+  const normalizedPath = path
+    .normalize(relativePath)
+    .replace(/^([/\\])+/, '')
+    .replace(/^(\.\.([/\\]|$))+/, '');
 
-    if (method === 'OPTIONS') {
-      res.writeHead(204, {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type',
-      });
-      res.end();
+  const filePath = path.resolve(CONTENT_ROOT, normalizedPath);
+
+  if (!filePath.startsWith(CONTENT_ROOT)) {
+    return null;
+  }
+
+  if (!path.extname(filePath)) {
+    return `${filePath}.html`;
+  }
+
+  return filePath;
+}
+
+function startContentServer() {
+  if (contentServer) {
+    return Promise.resolve(contentServer);
+  }
+
+  contentServer = http.createServer(async (req, res) => {
+    if (!req.url) {
+      res.writeHead(400, { 'Content-Type': 'text/plain' });
+      res.end('Bad Request');
       return;
     }
 
-    if (method === 'GET' && requestUrl.pathname === '/healthz') {
-      sendJson(res, 200, { status: 'ok', updatedAt: new Date().toISOString() });
+    if (req.method && !['GET', 'HEAD'].includes(req.method)) {
+      res.writeHead(405, { 'Content-Type': 'text/plain' });
+      res.end('Method Not Allowed');
       return;
     }
 
-    if (method === 'GET' && requestUrl.pathname === '/remote-ui/status') {
-      sendJson(res, 200, remoteUiStatus);
+    const filePath = resolveContentPath(req.url);
+
+    if (!filePath) {
+      res.writeHead(403, { 'Content-Type': 'text/plain' });
+      res.end('Forbidden');
       return;
     }
 
-    if (method === 'GET' && requestUrl.pathname === '/remote-ui/events') {
-      sendJson(res, 200, lastRemoteEvents);
-      return;
-    }
+    try {
+      const data = await fs.promises.readFile(filePath);
+      const headers = { 'Content-Type': getMimeType(filePath) };
 
-    if (method === 'POST' && requestUrl.pathname === '/remote-ui/commands') {
-      try {
-        const body = await readJsonBody(req);
-        const command = {
-          command: requestUrl.searchParams.get('command') || null,
-          payload: body,
-        };
+      res.writeHead(200, headers);
 
-        console.log('Remote UI command received', command);
-
-        recordRemoteEvent({ direction: 'backend', payload: command });
-
-        if (win?.webContents) {
-          win.webContents.send('remote-ui:command', command);
-        }
-
-        sendJson(res, 202, { accepted: true });
-      } catch (error) {
-        console.error('Failed to process remote command', error);
-        sendJson(res, 400, { accepted: false, error: error.message });
+      if (req.method === 'HEAD') {
+        res.end();
+      } else {
+        res.end(data);
       }
-
-      return;
+    } catch (error) {
+      if (error.code === 'ENOENT') {
+        res.writeHead(404, { 'Content-Type': 'text/plain' });
+        res.end('Not Found');
+      } else {
+        console.error('Static server error:', error);
+        res.writeHead(500, { 'Content-Type': 'text/plain' });
+        res.end('Internal Server Error');
+      }
     }
-
-    sendJson(res, 404, { error: 'Not found' });
   });
 
-  backendServer.on('listening', () => {
-    console.log(`Backend HTTP server listening on http://0.0.0.0:${BACKEND_SERVER_PORT}`);
-    updateRemoteUiStatus({ state: 'listening' });
-    recordRemoteEvent({ direction: 'backend-status', payload: remoteUiStatus });
+  return new Promise((resolve, reject) => {
+    const handleStartupError = (error) => {
+      console.error('Failed to start content server', error);
+      reject(error);
+    };
+
+    contentServer.once('error', handleStartupError);
+
+    contentServer.listen(CONTENT_SERVER_PORT, '0.0.0.0', () => {
+      contentServer.removeListener('error', handleStartupError);
+      contentServer.on('error', (error) => {
+        console.error('Content server error:', error);
+      });
+
+      console.log(`Content server available at http://0.0.0.0:${CONTENT_SERVER_PORT}`);
+      resolve(contentServer);
+    });
   });
-
-  backendServer.on('error', (error) => {
-    console.error('Backend server error', error);
-    updateRemoteUiStatus({ state: 'error', error: error.message });
-    recordRemoteEvent({ direction: 'backend-status', payload: remoteUiStatus });
-  });
-
-  backendServer.listen(BACKEND_SERVER_PORT, '0.0.0.0');
-
-  return backendServer;
 }
 
 function getCookieStorePath() {
@@ -312,8 +287,8 @@ async function initializeSessionPersistence() {
   scheduleCookiePersist(currentSession);
 }
 
-const menuPath = path.join(__dirname, 'page', 'menu.html');
-const menuUrl = `file://${menuPath.replace(/\\/g, '/')}`;
+const menuUrl = `http://127.0.0.1:${CONTENT_SERVER_PORT}/`;
+const menuOrigin = new URL(menuUrl).origin;
 
 function createWindow() {
   win = new BrowserWindow({
@@ -326,7 +301,7 @@ function createWindow() {
   });
 
   // Démarrer sur le menu local
-  win.loadFile(menuPath);
+  win.loadURL(menuUrl);
 
   // Ouvrir les liens externes dans la même fenêtre
   win.webContents.setWindowOpenHandler(({ url }) => {
@@ -338,11 +313,11 @@ function createWindow() {
   win.webContents.on('did-finish-load', () => {
     const script = `(() => {
       const MENU_URL = ${JSON.stringify(menuUrl)};
+      const MENU_ORIGIN = ${JSON.stringify(menuOrigin)};
       const existing = document.getElementById('backToMenu');
-      const isLocal = window.location.protocol === 'file:';
-      const onMenu = isLocal && window.location.href === MENU_URL;
+      const onLocalOrigin = window.location.origin === MENU_ORIGIN;
 
-      if (isLocal || onMenu) {
+      if (onLocalOrigin) {
         if (existing) existing.remove();
         return;
       }
@@ -444,13 +419,13 @@ ipcMain.handle('getBatteryLevel', async () => {
 
 ipcMain.on('go-home', () => {
   if (win) {
-    win.loadFile(menuPath);
+    win.loadURL(menuUrl);
   }
 });
 
 app.whenReady().then(async () => {
   await initializeSessionPersistence();
-  startBackendServer();
+  await startContentServer();
   createWindow();
   registerZoomShortcuts();
 });
@@ -462,9 +437,9 @@ app.on('window-all-closed', () => {
 app.on('will-quit', () => {
   globalShortcut.unregisterAll();
 
-  if (backendServer) {
-    backendServer.close();
-    backendServer = null;
+  if (contentServer) {
+    contentServer.close();
+    contentServer = null;
   }
 });
 
@@ -479,15 +454,3 @@ app.on('before-quit', () => {
   }
 });
 
-ipcMain.on('remote-ui:status-update', (_event, status) => {
-  if (status && typeof status === 'object') {
-    updateRemoteUiStatus(status);
-    recordRemoteEvent({ direction: 'renderer-status', payload: status });
-  }
-});
-
-ipcMain.on('remote-ui:outgoing', (_event, payload) => {
-  recordRemoteEvent({ direction: 'renderer', payload });
-});
-
-ipcMain.handle('remote-ui:get-status', () => remoteUiStatus);
