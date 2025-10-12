@@ -83,7 +83,7 @@ function emitRemoteUiStatus(status, extra = {}) {
 }
 
 function connectRemoteUiWS() {
-  const url = "ws://192.168.1.60:6001";
+  const url = "ws://192.168.1.76:6001";
   console.log(`[Remote UI] Ouverture connexion WS → ${url}`);
   emitRemoteUiStatus("connecting", { url });
 
