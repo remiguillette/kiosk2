@@ -51,6 +51,18 @@
     header h1 {
       font-size: clamp(2rem, 5vw, 3rem);
       letter-spacing: 1px;
+      display: inline-flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      align-items: baseline;
+    }
+
+    .hero-title .welcome {
+      color: #0d6efd;
+    }
+
+    .hero-title .brand {
+      color: var(--accent);
     }
 
     .lang-toggle {
@@ -190,7 +202,11 @@
 <body>
   <main class="wrapper">
     <header>
-      <h1 data-i18n="heroTitle">Bienvenue au Beaver&nbsp;Kiosk</h1>
+      <h1 class="hero-title" data-i18n="heroTitle">
+        <span class="welcome">Bienvenue</span>
+        <span class="preposition">au</span>
+        <span class="brand">BeaverKiosk</span>
+      </h1>
       <div class="lang-toggle">
         <button type="button" class="lang-btn active" data-lang="fr">FR</button>
         <button type="button" class="lang-btn" data-lang="en">EN</button>
@@ -205,7 +221,7 @@
 
       <a class="app-tile" href="home-automation.html">
         <span class="app-icon"><img src="../icon/house.svg" alt="Home icon" /></span>
-        <span class="app-label" data-i18n="homeAutomationTitle">Domotique</span>
+        <span class="app-label" data-i18n="beaverhomeTitle">BeaverHome</span>
       </a>
 
       <a class="app-tile" href="beaveralarm.html">
@@ -214,13 +230,13 @@
       </a>
 
       <a class="app-tile" href="http://192.168.1.76:8000">
-        <span class="app-icon"><span aria-hidden="true" style="font-size: 2rem;">📄</span></span>
-        <span class="app-label" data-i18n="beaverdocTitle">BeaverDoc Paperless</span>
+        <span class="app-icon"><img src="../icon/file-text.svg" alt="Document icon" /></span>
+        <span class="app-label" data-i18n="beaverdocTitle">BeaverDoc</span>
       </a>
 
       <a class="app-tile" href="https://rgbeavernet.ca">
         <span class="app-icon"><img src="../icon/beaver.png" alt="Beaver logo" /></span>
-        <span class="app-label" data-i18n="beavernetTitle">BeaverNet.ca</span>
+        <span class="app-label" data-i18n="beavernetTitle">BeaverNet</span>
       </a>
     </section>
 
@@ -233,20 +249,22 @@
   <script>
     const translations = {
       fr: {
-        heroTitle: "Bienvenue au Beaver&nbsp;Kiosk",
+        heroTitle:
+          "<span class=\"welcome\">Bienvenue</span> <span class=\"preposition\">au</span> <span class=\"brand\">BeaverKiosk</span>",
         beaverphoneTitle: "BeaverPhone",
-        homeAutomationTitle: "Domotique",
+        beaverhomeTitle: "BeaverHome",
         beaveralarmTitle: "BeaverAlarm",
-        beaverdocTitle: "BeaverDoc Paperless",
-        beavernetTitle: "BeaverNet.ca",
+        beaverdocTitle: "BeaverDoc",
+        beavernetTitle: "BeaverNet",
       },
       en: {
-        heroTitle: "Welcome to the Beaver Kiosk",
+        heroTitle:
+          "<span class=\"welcome\">Welcome</span> <span class=\"preposition\">to the</span> <span class=\"brand\">BeaverKiosk</span>",
         beaverphoneTitle: "BeaverPhone",
-        homeAutomationTitle: "Home Automation",
+        beaverhomeTitle: "BeaverHome",
         beaveralarmTitle: "BeaverAlarm",
-        beaverdocTitle: "BeaverDoc Paperless",
-        beavernetTitle: "BeaverNet.ca",
+        beaverdocTitle: "BeaverDoc",
+        beavernetTitle: "BeaverNet",
       },
     };
 
