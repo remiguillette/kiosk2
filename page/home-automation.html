@@ -450,28 +450,67 @@
         return `${capacity}%${status}`;
       };
 
-      const updateBatteryStatus = async () => {
+      const readElectronBattery = async () => {
+        if (!window.electronAPI?.getBatteryLevel) {
+          return null;
+        }
+
         try {
           const payload = await window.electronAPI.getBatteryLevel();
-          const label = formatStatus(payload);
-
-          if (!label) {
-            setChipState('Lecture impossible');
-            return;
-          }
-
-          setChipState(label, { success: true });
+          return payload ?? null;
         } catch (error) {
-          console.error('Unable to read battery level', error);
-          setChipState('Erreur de lecture');
+          console.error('Unable to read battery level from Electron bridge', error);
+          return null;
         }
       };
 
-      if (!window.electronAPI?.getBatteryLevel) {
-        console.warn('Electron API not available');
-        setChipState('Electron API indisponible');
-        return;
-      }
+      const readWebBattery = async () => {
+        if (typeof navigator === 'undefined' || typeof navigator.getBattery !== 'function') {
+          return null;
+        }
+
+        try {
+          const battery = await navigator.getBattery();
+          const capacity = Math.round(Number(battery.level) * 100);
+
+          if (!Number.isFinite(capacity)) {
+            return null;
+          }
+
+          return {
+            capacity,
+            status: battery.charging === true ? 'En charge' : battery.charging === false ? 'Sur batterie' : undefined,
+          };
+        } catch (error) {
+          console.error('Unable to read battery level from Web Battery API', error);
+          return null;
+        }
+      };
+
+      const updateBatteryStatus = async () => {
+        const sources = [readElectronBattery, readWebBattery];
+        let hadPayload = false;
+
+        for (const read of sources) {
+          const payload = await read();
+
+          if (payload) {
+            hadPayload = true;
+            const label = formatStatus(payload);
+
+            if (label) {
+              setChipState(label, { success: true });
+              return;
+            }
+          }
+        }
+
+        if (!hadPayload) {
+          setChipState('Batterie indisponible');
+        } else {
+          setChipState('Lecture impossible');
+        }
+      };
 
       updateBatteryStatus();
       setInterval(updateBatteryStatus, 10000);
