@@ -1,9 +1,6 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
 const WS_STATUS_EVENT_KEY = "beaverphone:ws-status";
-const REMOTE_WS_STATUS_EVENT_KEY = "remote-ui:ws-status";
-const REMOTE_WS_MESSAGE_EVENT_KEY = "remote-ui:ws-message";
-const REMOTE_DISPATCH_EVENT_KEY = "remote-ui:dispatch";
 
 contextBridge.exposeInMainWorld("electronAPI", {
   goHome: () => ipcRenderer.send("go-home"),
@@ -76,43 +73,7 @@ setInterval(() => {
   }
 }, 30000);
 
-function emitRemoteUiStatus(status, extra = {}) {
-  emitCustomEvent(REMOTE_WS_STATUS_EVENT_KEY, { status, ...extra });
-}
-
-function reportRendererStatus(status, extra = {}) {
-  const payload = { state: status, status, ...extra };
-  ipcRenderer.send("remote-ui:status-update", payload);
-  emitRemoteUiStatus(status, extra);
-}
-
 connectBeaverphoneWS();
-
-ipcRenderer.on("remote-ui:command", (_event, detail) => {
-  console.log("[Remote UI] 📩 Commande depuis le backend:", detail);
-  emitCustomEvent(REMOTE_WS_MESSAGE_EVENT_KEY, { message: detail });
-});
-
-ipcRenderer
-  .invoke("remote-ui:get-status")
-  .then((status) => {
-    emitRemoteUiStatus("backend-ready", status || {});
-  })
-  .catch((error) => {
-    emitRemoteUiStatus("backend-error", { error: error.message || String(error) });
-  });
-
-window.addEventListener(REMOTE_DISPATCH_EVENT_KEY, (event) => {
-  const payload = event.detail ?? {};
-  console.log("[Remote UI] 📤 Dispatch DOM → backend:", payload);
-  ipcRenderer.send("remote-ui:outgoing", payload);
-});
-
-reportRendererStatus("renderer-preload-ready");
-
-window.addEventListener("DOMContentLoaded", () => {
-  reportRendererStatus("renderer-dom-ready");
-});
 
 // Capture des événements du dialpad
 window.addEventListener("DOMContentLoaded", () => {
