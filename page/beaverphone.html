@@ -49,12 +49,17 @@
       display: flex;
       align-items: center;
       gap: 1rem;
+      justify-content: space-between;
+      flex-wrap: wrap;
     }
 
     .header-title {
       display: inline-flex;
       align-items: center;
       gap: 0.85rem;
+      flex: 1 1 auto;
+      min-width: min(260px, 100%);
+      justify-content: flex-start;
     }
 
     header .eyebrow {
@@ -298,10 +303,38 @@
     .dialpad-actions,
     .dialpad-secondary {
       margin-top: 1.6rem;
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      display: flex;
       gap: 1rem;
-      align-items: center;
+      align-items: stretch;
+      justify-content: center;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      padding-bottom: 0.4rem;
+      scroll-snap-type: x proximity;
+      scrollbar-width: thin;
+    }
+
+    .dialpad-actions::-webkit-scrollbar,
+    .dialpad-secondary::-webkit-scrollbar {
+      height: 8px;
+    }
+
+    .dialpad-actions::-webkit-scrollbar-track,
+    .dialpad-secondary::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 999px;
+    }
+
+    .dialpad-actions::-webkit-scrollbar-thumb,
+    .dialpad-secondary::-webkit-scrollbar-thumb {
+      background: rgba(248, 148, 34, 0.45);
+      border-radius: 999px;
+    }
+
+    .dialpad-actions > *,
+    .dialpad-secondary > * {
+      flex: 0 0 clamp(160px, 30%, 240px);
+      scroll-snap-align: center;
     }
 
     .dialpad-secondary {
@@ -502,27 +535,13 @@
         gap: 2.1rem;
       }
 
-      header {
-        flex-direction: column;
-        align-items: stretch;
-      }
-
       .header-title {
-        width: 100%;
-        justify-content: space-between;
-      }
-
-      .menu-return {
-        align-self: flex-start;
+        flex: 1 1 100%;
       }
 
       .dialpad-actions,
       .dialpad-secondary {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-
-      .dialpad-secondary {
-        margin-top: 1.2rem;
+        justify-content: flex-start;
       }
     }
 
@@ -531,13 +550,13 @@
         padding: 1rem 1.1rem;
       }
 
-      .dialpad-actions,
-      .dialpad-secondary {
-        grid-template-columns: 1fr;
-      }
-
       .dialpad-grid {
         gap: 0.75rem;
+      }
+
+      .dialpad-actions > *,
+      .dialpad-secondary > * {
+        flex-basis: min(220px, 80vw);
       }
 
       .extension-card {
@@ -655,7 +674,6 @@
             <span class="btn-label">Hold</span>
           </button>
           <button type="button" class="pill-btn" id="clear-btn">Clear</button>
-          <span></span>
         </div>
 
         <p class="subtext" id="helper-text">Tap digits or choose a contact to start dialing.</p>
