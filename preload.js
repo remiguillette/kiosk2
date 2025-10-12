@@ -3,6 +3,7 @@ const { contextBridge, ipcRenderer } = require('electron');
 const WS_STATUS_EVENT_KEY = "beaverphone:ws-status";
 const REMOTE_WS_STATUS_EVENT_KEY = "remote-ui:ws-status";
 const REMOTE_WS_MESSAGE_EVENT_KEY = "remote-ui:ws-message";
+const REMOTE_DISPATCH_EVENT_KEY = "remote-ui:dispatch";
 
 contextBridge.exposeInMainWorld("electronAPI", {
   goHome: () => ipcRenderer.send("go-home"),
@@ -12,9 +13,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
 console.log("✅ preload loaded");
 
 let beaverphoneWs;
-let remoteUiWs;
-let remoteReconnectTimer;
-
 const emitCustomEvent = (key, detail) => {
   window.dispatchEvent(
     new CustomEvent(key, {
@@ -82,58 +80,39 @@ function emitRemoteUiStatus(status, extra = {}) {
   emitCustomEvent(REMOTE_WS_STATUS_EVENT_KEY, { status, ...extra });
 }
 
-function connectRemoteUiWS() {
-  const url = "ws://192.168.1.76:6001";
-  console.log(`[Remote UI] Ouverture connexion WS → ${url}`);
-  emitRemoteUiStatus("connecting", { url });
-
-  const scheduleReconnect = () => {
-    clearTimeout(remoteReconnectTimer);
-    remoteReconnectTimer = setTimeout(connectRemoteUiWS, 5000);
-  };
-
-  try {
-    remoteUiWs = new WebSocket(url);
-
-    remoteUiWs.onopen = () => {
-      clearTimeout(remoteReconnectTimer);
-      console.log("[Remote UI] ✅ Connecté au WS graphique");
-      emitRemoteUiStatus("connected", { url });
-    };
-
-    remoteUiWs.onmessage = (event) => {
-      console.log("[Remote UI] 📩 Reçu:", event.data);
-      emitCustomEvent(REMOTE_WS_MESSAGE_EVENT_KEY, {
-        message: event.data,
-      });
-    };
-
-    remoteUiWs.onclose = (event) => {
-      console.warn("[Remote UI] ⚠️ Connexion fermée", {
-        code: event.code,
-        reason: event.reason,
-      });
-      emitRemoteUiStatus("disconnected", {
-        code: event.code,
-        reason: event.reason,
-      });
-      scheduleReconnect();
-    };
-
-    remoteUiWs.onerror = (err) => {
-      console.error("[Remote UI] ❌ Erreur WS:", err.message || err);
-      emitRemoteUiStatus("error", { error: err.message || String(err) });
-      scheduleReconnect();
-    };
-  } catch (error) {
-    console.error("[Remote UI] ❌ Exception lors de la connexion:", error);
-    emitRemoteUiStatus("error", { error: error.message || String(error) });
-    scheduleReconnect();
-  }
+function reportRendererStatus(status, extra = {}) {
+  const payload = { state: status, status, ...extra };
+  ipcRenderer.send("remote-ui:status-update", payload);
+  emitRemoteUiStatus(status, extra);
 }
 
 connectBeaverphoneWS();
-connectRemoteUiWS();
+
+ipcRenderer.on("remote-ui:command", (_event, detail) => {
+  console.log("[Remote UI] 📩 Commande depuis le backend:", detail);
+  emitCustomEvent(REMOTE_WS_MESSAGE_EVENT_KEY, { message: detail });
+});
+
+ipcRenderer
+  .invoke("remote-ui:get-status")
+  .then((status) => {
+    emitRemoteUiStatus("backend-ready", status || {});
+  })
+  .catch((error) => {
+    emitRemoteUiStatus("backend-error", { error: error.message || String(error) });
+  });
+
+window.addEventListener(REMOTE_DISPATCH_EVENT_KEY, (event) => {
+  const payload = event.detail ?? {};
+  console.log("[Remote UI] 📤 Dispatch DOM → backend:", payload);
+  ipcRenderer.send("remote-ui:outgoing", payload);
+});
+
+reportRendererStatus("renderer-preload-ready");
+
+window.addEventListener("DOMContentLoaded", () => {
+  reportRendererStatus("renderer-dom-ready");
+});
 
 // Capture des événements du dialpad
 window.addEventListener("DOMContentLoaded", () => {
