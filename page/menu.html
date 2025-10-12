@@ -2,6 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Beaver Kiosk</title>
   <style>
     :root {
@@ -26,7 +27,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      padding: 2rem;
+      padding: clamp(1.25rem, 5vw, 3rem);
       background: var(--bg-gradient);
       color: var(--text-main);
     }
@@ -36,6 +37,10 @@
       display: grid;
       gap: 3rem;
       text-align: center;
+    }
+
+    .wrapper > * {
+      margin-inline: auto;
     }
 
     .lang-toggle {
@@ -172,13 +177,57 @@
       font-weight: 600;
     }
 
+    @media (max-width: 900px) {
+      body {
+        align-items: flex-start;
+      }
+
+      .wrapper {
+        text-align: left;
+        gap: 2.5rem;
+      }
+
+      .wrapper > * {
+        margin-inline: 0;
+      }
+
+      header p {
+        margin-inline: 0;
+      }
+
+      .lang-toggle {
+        justify-self: start;
+      }
+    }
+
     @media (max-width: 600px) {
       body {
         padding: 1.5rem;
       }
 
+      .wrapper {
+        gap: 2rem;
+      }
+
+      header h1 {
+        line-height: 1.2;
+      }
+
+      header p {
+        font-size: 1rem;
+      }
+
       .card {
-        padding: 2rem 1.6rem;
+        padding: 1.75rem 1.4rem;
+      }
+
+      .card h2 {
+        font-size: 1.4rem;
+      }
+
+      .card .icon {
+        width: 56px;
+        height: 56px;
       }
     }
   </style>
