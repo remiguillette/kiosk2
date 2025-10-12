@@ -1,7 +1,8 @@
 const { app, BrowserWindow, ipcMain, globalShortcut, session } = require('electron');
 const fs = require('fs');
+const http = require('http');
 const path = require('path');
-const WebSocket = require('ws');
+const { URL } = require('url');
 
 const BATTERY_BASE_PATH = '/sys/class/power_supply/battery';
 const COOKIE_STORE_FILENAME = 'session-cookies.json';
@@ -13,56 +14,148 @@ const MAX_ZOOM_LEVEL = 5;
 
 let cookieStorePath;
 let cookiePersistTimer;
-let remoteUiServer;
+let backendServer;
+let lastRemoteEvents = [];
+let remoteUiStatus = {
+  state: 'idle',
+  updatedAt: null,
+  port: 5000,
+};
 
-const REMOTE_UI_PORT = 6001;
+const BACKEND_SERVER_PORT = 5000;
 
-function startRemoteUiServer() {
-  if (remoteUiServer) {
-    return remoteUiServer;
+function recordRemoteEvent(event) {
+  const entry = {
+    ...event,
+    timestamp: new Date().toISOString(),
+  };
+
+  lastRemoteEvents = [...lastRemoteEvents.slice(-24), entry];
+}
+
+function updateRemoteUiStatus(patch) {
+  remoteUiStatus = {
+    ...remoteUiStatus,
+    ...patch,
+    updatedAt: new Date().toISOString(),
+  };
+}
+
+function readJsonBody(req) {
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+
+    req.on('data', (chunk) => {
+      chunks.push(chunk);
+    });
+
+    req.on('end', () => {
+      if (chunks.length === 0) {
+        resolve(null);
+        return;
+      }
+
+      try {
+        const raw = Buffer.concat(chunks).toString('utf8');
+        resolve(raw.length > 0 ? JSON.parse(raw) : null);
+      } catch (error) {
+        reject(error);
+      }
+    });
+
+    req.on('error', (error) => {
+      reject(error);
+    });
+  });
+}
+
+function sendJson(res, statusCode, payload) {
+  res.writeHead(statusCode, {
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+  });
+  res.end(JSON.stringify(payload));
+}
+
+function startBackendServer() {
+  if (backendServer) {
+    return backendServer;
   }
 
-  remoteUiServer = new WebSocket.Server({ port: REMOTE_UI_PORT });
+  backendServer = http.createServer(async (req, res) => {
+    const { method, url } = req;
+    const requestUrl = new URL(url, `http://localhost:${BACKEND_SERVER_PORT}`);
 
-  remoteUiServer.on('listening', () => {
-    console.log(`Remote UI WebSocket listening on ws://0.0.0.0:${REMOTE_UI_PORT}`);
-  });
+    if (method === 'OPTIONS') {
+      res.writeHead(204, {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+      });
+      res.end();
+      return;
+    }
 
-  remoteUiServer.on('connection', (socket, request) => {
-    const { remoteAddress, remotePort } = request.socket;
-    console.log('Remote UI client connected', {
-      remoteAddress,
-      remotePort,
-    });
+    if (method === 'GET' && requestUrl.pathname === '/healthz') {
+      sendJson(res, 200, { status: 'ok', updatedAt: new Date().toISOString() });
+      return;
+    }
 
-    socket.on('message', (data) => {
-      const payload = data instanceof Buffer ? data.toString('utf8') : String(data);
-      console.log('Remote UI message received', { payload });
+    if (method === 'GET' && requestUrl.pathname === '/remote-ui/status') {
+      sendJson(res, 200, remoteUiStatus);
+      return;
+    }
 
-      remoteUiServer.clients.forEach((client) => {
-        if (client !== socket && client.readyState === WebSocket.OPEN) {
-          client.send(payload);
+    if (method === 'GET' && requestUrl.pathname === '/remote-ui/events') {
+      sendJson(res, 200, lastRemoteEvents);
+      return;
+    }
+
+    if (method === 'POST' && requestUrl.pathname === '/remote-ui/commands') {
+      try {
+        const body = await readJsonBody(req);
+        const command = {
+          command: requestUrl.searchParams.get('command') || null,
+          payload: body,
+        };
+
+        console.log('Remote UI command received', command);
+
+        recordRemoteEvent({ direction: 'backend', payload: command });
+
+        if (win?.webContents) {
+          win.webContents.send('remote-ui:command', command);
         }
-      });
-    });
 
-    socket.on('close', (code, reason) => {
-      console.log('Remote UI client disconnected', {
-        code,
-        reason: typeof reason === 'string' ? reason : reason?.toString(),
-      });
-    });
+        sendJson(res, 202, { accepted: true });
+      } catch (error) {
+        console.error('Failed to process remote command', error);
+        sendJson(res, 400, { accepted: false, error: error.message });
+      }
 
-    socket.on('error', (error) => {
-      console.error('Remote UI socket error', error);
-    });
+      return;
+    }
+
+    sendJson(res, 404, { error: 'Not found' });
   });
 
-  remoteUiServer.on('error', (error) => {
-    console.error('Remote UI server error', error);
+  backendServer.on('listening', () => {
+    console.log(`Backend HTTP server listening on http://0.0.0.0:${BACKEND_SERVER_PORT}`);
+    updateRemoteUiStatus({ state: 'listening' });
+    recordRemoteEvent({ direction: 'backend-status', payload: remoteUiStatus });
   });
 
-  return remoteUiServer;
+  backendServer.on('error', (error) => {
+    console.error('Backend server error', error);
+    updateRemoteUiStatus({ state: 'error', error: error.message });
+    recordRemoteEvent({ direction: 'backend-status', payload: remoteUiStatus });
+  });
+
+  backendServer.listen(BACKEND_SERVER_PORT, '0.0.0.0');
+
+  return backendServer;
 }
 
 function getCookieStorePath() {
@@ -357,7 +450,7 @@ ipcMain.on('go-home', () => {
 
 app.whenReady().then(async () => {
   await initializeSessionPersistence();
-  startRemoteUiServer();
+  startBackendServer();
   createWindow();
   registerZoomShortcuts();
 });
@@ -369,9 +462,9 @@ app.on('window-all-closed', () => {
 app.on('will-quit', () => {
   globalShortcut.unregisterAll();
 
-  if (remoteUiServer) {
-    remoteUiServer.close();
-    remoteUiServer = null;
+  if (backendServer) {
+    backendServer.close();
+    backendServer = null;
   }
 });
 
@@ -385,3 +478,16 @@ app.on('before-quit', () => {
     persistCookies(currentSession);
   }
 });
+
+ipcMain.on('remote-ui:status-update', (_event, status) => {
+  if (status && typeof status === 'object') {
+    updateRemoteUiStatus(status);
+    recordRemoteEvent({ direction: 'renderer-status', payload: status });
+  }
+});
+
+ipcMain.on('remote-ui:outgoing', (_event, payload) => {
+  recordRemoteEvent({ direction: 'renderer', payload });
+});
+
+ipcMain.handle('remote-ui:get-status', () => remoteUiStatus);
