@@ -107,7 +107,7 @@ document.body.append('<i data-lucide="chevrons-left-right-ellipsis"></i>');
 
 <h3>file-text</h3>
 <p>
-  <a href="./file-text.svg">volume-2.svg</a><br />
+  <a href="./file-text.svg">file-text.svg</a><br />
   <img src="./file-text.svg" alt="Doc" width="48" height="48" />
 </p>
 <pre><code>import { createIcons, icons } from 'lucide';
