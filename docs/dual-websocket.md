@@ -17,7 +17,7 @@ UI features can be monitored or reconnected independently.
 - **Keep alive:** Sends a JSON ping every 30 seconds while connected.
 
 ## Remote UI session
-- **URL:** `ws://192.168.1.60:6001`
+- **URL:** `ws://192.168.1.76:6001`
 - **Purpose:** Provides a dedicated channel for remote graphical control and
   monitoring separate from Beaverphone traffic.
 - **Handlers:**
