@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Beaver Kiosk</title>
   <style>
     :root {
@@ -23,174 +23,126 @@
 
     body {
       font-family: "Inter", "Segoe UI", sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text-main);
       min-height: 100vh;
       display: flex;
       justify-content: center;
+      align-items: flex-start;
+      padding: 2rem;
+    }
+
+    main.wrapper {
+      width: min(1200px, 100%);
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    /* === HEADER === */
+    header {
+      display: flex;
+      justify-content: space-between;
       align-items: center;
-      padding: clamp(1.25rem, 5vw, 3rem);
-      background: var(--bg-gradient);
-      color: var(--text-main);
+      flex-wrap: wrap;
+      gap: 1rem;
     }
 
-    .wrapper {
-      width: min(1040px, 100%);
-      display: grid;
-      gap: 3rem;
-      text-align: center;
-    }
-
-    .wrapper > * {
-      margin-inline: auto;
+    header h1 {
+      font-size: clamp(2rem, 5vw, 3rem);
+      letter-spacing: 1px;
     }
 
     .lang-toggle {
       display: inline-flex;
-      align-self: flex-end;
-      justify-self: end;
-      gap: 0.75rem;
+      gap: 0.5rem;
       background: rgba(24, 24, 32, 0.6);
-      padding: 0.5rem 0.6rem;
+      padding: 0.4rem 0.5rem;
       border-radius: 999px;
       border: 1px solid rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
+      backdrop-filter: blur(8px);
     }
 
     .lang-btn {
-      appearance: none;
       border: none;
       background: transparent;
       color: var(--text-muted);
-      font-size: 0.95rem;
       font-weight: 600;
+      font-size: 0.95rem;
       padding: 0.4rem 0.9rem;
       border-radius: 999px;
       cursor: pointer;
-      transition: color 150ms ease, background 150ms ease, transform 150ms ease;
-    }
-
-    .lang-btn:hover {
-      color: var(--text-main);
-      transform: translateY(-1px);
+      transition: all 0.2s ease;
     }
 
     .lang-btn.active {
       background: var(--accent);
       color: #121219;
-      box-shadow: 0 8px 18px rgba(248, 148, 34, 0.35);
+      box-shadow: 0 0 12px rgba(248, 148, 34, 0.3);
     }
 
-    header h1 {
-      font-size: clamp(2.5rem, 5vw, 3.5rem);
-      letter-spacing: 1px;
+    .lang-btn:hover {
+      color: var(--text-main);
     }
 
-    header p {
-      margin-top: 1rem;
-      font-size: clamp(1rem, 2vw, 1.3rem);
-      color: var(--text-muted);
-      max-width: 640px;
-      margin-left: auto;
-      margin-right: auto;
-      line-height: 1.6;
-    }
-
+    /* === GRID MENU === */
     .menu {
-      display: flex;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
       gap: 1.8rem;
-      justify-content: center;
-      flex-wrap: nowrap;
-      overflow-x: auto;
-      padding-bottom: 0.5rem;
-      scroll-snap-type: x proximity;
-      scrollbar-width: thin;
-    }
-
-    .menu::-webkit-scrollbar {
-      height: 8px;
-    }
-
-    .menu::-webkit-scrollbar-track {
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 999px;
-    }
-
-    .menu::-webkit-scrollbar-thumb {
-      background: rgba(248, 148, 34, 0.45);
-      border-radius: 999px;
     }
 
     .card {
-      position: relative;
-      overflow: hidden;
-      padding: 2.4rem 2rem;
-      border-radius: 22px;
       background: var(--card-bg);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      backdrop-filter: blur(14px);
-      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      padding: 2rem 1.5rem;
+      text-align: center;
+      backdrop-filter: blur(12px);
+      transition: transform 0.2s ease, border-color 0.2s ease;
       cursor: pointer;
-      transition: transform 200ms ease, border-color 200ms ease;
-      flex: 0 0 clamp(220px, 26vw, 260px);
-      scroll-snap-align: center;
-    }
-
-    .card::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: var(--accent-soft);
-      opacity: 0;
-      transition: opacity 200ms ease;
-      pointer-events: none;
     }
 
     .card:hover {
-      transform: translateY(-6px) scale(1.02);
-      border-color: rgba(248, 148, 34, 0.45);
+      transform: translateY(-6px);
+      border-color: var(--accent);
     }
 
-    .card:hover::after {
-      opacity: 1;
-    }
-
-    .card h2 {
-      font-size: 1.6rem;
-      margin-top: 1rem;
-      font-weight: 600;
-    }
-
-    .card p {
-      margin-top: 0.75rem;
-      color: var(--text-muted);
-      line-height: 1.5;
-    }
-
-    .card .icon {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
+    .icon {
       width: 64px;
       height: 64px;
-      margin: 0 auto;
-      border-radius: 18px;
-      font-size: 2rem;
+      margin: 0 auto 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       background: rgba(248, 148, 34, 0.18);
-      color: var(--accent);
-      overflow: hidden;
+      border-radius: 18px;
     }
 
-    .card .icon img {
+    .icon img {
       width: 42px;
       height: 42px;
       object-fit: contain;
     }
 
-    footer {
-      display: flex;
-      flex-direction: column;
-      gap: 0.6rem;
+    .card h2 {
+      font-size: 1.4rem;
+      margin-top: 0.5rem;
+      font-weight: 600;
+    }
+
+    .card p {
+      margin-top: 0.6rem;
       color: var(--text-muted);
       font-size: 0.95rem;
+      line-height: 1.4;
+    }
+
+    /* === FOOTER === */
+    footer {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.9rem;
     }
 
     footer .highlight {
@@ -198,118 +150,98 @@
       font-weight: 600;
     }
 
-    @media (max-width: 900px) {
-      body {
-        align-items: flex-start;
-      }
-
-      .wrapper {
-        text-align: left;
-        gap: 2.5rem;
-      }
-
-      .wrapper > * {
-        margin-inline: 0;
-      }
-
-      header p {
-        margin-inline: 0;
-      }
-
-      .lang-toggle {
-        justify-self: start;
-      }
-    }
-
-    @media (max-width: 720px) {
-      .menu {
-        justify-content: flex-start;
-      }
-    }
-
-    @media (max-width: 600px) {
-      body {
-        padding: 1.5rem;
-      }
-
-      .wrapper {
-        gap: 2rem;
+    /* === RESPONSIVE === */
+    @media (max-width: 800px) {
+      header {
+        flex-direction: row;
+        justify-content: space-between;
       }
 
       header h1 {
-        line-height: 1.2;
+        font-size: 1.8rem;
       }
 
-      header p {
-        font-size: 1rem;
+      .menu {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      }
+    }
+
+    @media (max-width: 500px) {
+      body {
+        padding: 1rem;
+      }
+
+      header {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      header h1 {
+        font-size: 1.5rem;
+      }
+
+      .lang-toggle {
+        padding: 0.3rem 0.4rem;
+      }
+
+      .menu {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
       }
 
       .card {
-        flex-basis: min(80vw, 260px);
-        padding: 1.75rem 1.4rem;
+        padding: 1.5rem 1rem;
+      }
+
+      .icon {
+        width: 52px;
+        height: 52px;
       }
 
       .card h2 {
-        font-size: 1.4rem;
-      }
-
-      .card .icon {
-        width: 56px;
-        height: 56px;
+        font-size: 1.1rem;
       }
     }
   </style>
 </head>
 <body>
   <main class="wrapper">
-    <div class="lang-toggle" role="group" aria-label="Sélecteur de langue">
-      <button type="button" class="lang-btn active" data-lang="fr" aria-pressed="true">Français</button>
-      <button type="button" class="lang-btn" data-lang="en" aria-pressed="false">English</button>
-    </div>
     <header>
       <h1 data-i18n="heroTitle">Bienvenue au Beaver&nbsp;Kiosk</h1>
-      <p data-i18n="heroSubtitle">
-     
-      </p>
+      <div class="lang-toggle">
+        <button type="button" class="lang-btn active" data-lang="fr">FR</button>
+        <button type="button" class="lang-btn" data-lang="en">EN</button>
+      </div>
     </header>
 
     <section class="menu">
       <article class="card" onclick="location.href='beaverphone.html'">
-        <div class="icon" aria-hidden="true">
-          <img src="../icon/phone.svg" alt="" />
-        </div>
+        <div class="icon"><img src="../icon/phone.svg" alt="Phone icon" /></div>
         <h2 data-i18n="beaverphoneTitle">BeaverPhone</h2>
         <p data-i18n="beaverphoneBody"></p>
       </article>
 
       <article class="card" onclick="location.href='home-automation.html'">
-        <div class="icon" aria-hidden="true">
-          <img src="../icon/house.svg" alt="" />
-        </div>
+        <div class="icon"><img src="../icon/house.svg" alt="Home icon" /></div>
         <h2 data-i18n="homeAutomationTitle">Domotique</h2>
         <p data-i18n="homeAutomationBody"></p>
       </article>
 
       <article class="card" onclick="location.href='beaveralarm.html'">
-        <div class="icon" aria-hidden="true">
-          <img src="../icon/alarm.svg" alt="" />
-        </div>
+        <div class="icon"><img src="../icon/alarm.svg" alt="Alarm icon" /></div>
         <h2 data-i18n="beaveralarmTitle">BeaverAlarm</h2>
         <p data-i18n="beaveralarmBody"></p>
       </article>
 
       <article class="card" onclick="location.href='http://192.168.1.76:8000'">
-        <div class="icon" aria-hidden="true">
-          <span style="font-size: 1.8rem;">📄</span>
-        </div>
+        <div class="icon"><span style="font-size: 1.8rem;">📄</span></div>
         <h2 data-i18n="beaverdocTitle">BeaverDoc Paperless</h2>
         <p data-i18n="beaverdocBody"></p>
       </article>
 
       <article class="card" onclick="location.href='https://rgbeavernet.ca'">
-        <div class="icon" aria-hidden="true">
-          <img src="../icon/beaver.png" alt="" />
-        </div>
+        <div class="icon"><img src="../icon/beaver.png" alt="Beaver logo" /></div>
         <h2 data-i18n="beavernetTitle">BeaverNet.ca</h2>
         <p data-i18n="beavernetBody"></p>
       </article>
@@ -320,6 +252,7 @@
       <span data-i18n="tipBody"></span>
     </footer>
   </main>
+
   <script>
     const translations = {
       fr: {
@@ -339,39 +272,34 @@
         beaverdocTitle: "BeaverDoc Paperless",
         beavernetTitle: "BeaverNet.ca",
         beaverdocBody: "Manage your scanned documents locally.",
-
-
-      }
+      },
     };
 
-    const langButtons = document.querySelectorAll('.lang-btn');
+    const langButtons = document.querySelectorAll(".lang-btn");
 
     function setLanguage(lang) {
       if (!translations[lang]) return;
       document.documentElement.lang = lang;
-      document.querySelectorAll('[data-i18n]').forEach((node) => {
+      document.querySelectorAll("[data-i18n]").forEach((node) => {
         const key = node.dataset.i18n;
         const value = translations[lang][key];
-        if (value) {
-          node.innerHTML = value;
-        }
+        if (value) node.innerHTML = value;
       });
 
-      langButtons.forEach((button) => {
-        const isActive = button.dataset.lang === lang;
-        button.classList.toggle('active', isActive);
-        button.setAttribute('aria-pressed', String(isActive));
+      langButtons.forEach((btn) => {
+        const isActive = btn.dataset.lang === lang;
+        btn.classList.toggle("active", isActive);
       });
 
-      localStorage.setItem('preferredLang', lang);
+      localStorage.setItem("preferredLang", lang);
     }
 
-    langButtons.forEach((button) => {
-      button.addEventListener('click', () => setLanguage(button.dataset.lang));
+    langButtons.forEach((btn) => {
+      btn.addEventListener("click", () => setLanguage(btn.dataset.lang));
     });
 
-    const savedLang = localStorage.getItem('preferredLang');
-    setLanguage(savedLang && translations[savedLang] ? savedLang : 'fr');
+    const savedLang = localStorage.getItem("preferredLang");
+    setLanguage(savedLang && translations[savedLang] ? savedLang : "fr");
   </script>
 </body>
 </html>
