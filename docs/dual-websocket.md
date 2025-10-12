@@ -29,6 +29,31 @@ UI features can be monitored or reconnected independently.
     after 5 seconds.
   - `onerror` records the failure and schedules the same reconnect logic.
 
+### Accessing the graphical Remote UI
+
+1. **Open the kiosk web page, not the raw WebSocket.** From another device on
+   the same network, point a browser to the kiosk IP (for example
+   `http://192.168.1.60`). This serves the regular menu interface that the
+   Electron shell displays locally, so you get the exact same controls in a
+   standard web view.
+2. **Let the page establish the WebSocket for you.** The renderer script inside
+   the kiosk automatically connects to `ws://192.168.1.76:6001`, dispatches
+   status events, and mirrors any Remote UI messages it receives. There is no
+   need to open the WebSocket endpoint manually—loading the page triggers the
+   handshake and keeps it alive with reconnect logic.
+3. **Check the connection status.** You can listen for the
+   `remote-ui:ws-status` event in the browser console to verify whether the
+   socket is connected and which URL is in use. If you see `disconnected`, the
+   kiosk will retry every 5 seconds until the Electron host comes back online.
+4. **Send commands through the DOM.** Dispatch a `remote-ui:ws-message` custom
+   event with the payload you want to transmit. The preload script forwards it
+   to the open WebSocket, and every connected Remote UI client receives it.
+
+> **Important:** Do **not** browse directly to `:6001` or `:5001` in a browser.
+> These ports are dedicated to background signaling. Always use the base HTTP
+> address of the kiosk so that the Electron-rendered UI handles the WebSocket
+> negotiation on your behalf.
+
 ## Listening for status in the renderer
 Both sessions dispatch DOM custom events. Attach listeners in the renderer to
 stay informed:
