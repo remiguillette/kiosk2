@@ -3,6 +3,7 @@ const fs = require('fs');
 const http = require('http');
 const path = require('path');
 const { URL } = require('url');
+const Database = require('better-sqlite3');
 
 const BATTERY_BASE_PATH = '/sys/class/power_supply/battery';
 const COOKIE_STORE_FILENAME = 'session-cookies.json';
@@ -15,6 +16,8 @@ const MAX_ZOOM_LEVEL = 5;
 let cookieStorePath;
 let cookiePersistTimer;
 let contentServer;
+let taskDb;
+let taskStatements;
 
 const CONTENT_SERVER_PORT = Number.parseInt(process.env.PORT, 10) || 5000;
 const CONTENT_ROOT = path.join(__dirname, 'page');
@@ -30,6 +33,191 @@ const MIME_TYPES = {
   '.svg': 'image/svg+xml',
   '.ico': 'image/x-icon',
 };
+
+function initializeTaskDatabase() {
+  if (taskDb) {
+    return taskDb;
+  }
+
+  if (!app.isReady()) {
+    throw new Error('Application must be ready before initialising the task database.');
+  }
+
+  const userDataPath = app.getPath('userData');
+  const dbPath = path.join(userDataPath, 'beavertask.db');
+
+  taskDb = new Database(dbPath);
+  taskDb.pragma('journal_mode = WAL');
+  taskDb.exec(`
+    CREATE TABLE IF NOT EXISTS tasks (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT NOT NULL,
+      assignee TEXT,
+      due_date TEXT,
+      priority TEXT,
+      status TEXT NOT NULL DEFAULT 'pending',
+      notes TEXT,
+      image_data TEXT,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+  `);
+
+  taskStatements = {
+    list: taskDb.prepare(`
+      SELECT id, title, assignee, due_date, priority, status, notes, image_data, created_at, updated_at
+      FROM tasks
+      ORDER BY
+        CASE WHEN due_date IS NULL OR due_date = '' THEN 1 ELSE 0 END,
+        due_date,
+        created_at DESC
+    `),
+    insert: taskDb.prepare(`
+      INSERT INTO tasks (title, assignee, due_date, priority, status, notes, image_data, created_at, updated_at)
+      VALUES (@title, @assignee, @dueDate, @priority, @status, @notes, @imageData, @createdAt, @updatedAt)
+    `),
+    delete: taskDb.prepare('DELETE FROM tasks WHERE id = ?'),
+    getById: taskDb.prepare(`
+      SELECT id, title, assignee, due_date, priority, status, notes, image_data, created_at, updated_at
+      FROM tasks
+      WHERE id = ?
+    `),
+  };
+
+  return taskDb;
+}
+
+function mapTaskRow(row) {
+  if (!row) {
+    return null;
+  }
+
+  return {
+    id: row.id,
+    title: row.title,
+    assignee: row.assignee,
+    dueDate: row.due_date || null,
+    priority: row.priority,
+    status: row.status,
+    notes: row.notes,
+    imageData: row.image_data,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+function listTasks() {
+  initializeTaskDatabase();
+  return taskStatements.list.all().map(mapTaskRow);
+}
+
+function getTaskById(id) {
+  initializeTaskDatabase();
+  return mapTaskRow(taskStatements.getById.get(id));
+}
+
+function sanitizeNullableText(value) {
+  if (value === undefined || value === null) {
+    return null;
+  }
+
+  const trimmed = String(value).trim();
+  return trimmed.length === 0 ? null : trimmed;
+}
+
+function normalizeStatus(status) {
+  const value = (status || '').toString().trim().toLowerCase();
+  const allowed = new Set(['pending', 'in_progress', 'done']);
+
+  if (allowed.has(value)) {
+    return value;
+  }
+
+  return 'pending';
+}
+
+function addTask(task) {
+  initializeTaskDatabase();
+
+  if (!task || !task.title || String(task.title).trim().length === 0) {
+    throw new Error('Le titre de la tâche est obligatoire.');
+  }
+
+  const timestamp = new Date().toISOString();
+  const payload = {
+    title: String(task.title).trim(),
+    assignee: sanitizeNullableText(task.assignee),
+    dueDate: sanitizeNullableText(task.dueDate),
+    priority: sanitizeNullableText(task.priority),
+    status: normalizeStatus(task.status),
+    notes: sanitizeNullableText(task.notes),
+    imageData: task.imageData || null,
+    createdAt: timestamp,
+    updatedAt: timestamp,
+  };
+
+  const info = taskStatements.insert.run(payload);
+  return getTaskById(info.lastInsertRowid);
+}
+
+function updateTask(id, updates = {}) {
+  initializeTaskDatabase();
+
+  if (!id) {
+    throw new Error('Identifiant de tâche manquant pour la mise à jour.');
+  }
+
+  const columns = {
+    title: 'title',
+    assignee: 'assignee',
+    dueDate: 'due_date',
+    priority: 'priority',
+    status: 'status',
+    notes: 'notes',
+    imageData: 'image_data',
+  };
+
+  const setters = [];
+  const params = { id, updatedAt: new Date().toISOString() };
+
+  Object.entries(columns).forEach(([key, column]) => {
+    if (Object.prototype.hasOwnProperty.call(updates, key)) {
+      let value = updates[key];
+
+      if (key === 'status') {
+        value = normalizeStatus(value);
+      } else if (key === 'imageData') {
+        value = value || null;
+      } else {
+        value = sanitizeNullableText(value);
+      }
+
+      params[key] = value;
+      setters.push(`${column} = @${key}`);
+    }
+  });
+
+  if (setters.length === 0) {
+    return getTaskById(id);
+  }
+
+  setters.push('updated_at = @updatedAt');
+  const statement = taskDb.prepare(`UPDATE tasks SET ${setters.join(', ')} WHERE id = @id`);
+  statement.run(params);
+
+  return getTaskById(id);
+}
+
+function deleteTask(id) {
+  initializeTaskDatabase();
+
+  if (!id) {
+    return false;
+  }
+
+  const info = taskStatements.delete.run(id);
+  return info.changes > 0;
+}
 
 function getMimeType(filePath) {
   const extension = path.extname(filePath).toLowerCase();
@@ -418,6 +606,42 @@ function registerZoomShortcuts() {
   });
 }
 
+ipcMain.handle('tasks:list', async () => {
+  try {
+    return listTasks();
+  } catch (error) {
+    console.error('Erreur lors de la lecture des tâches :', error);
+    throw error;
+  }
+});
+
+ipcMain.handle('tasks:add', async (_event, task) => {
+  try {
+    return addTask(task);
+  } catch (error) {
+    console.error('Erreur lors de la création d\'une tâche :', error);
+    throw error;
+  }
+});
+
+ipcMain.handle('tasks:update', async (_event, { id, updates }) => {
+  try {
+    return updateTask(id, updates);
+  } catch (error) {
+    console.error('Erreur lors de la mise à jour d\'une tâche :', error);
+    throw error;
+  }
+});
+
+ipcMain.handle('tasks:delete', async (_event, id) => {
+  try {
+    return deleteTask(id);
+  } catch (error) {
+    console.error('Erreur lors de la suppression d\'une tâche :', error);
+    throw error;
+  }
+});
+
 ipcMain.handle('getBatteryLevel', async () => {
   try {
     const capacityRaw = fs.readFileSync(path.join(BATTERY_BASE_PATH, 'capacity'), 'utf8').trim();
@@ -442,6 +666,7 @@ ipcMain.on('go-home', () => {
 });
 
 app.whenReady().then(async () => {
+  initializeTaskDatabase();
   await initializeSessionPersistence();
   await startContentServer();
   createWindow();
@@ -458,6 +683,12 @@ app.on('will-quit', () => {
   if (contentServer) {
     contentServer.close();
     contentServer = null;
+  }
+
+  if (taskDb) {
+    taskDb.close();
+    taskDb = null;
+    taskStatements = undefined;
   }
 });
 

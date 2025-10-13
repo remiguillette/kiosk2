@@ -5,6 +5,12 @@ const WS_STATUS_EVENT_KEY = "beaverphone:ws-status";
 contextBridge.exposeInMainWorld("electronAPI", {
   goHome: () => ipcRenderer.send("go-home"),
   getBatteryLevel: () => ipcRenderer.invoke("getBatteryLevel"),
+  tasks: {
+    list: () => ipcRenderer.invoke("tasks:list"),
+    add: (task) => ipcRenderer.invoke("tasks:add", task),
+    update: (id, updates) => ipcRenderer.invoke("tasks:update", { id, updates }),
+    delete: (id) => ipcRenderer.invoke("tasks:delete", id),
+  },
 });
 
 console.log("✅ preload loaded");

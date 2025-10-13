@@ -1,78 +1,1004 @@
-<!-- Onglets BeaverTask -->
-<section class="cards" aria-label="Task interface">
-  <div class="tab-header" style="display:flex; gap:1rem; margin-bottom:1rem;">
-    <button class="tab-btn active" data-tab="list">Liste des tâches</button>
-    <button class="tab-btn" data-tab="add">Ajouter une tâche</button>
-    <button class="tab-btn" data-tab="calendar">Calendrier</button>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/main.min.css">
+
+<section class="cards task-manager" aria-label="Gestionnaire de tâches BeaverTask">
+  <header class="task-manager__header">
+    <div class="task-manager__hero">
+      <div class="task-manager__badge" aria-hidden="true">🦫</div>
+      <div class="task-manager__title">
+        <h2>BeaverTask</h2>
+        <p>Créez, suivez et partagez vos tâches en un clin d'œil.</p>
+      </div>
+    </div>
+    <dl class="task-manager__stats" aria-label="Statistiques des tâches">
+      <div class="task-manager__stat">
+        <dt>Total</dt>
+        <dd id="stats-total">0</dd>
+      </div>
+      <div class="task-manager__stat">
+        <dt>À faire</dt>
+        <dd id="stats-pending">0</dd>
+      </div>
+      <div class="task-manager__stat">
+        <dt>En cours</dt>
+        <dd id="stats-progress">0</dd>
+      </div>
+      <div class="task-manager__stat">
+        <dt>Terminées</dt>
+        <dd id="stats-done">0</dd>
+      </div>
+    </dl>
+  </header>
+
+  <div class="tab-header" role="tablist" aria-label="Vues des tâches">
+    <button class="tab-btn active" data-tab="list" role="tab" aria-selected="true">Liste</button>
+    <button class="tab-btn" data-tab="add" role="tab" aria-selected="false">Ajouter</button>
+    <button class="tab-btn" data-tab="calendar" role="tab" aria-selected="false">Calendrier</button>
   </div>
 
+  <div id="task-feedback" class="task-feedback" role="status" aria-live="polite"></div>
+
   <div class="tab-content">
-    <div class="tab-panel" id="list">
-      <p>Affiche ici toutes les tâches créées avec leur priorité, échéance et statut.</p>
-      <!-- Ici tu pourras générer dynamiquement les cartes ou lignes de tâches depuis SQLite -->
-    </div>
-    <div class="tab-panel" id="add" style="display:none;">
-      <p>Formulaire pour créer une nouvelle tâche :</p>
-      <form id="add-task-form">
-        <label>Titre: <input type="text" name="title" required></label><br>
-        <label>Responsable: <input type="text" name="assignee"></label><br>
-        <label>Date d'échéance: <input type="date" name="dueDate"></label><br>
-        <label>Priorité:
-          <select name="priority">
-            <option>Élevé</option>
-            <option>Moyen</option>
-            <option>Faible</option>
+    <section class="tab-panel" id="list" role="tabpanel">
+      <div class="task-list-controls">
+        <label class="search-label" for="task-search">Recherche</label>
+        <input id="task-search" type="search" placeholder="Titre, responsable ou note" autocomplete="off">
+        <button id="refresh-tasks" type="button" class="ghost-btn">⟳ Actualiser</button>
+      </div>
+      <div id="task-list" class="task-list" aria-live="polite"></div>
+    </section>
+
+    <section class="tab-panel" id="add" role="tabpanel" hidden>
+      <form id="add-task-form" class="task-form">
+        <div class="form-row">
+          <label for="task-title">Titre <span aria-hidden="true">*</span></label>
+          <input id="task-title" name="title" type="text" required placeholder="Ex. Mise à jour du site">
+        </div>
+        <div class="form-row">
+          <label for="task-assignee">Responsable</label>
+          <input id="task-assignee" name="assignee" type="text" placeholder="Qui s'en charge ?">
+        </div>
+        <div class="form-row form-row--split">
+          <label for="task-due-date">Échéance</label>
+          <input id="task-due-date" name="dueDate" type="date">
+          <label for="task-priority">Priorité</label>
+          <select id="task-priority" name="priority">
+            <option value="Haute">Haute</option>
+            <option value="Moyenne" selected>Moyenne</option>
+            <option value="Basse">Basse</option>
           </select>
-        </label><br>
-        <label>Notes / Liens: <textarea name="notes"></textarea></label><br>
-        <label>Image: <input type="file" name="image"></label><br>
-        <button type="submit">Ajouter</button>
+        </div>
+        <div class="form-row">
+          <label for="task-status">Statut</label>
+          <select id="task-status" name="status">
+            <option value="pending" selected>À faire</option>
+            <option value="in_progress">En cours</option>
+            <option value="done">Terminée</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label for="task-notes">Notes &amp; liens</label>
+          <textarea id="task-notes" name="notes" rows="3" placeholder="Ajouter des détails, liens ou consignes"></textarea>
+        </div>
+        <div class="form-row">
+          <label for="task-image">Image (optionnel)</label>
+          <input id="task-image" name="image" type="file" accept="image/*">
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="primary-btn">Ajouter la tâche</button>
+          <button type="reset" class="ghost-btn">Réinitialiser</button>
+        </div>
       </form>
-    </div>
-    <div class="tab-panel" id="calendar" style="display:none;">
-      <p>Vue calendrier : ici on affichera un calendrier avec toutes les tâches par date d'échéance.</p>
-      <!-- Tu pourras intégrer FullCalendar ou une librairie JS calendrier -->
-    </div>
+    </section>
+
+    <section class="tab-panel" id="calendar" role="tabpanel" hidden>
+      <div id="task-calendar" class="task-calendar" aria-label="Calendrier des échéances"></div>
+      <p class="calendar-hint">Les tâches sans date limite restent visibles dans la liste et la recherche.</p>
+    </section>
   </div>
 </section>
 
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" integrity="sha512-JZ7yM1H6pXhl2bI+8pP7EW6ryadFAmFA3ny6xVpz1uoGhq4WGgEWG8fEwbkO6z5FfQULN0Pq9HUnQnV7p67RPw==" crossorigin="anonymous" referrerpolicy="no-referrer" defer></script>
 <script>
-  const tabs = document.querySelectorAll('.tab-btn');
-  const panels = document.querySelectorAll('.tab-panel');
+  (function () {
+    const tabs = Array.from(document.querySelectorAll('.tab-btn'));
+    const panels = Array.from(document.querySelectorAll('.tab-panel'));
+    const feedback = document.getElementById('task-feedback');
+    const taskListContainer = document.getElementById('task-list');
+    const searchInput = document.getElementById('task-search');
+    const refreshBtn = document.getElementById('refresh-tasks');
+    const calendarHost = document.getElementById('task-calendar');
+    const form = document.getElementById('add-task-form');
+    const statTotal = document.getElementById('stats-total');
+    const statPending = document.getElementById('stats-pending');
+    const statProgress = document.getElementById('stats-progress');
+    const statDone = document.getElementById('stats-done');
+    const STATUS_LABELS = {
+      pending: 'À faire',
+      in_progress: 'En cours',
+      done: 'Terminée',
+    };
+    const PRIORITY_BADGES = {
+      Haute: 'priority-high',
+      Moyenne: 'priority-medium',
+      Basse: 'priority-low',
+    };
 
-  tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      // Reset active
-      tabs.forEach(t => t.classList.remove('active'));
-      panels.forEach(p => p.style.display = 'none');
+    let tasks = [];
+    let calendar;
 
-      // Activer le tab cliqué
-      tab.classList.add('active');
-      document.getElementById(tab.dataset.tab).style.display = 'block';
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        tabs.forEach((btn) => {
+          btn.classList.toggle('active', btn === tab);
+          btn.setAttribute('aria-selected', btn === tab ? 'true' : 'false');
+        });
+
+        panels.forEach((panel) => {
+          const match = panel.id === tab.dataset.tab;
+          panel.toggleAttribute('hidden', !match);
+        });
+      });
     });
-  });
+
+    function showFeedback(message, variant = 'info') {
+      if (!feedback) return;
+      feedback.textContent = message || '';
+      feedback.className = `task-feedback ${variant}`.trim();
+      if (message) {
+        setTimeout(() => {
+          if (feedback.textContent === message) {
+            feedback.textContent = '';
+            feedback.className = 'task-feedback';
+          }
+        }, 4000);
+      }
+    }
+
+    function formatDate(dateString) {
+      if (!dateString) return 'Aucune';
+      try {
+        const value = new Date(`${dateString}T00:00:00`);
+        if (Number.isNaN(value.getTime())) return 'Aucune';
+        return value.toLocaleDateString('fr-CA', { year: 'numeric', month: 'short', day: 'numeric' });
+      } catch (error) {
+        console.warn('Impossible de formater la date', error);
+        return dateString;
+      }
+    }
+
+    function buildShareText(task) {
+      const lines = [
+        `Tâche: ${task.title}`,
+        `Statut: ${STATUS_LABELS[task.status] || task.status}`,
+        `Responsable: ${task.assignee || 'Non assigné'}`,
+      ];
+
+      if (task.dueDate) {
+        lines.push(`Échéance: ${task.dueDate}`);
+      }
+
+      if (task.priority) {
+        lines.push(`Priorité: ${task.priority}`);
+      }
+
+      if (task.notes) {
+        lines.push('', task.notes);
+      }
+
+      return lines.join('\n');
+    }
+
+    function renderQrCode(container, task) {
+      if (!container) return;
+      container.innerHTML = '';
+
+      if (window.QRCode) {
+        try {
+          new QRCode(container, {
+            text: buildShareText(task),
+            width: 120,
+            height: 120,
+            correctLevel: QRCode.CorrectLevel.M,
+          });
+          return;
+        } catch (error) {
+          console.error('Erreur de génération du QR code:', error);
+        }
+      }
+
+      const fallback = document.createElement('p');
+      fallback.textContent = 'QR code indisponible.';
+      container.appendChild(fallback);
+    }
+
+    function updateCalendar() {
+      if (!window.FullCalendar || !calendarHost) {
+        return;
+      }
+
+      const events = tasks
+        .filter((task) => Boolean(task.dueDate))
+        .map((task) => ({
+          id: String(task.id),
+          title: `${task.title} (${STATUS_LABELS[task.status] || task.status})`,
+          start: task.dueDate,
+          allDay: true,
+        }));
+
+      if (!calendar) {
+        calendar = new FullCalendar.Calendar(calendarHost, {
+          initialView: 'dayGridMonth',
+          height: 'auto',
+          locale: 'fr',
+          firstDay: 1,
+          headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,listWeek',
+          },
+          events,
+        });
+        calendar.render();
+      } else {
+        calendar.removeAllEvents();
+        events.forEach((event) => calendar.addEvent(event));
+      }
+    }
+
+    function updateStats() {
+      if (!statTotal || !statPending || !statProgress || !statDone) {
+        return;
+      }
+
+      const total = tasks.length;
+      const pending = tasks.filter((task) => task.status === 'pending').length;
+      const inProgress = tasks.filter((task) => task.status === 'in_progress').length;
+      const done = tasks.filter((task) => task.status === 'done').length;
+
+      statTotal.textContent = total;
+      statPending.textContent = pending;
+      statProgress.textContent = inProgress;
+      statDone.textContent = done;
+    }
+
+    function renderTasks() {
+      const term = searchInput.value.trim().toLowerCase();
+      const filtered = term
+        ? tasks.filter((task) => {
+            const corpus = [task.title, task.assignee, task.notes, task.priority]
+              .filter(Boolean)
+              .join(' ')
+              .toLowerCase();
+            return corpus.includes(term);
+          })
+        : tasks;
+
+      taskListContainer.innerHTML = '';
+
+      updateStats();
+
+      if (filtered.length === 0) {
+        const empty = document.createElement('p');
+        empty.className = 'empty-state';
+        empty.textContent = term
+          ? 'Aucune tâche ne correspond à votre recherche.'
+          : 'Aucune tâche pour le moment. Ajoutez-en une dans l’onglet "Ajouter".';
+        taskListContainer.appendChild(empty);
+        updateCalendar();
+        return;
+      }
+
+      filtered.forEach((task) => {
+        const card = document.createElement('article');
+        card.className = 'task-card';
+
+        const header = document.createElement('header');
+        header.className = 'task-card__header';
+
+        const title = document.createElement('h3');
+        title.textContent = task.title;
+        header.appendChild(title);
+
+        const meta = document.createElement('div');
+        meta.className = 'task-card__meta';
+
+        const due = document.createElement('span');
+        due.className = 'task-due';
+        due.textContent = `Échéance : ${formatDate(task.dueDate)}`;
+        meta.appendChild(due);
+
+        if (task.priority) {
+          const priority = document.createElement('span');
+          priority.className = `task-priority ${PRIORITY_BADGES[task.priority] || ''}`.trim();
+          priority.textContent = `Priorité : ${task.priority}`;
+          meta.appendChild(priority);
+        }
+
+        header.appendChild(meta);
+        card.appendChild(header);
+
+        const content = document.createElement('div');
+        content.className = 'task-card__content';
+
+        if (task.assignee) {
+          const assignee = document.createElement('p');
+          assignee.innerHTML = `<strong>Responsable :</strong> ${task.assignee}`;
+          content.appendChild(assignee);
+        }
+
+        if (task.notes) {
+          const notes = document.createElement('p');
+          notes.className = 'task-notes';
+          notes.textContent = task.notes;
+          content.appendChild(notes);
+        }
+
+        if (task.imageData) {
+          const imageWrapper = document.createElement('figure');
+          imageWrapper.className = 'task-image';
+          const img = document.createElement('img');
+          img.src = task.imageData;
+          img.alt = `Illustration pour ${task.title}`;
+          imageWrapper.appendChild(img);
+          content.appendChild(imageWrapper);
+        }
+
+        const actions = document.createElement('div');
+        actions.className = 'task-card__actions';
+
+        const statusLabel = document.createElement('label');
+        statusLabel.textContent = 'Statut';
+        statusLabel.setAttribute('for', `status-${task.id}`);
+        actions.appendChild(statusLabel);
+
+        const statusSelect = document.createElement('select');
+        statusSelect.id = `status-${task.id}`;
+        statusSelect.innerHTML = `
+          <option value="pending">À faire</option>
+          <option value="in_progress">En cours</option>
+          <option value="done">Terminée</option>
+        `;
+        statusSelect.value = task.status || 'pending';
+        statusSelect.addEventListener('change', async () => {
+          try {
+            const updated = await backend.update(task.id, { status: statusSelect.value });
+            tasks = tasks.map((item) => (item.id === updated.id ? updated : item));
+            renderTasks();
+            showFeedback(`Statut de "${updated.title}" mis à jour.`, 'success');
+          } catch (error) {
+            console.error(error);
+            showFeedback('Impossible de mettre à jour le statut.', 'error');
+            statusSelect.value = task.status;
+          }
+        });
+        actions.appendChild(statusSelect);
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.type = 'button';
+        deleteBtn.className = 'ghost-btn';
+        deleteBtn.textContent = 'Supprimer';
+        deleteBtn.addEventListener('click', async () => {
+          const confirmation = confirm(`Supprimer la tâche "${task.title}" ?`);
+          if (!confirmation) return;
+
+          try {
+            const removed = await backend.delete(task.id);
+            if (removed) {
+              tasks = tasks.filter((item) => item.id !== task.id);
+              renderTasks();
+              showFeedback('Tâche supprimée.', 'success');
+            }
+          } catch (error) {
+            console.error(error);
+            showFeedback('Impossible de supprimer la tâche.', 'error');
+          }
+        });
+        actions.appendChild(deleteBtn);
+
+        const qrWrapper = document.createElement('div');
+        qrWrapper.className = 'task-card__qr';
+        const qrTitle = document.createElement('p');
+        qrTitle.textContent = 'Partager';
+        qrWrapper.appendChild(qrTitle);
+        const qrContainer = document.createElement('div');
+        qrContainer.className = 'task-qr';
+        qrWrapper.appendChild(qrContainer);
+
+        actions.appendChild(qrWrapper);
+        content.appendChild(actions);
+
+        card.appendChild(content);
+        taskListContainer.appendChild(card);
+
+        renderQrCode(qrContainer, task);
+      });
+
+      updateCalendar();
+    }
+
+    function readFileAsDataURL(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = (error) => reject(error);
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function createLocalBackend() {
+      const storageKey = 'beavertask:fallback';
+
+      const load = () => {
+        try {
+          const raw = localStorage.getItem(storageKey);
+          return raw ? JSON.parse(raw) : [];
+        } catch (error) {
+          console.warn('Impossible de charger les tâches locales', error);
+          return [];
+        }
+      };
+
+      const save = (data) => {
+        localStorage.setItem(storageKey, JSON.stringify(data));
+      };
+
+      return {
+        async list() {
+          return load();
+        },
+        async add(task) {
+          const collection = load();
+          const now = new Date().toISOString();
+          const entry = {
+            ...task,
+            id: Date.now(),
+            createdAt: now,
+            updatedAt: now,
+          };
+          collection.push(entry);
+          save(collection);
+          return entry;
+        },
+        async update(id, updates) {
+          const collection = load();
+          const index = collection.findIndex((item) => item.id === id);
+          if (index === -1) throw new Error('Tâche introuvable');
+          const updated = {
+            ...collection[index],
+            ...updates,
+            updatedAt: new Date().toISOString(),
+          };
+          collection[index] = updated;
+          save(collection);
+          return updated;
+        },
+        async delete(id) {
+          const collection = load();
+          const filtered = collection.filter((item) => item.id !== id);
+          save(filtered);
+          return collection.length !== filtered.length;
+        },
+      };
+    }
+
+    const backend = (window.electronAPI && window.electronAPI.tasks)
+      ? {
+          list: () => window.electronAPI.tasks.list(),
+          add: (task) => window.electronAPI.tasks.add(task),
+          update: (id, updates) => window.electronAPI.tasks.update(id, updates),
+          delete: (id) => window.electronAPI.tasks.delete(id),
+        }
+      : createLocalBackend();
+
+    async function refreshTasks() {
+      try {
+        tasks = await backend.list();
+        renderTasks();
+      } catch (error) {
+        console.error(error);
+        showFeedback('Impossible de charger les tâches.', 'error');
+      }
+    }
+
+    refreshBtn.addEventListener('click', refreshTasks);
+    searchInput.addEventListener('input', renderTasks);
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const data = new FormData(form);
+
+      const payload = {
+        title: data.get('title'),
+        assignee: data.get('assignee'),
+        dueDate: data.get('dueDate'),
+        priority: data.get('priority'),
+        status: data.get('status'),
+        notes: data.get('notes'),
+        imageData: null,
+      };
+
+      const image = data.get('image');
+      if (image && image.size > 0) {
+        try {
+          payload.imageData = await readFileAsDataURL(image);
+        } catch (error) {
+          console.error(error);
+          showFeedback('Impossible de lire le fichier image.', 'error');
+          return;
+        }
+      }
+
+      try {
+        const created = await backend.add(payload);
+        tasks = [...tasks, created];
+        form.reset();
+        renderTasks();
+        showFeedback(`"${created.title}" ajouté avec succès.`, 'success');
+        tabs[0].click();
+      } catch (error) {
+        console.error(error);
+        showFeedback('Impossible d\'ajouter la tâche.', 'error');
+      }
+    });
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        refreshTasks();
+      }
+    });
+
+    refreshTasks();
+  })();
 </script>
 
 <style>
-  .tab-btn {
-    padding: 0.5rem 1rem;
-    border-radius: 12px;
-    background: var(--card-bg);
-    border: 1px solid var(--border);
+  .task-manager {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
     color: var(--text-main);
+  }
+
+  .task-manager__header {
+    display: grid;
+    gap: 1.5rem;
+    padding: clamp(1.25rem, 1.1rem + 1vw, 2rem);
+    border-radius: 28px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: linear-gradient(135deg, rgba(248, 148, 34, 0.24), rgba(84, 93, 255, 0.16))
+        padding-box,
+      linear-gradient(135deg, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0)) border-box;
+    box-shadow: 0 32px 60px rgba(9, 9, 15, 0.45);
+    backdrop-filter: blur(20px);
+  }
+
+  .task-manager__hero {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  .task-manager__badge {
+    width: 56px;
+    height: 56px;
+    border-radius: 18px;
+    display: grid;
+    place-items: center;
+    font-size: 2rem;
+    background: rgba(9, 12, 20, 0.65);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+  }
+
+  .task-manager__title h2 {
+    margin: 0;
+    font-size: clamp(1.6rem, 1.25rem + 1vw, 2.3rem);
+    letter-spacing: -0.01em;
+  }
+
+  .task-manager__title p {
+    margin: 0.35rem 0 0;
+    color: rgba(255, 255, 255, 0.78);
+  }
+
+  .task-manager__stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+    margin: 0;
+  }
+
+  .task-manager__stat {
+    padding: 0.85rem 1rem;
+    border-radius: 18px;
+    background: rgba(9, 12, 20, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    display: grid;
+    gap: 0.25rem;
+  }
+
+  .task-manager__stat dt {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(255, 255, 255, 0.66);
+  }
+
+  .task-manager__stat dd {
+    margin: 0;
+    font-size: clamp(1.4rem, 1.2rem + 0.5vw, 1.8rem);
+    font-weight: 700;
+  }
+
+  .task-manager__header h2 {
+    margin: 0;
+  }
+
+  .task-manager__header p {
+    margin: 0;
+  }
+
+  .task-manager__header p {
+    color: var(--text-muted, #c7c7cc);
+  }
+
+  .tab-header {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.4rem;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(9, 12, 20, 0.6);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+    align-self: flex-start;
+  }
+
+  .tab-btn {
+    padding: 0.55rem 1.3rem;
+    border-radius: 999px;
+    background: transparent;
+    border: none;
+    color: inherit;
     cursor: pointer;
     font-weight: 600;
+    transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease;
   }
+
+  .tab-btn:hover {
+    transform: translateY(-1px);
+    background: rgba(255, 255, 255, 0.08);
+  }
+
   .tab-btn.active {
-    background: var(--accent);
-    color: #fff;
+    background: var(--accent, #f89422);
+    color: #0a0d18;
+    box-shadow: 0 12px 20px rgba(248, 148, 34, 0.35);
   }
-  .tab-panel {
-    background: var(--card-bg);
-    border: 1px solid var(--border);
+
+  .tab-content {
+    background: rgba(12, 16, 28, 0.85);
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+    padding: clamp(1.25rem, 1.1rem + 1vw, 2rem);
+    backdrop-filter: blur(18px);
+  }
+
+  .task-feedback {
+    min-height: 1.5rem;
+    font-weight: 600;
+  }
+
+  .task-feedback.success {
+    color: #2ecc71;
+  }
+
+  .task-feedback.error {
+    color: #ff6b6b;
+  }
+
+  .task-feedback.info {
+    color: var(--text-muted, #c7c7cc);
+  }
+
+  .task-list-controls {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+    padding: 0.85rem 1rem;
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(10, 13, 24, 0.72);
+    box-shadow: 0 18px 36px rgba(0, 0, 0, 0.35);
+  }
+
+  .search-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .task-list-controls input[type="search"] {
+    flex: 1 1 220px;
+    padding: 0.65rem 1rem;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    background: rgba(12, 16, 28, 0.95);
+    color: inherit;
+    box-shadow: 0 12px 24px rgba(9, 12, 20, 0.35);
+  }
+
+  .task-list-controls .ghost-btn {
+    border-color: rgba(255, 255, 255, 0.16);
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .task-list {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .task-card {
     border-radius: 20px;
-    padding: 1.5rem;
-    box-shadow: 0 20px 32px rgba(0,0,0,0.45);
+    background: rgba(19, 24, 40, 0.82);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 1rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    box-shadow: 0 20px 38px rgba(0, 0, 0, 0.35);
+  }
+
+  .task-card__header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .task-card__header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+  }
+
+  .task-card__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    color: var(--text-muted, #c7c7cc);
+    font-size: 0.9rem;
+  }
+
+  .task-priority {
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .priority-high {
+    background: rgba(255, 99, 132, 0.2);
+    color: #ff778d;
+  }
+
+  .priority-medium {
+    background: rgba(255, 206, 86, 0.2);
+    color: #ffd65c;
+  }
+
+  .priority-low {
+    background: rgba(75, 192, 192, 0.2);
+    color: #6de0e0;
+  }
+
+  .task-card__content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .task-notes {
+    white-space: pre-wrap;
+    margin: 0;
+  }
+
+  .task-image {
+    margin: 0;
+  }
+
+  .task-image img {
+    max-width: 100%;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .task-card__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+  }
+
+  .task-card__actions label {
+    font-weight: 600;
+  }
+
+  .task-card__actions select {
+    padding: 0.45rem 0.75rem;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(9, 12, 20, 0.75);
+    color: inherit;
+  }
+
+  .task-card__qr {
+    margin-left: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    align-items: center;
+  }
+
+  .task-qr {
+    width: 120px;
+    height: 120px;
+    display: grid;
+    place-items: center;
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: 12px;
+    padding: 0.5rem;
+  }
+
+  .empty-state {
+    margin: 1.5rem 0;
+    text-align: center;
+    color: var(--text-muted, #c7c7cc);
+  }
+
+  .task-form {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .form-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .form-row--split {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1rem;
+  }
+
+  .form-row label {
+    font-weight: 600;
+  }
+
+  .form-row input,
+  .form-row select,
+  .form-row textarea {
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(9, 12, 20, 0.75);
+    color: inherit;
+    padding: 0.6rem 0.75rem;
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .primary-btn {
+    background: linear-gradient(135deg, #f89422, #ffb347);
+    color: #0a0d18;
+    border: none;
+    padding: 0.7rem 1.4rem;
+    border-radius: 999px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 16px 26px rgba(248, 148, 34, 0.35);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .ghost-btn {
+    background: transparent;
+    color: inherit;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    padding: 0.6rem 1.2rem;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: transform 0.2s ease, opacity 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .ghost-btn:hover,
+  .primary-btn:hover {
+    transform: translateY(-1px);
+    opacity: 0.95;
+    box-shadow: 0 20px 34px rgba(248, 148, 34, 0.3);
+  }
+
+  .task-calendar {
+    min-height: 520px;
+  }
+
+  .calendar-hint {
+    margin-top: 1rem;
+    color: var(--text-muted, #c7c7cc);
+  }
+
+  @media (max-width: 900px) {
+    .task-manager__header {
+      gap: 1.25rem;
+      padding: 1.25rem 1.5rem;
+    }
+
+    .task-manager__stats {
+      gap: 0.75rem;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .task-manager__hero {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+
+    .task-manager__badge {
+      width: 48px;
+      height: 48px;
+      font-size: 1.6rem;
+    }
+
+    .task-manager__stats {
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    }
+
+    .tab-header {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .tab-btn {
+      flex: 1 1 30%;
+      min-width: 120px;
+      text-align: center;
+    }
+  }
+
+  @media (max-width: 520px) {
+    .tab-btn {
+      flex: 1 1 100%;
+    }
+
+    .tab-header {
+      gap: 0.35rem;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .task-card__actions {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .task-card__qr {
+      width: 100%;
+      margin-left: 0;
+      flex-direction: row;
+      justify-content: space-between;
+    }
   }
 </style>
-
