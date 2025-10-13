@@ -59,8 +59,9 @@ function resolveContentPath(requestUrl) {
   let baseDir = CONTENT_ROOT;
   let safeRelativePath = normalizedPath;
 
-  if (firstSegment === 'icon') {
-    baseDir = path.join(__dirname, 'icon');
+  if (firstSegment === 'icon' || firstSegment === 'contact') {
+    const staticDir = firstSegment === 'icon' ? 'icon' : 'contact';
+    baseDir = path.join(__dirname, staticDir);
     safeRelativePath = otherSegments.join(path.sep);
 
     if (!safeRelativePath) {
