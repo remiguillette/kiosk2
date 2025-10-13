@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
   <meta charset="UTF-8" />
   <title>BeaverPhone</title>
@@ -100,6 +100,39 @@
       width: 24px;
       height: 24px;
       stroke-width: 1.8;
+    }
+
+    .lang-toggle {
+      display: inline-flex;
+      gap: 0.5rem;
+      background: rgba(24, 24, 32, 0.6);
+      padding: 0.4rem 0.5rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(8px);
+    }
+
+    .lang-btn {
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.95rem;
+      padding: 0.4rem 0.9rem;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: color 150ms ease, background 150ms ease, transform 150ms ease;
+    }
+
+    .lang-btn:hover {
+      color: var(--text-main);
+      transform: translateY(-1px);
+    }
+
+    .lang-btn.active {
+      background: var(--accent);
+      color: #121219;
+      box-shadow: 0 8px 18px rgba(248, 148, 34, 0.35);
     }
 
     .app {
@@ -582,7 +615,7 @@
   <div class="beaverphone">
     <header>
       <div class="header-title">
-        <a class="menu-return" href="menu.html" aria-label="Return to menu">
+        <a class="menu-return" href="menu.html" aria-label="Retour au menu" data-i18n-aria-label="header.menuAria">
           <span class="btn-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"
               stroke-linejoin="round">
@@ -592,14 +625,18 @@
             </svg>
           </span>
         </a>
-        <span class="eyebrow">BeaverPhone</span>
+        <span class="eyebrow" data-i18n="header.brand">BeaverPhone</span>
+      </div>
+      <div class="lang-toggle" role="group" aria-label="Sélecteur de langue" data-i18n-aria-label="header.languageLabel">
+        <button type="button" class="lang-btn active" data-lang="fr" aria-pressed="true">FR</button>
+        <button type="button" class="lang-btn" data-lang="en" aria-pressed="false">EN</button>
       </div>
     </header>
 
     <div class="app">
       <section class="panel" aria-labelledby="dialpad-heading">
         <div class="dialpad-header">
-          <h2 id="dialpad-heading">Dialpad</h2>
+          <h2 id="dialpad-heading" data-i18n="dialpad.heading">Clavier téléphonique</h2>
           <div class="status-cluster">
             <span class="ws-indicator" id="ws-indicator" data-state="connecting">
               <span class="ws-icon" aria-hidden="true">
@@ -612,17 +649,18 @@
                   <path d="M8 12h.01"></path>
                 </svg>
               </span>
-              <span class="ws-label">Connecting…</span>
+              <span class="ws-label" data-i18n="dialpad.ws.connecting">Connexion…</span>
             </span>
             <span class="status-pill" id="status-pill" data-active="false">
-              <span class="status-text">Ready</span>
+              <span class="status-text" data-i18n="dialpad.status.ready">Prêt</span>
             </span>
           </div>
         </div>
 
         <div class="composer">
-          <label for="composer-input">Composer</label>
-          <input id="composer-input" type="text" inputmode="tel" autocomplete="off" placeholder="Tap numbers to dial"
+          <label for="composer-input" data-i18n="dialpad.composerLabel">Composeur</label>
+          <input id="composer-input" type="text" inputmode="tel" autocomplete="off"
+            placeholder="Touchez les chiffres pour composer" data-i18n-placeholder="dialpad.composerPlaceholder"
             aria-live="polite" />
         </div>
 
@@ -639,7 +677,7 @@
                 <path d="M20 9v6"></path>
               </svg>
             </span>
-            <span class="btn-label">Erase</span>
+            <span class="btn-label" data-i18n="dialpad.actions.erase">Effacer</span>
           </button>
           <button type="button" class="pill-btn call-btn" id="call-btn">
             <span class="btn-icon" aria-hidden="true">
@@ -650,7 +688,7 @@
                 </path>
               </svg>
             </span>
-            <span class="btn-label">Call</span>
+            <span class="btn-label" data-i18n="dialpad.actions.call.idle">Appeler</span>
           </button>
           <button type="button" class="pill-btn" id="speaker-btn">
             <span class="btn-icon" aria-hidden="true">
@@ -661,7 +699,7 @@
                 <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
               </svg>
             </span>
-            <span class="btn-label">Speaker</span>
+            <span class="btn-label" data-i18n="dialpad.actions.speaker.idle">Haut-parleur</span>
           </button>
         </div>
 
@@ -675,26 +713,270 @@
                 <line x1="14" x2="14" y1="15" y2="9"></line>
               </svg>
             </span>
-            <span class="btn-label">Hold</span>
+            <span class="btn-label" data-i18n="dialpad.actions.hold.idle">Pause</span>
           </button>
-          <button type="button" class="pill-btn" id="clear-btn">Clear</button>
+          <button type="button" class="pill-btn" id="clear-btn" data-i18n="dialpad.actions.clear">Réinitialiser</button>
         </div>
 
-        <p class="subtext" id="helper-text">Tap digits or choose a contact to start dialing.</p>
+        <p class="subtext" id="helper-text" data-i18n="dialpad.helper.idle">Touchez les chiffres ou choisissez un contact pour commencer à composer.</p>
       </section>
 
       <aside class="panel extensions" aria-labelledby="extension-heading">
         <header>
-          <h2 id="extension-heading">Extensions</h2>
-          <p>Tap a contact to call automatically.</p>
+          <h2 id="extension-heading" data-i18n="extensions.heading">Contacts rapides</h2>
+          <p data-i18n="extensions.subtitle">Touchez un contact pour appeler automatiquement.</p>
         </header>
         <div class="extension-list" id="extension-list"></div>
       </aside>
     </div>
   </div>
 
+  <script>
+    (function () {
+      const translations = {
+        fr: {
+          meta: { title: 'BeaverPhone' },
+          header: {
+            brand: 'BeaverPhone',
+            menuAria: 'Retour au menu',
+            languageLabel: 'Sélecteur de langue'
+          },
+          dialpad: {
+            heading: 'Clavier téléphonique',
+            ws: {
+              connecting: 'Connexion…',
+              connected: 'Connecté',
+              disconnected: 'Hors ligne'
+            },
+            status: {
+              ready: 'Prêt',
+              onCall: 'En appel',
+              onHold: 'En attente'
+            },
+            composerLabel: 'Composeur',
+            composerPlaceholder: 'Touchez les chiffres pour composer',
+            actions: {
+              erase: 'Effacer',
+              call: { idle: 'Appeler', active: 'Raccrocher' },
+              speaker: { idle: 'Haut-parleur', active: 'Muet' },
+              hold: { idle: 'Pause', active: 'Reprendre' },
+              clear: 'Réinitialiser'
+            },
+            helper: {
+              idle: 'Touchez les chiffres ou choisissez un contact pour commencer à composer.',
+              number: 'Appuyez sur Appeler pour connecter ou sur Effacer pour modifier le numéro.',
+              onCall: 'Vous êtes connecté. Utilisez Pause ou Haut-parleur si nécessaire.',
+              onHold: 'Appel en attente. Touchez Pause pour reprendre.',
+              missing: 'Entrez un numéro ou choisissez un contact d’abord.',
+              nothingToErase: 'Rien à effacer.'
+            }
+          },
+          extensions: {
+            heading: 'Contacts rapides',
+            subtitle: 'Touchez un contact pour appeler automatiquement.',
+            empty: 'Aucun contact enregistré.',
+            extensionPrefix: 'Poste {{extension}}'
+          }
+        },
+        en: {
+          meta: { title: 'BeaverPhone' },
+          header: {
+            brand: 'BeaverPhone',
+            menuAria: 'Back to menu',
+            languageLabel: 'Language selector'
+          },
+          dialpad: {
+            heading: 'Dialpad',
+            ws: {
+              connecting: 'Connecting…',
+              connected: 'Connected',
+              disconnected: 'Offline'
+            },
+            status: {
+              ready: 'Ready',
+              onCall: 'On Call',
+              onHold: 'On Hold'
+            },
+            composerLabel: 'Composer',
+            composerPlaceholder: 'Tap numbers to dial',
+            actions: {
+              erase: 'Erase',
+              call: { idle: 'Call', active: 'End' },
+              speaker: { idle: 'Speaker', active: 'Mute' },
+              hold: { idle: 'Hold', active: 'Resume' },
+              clear: 'Clear'
+            },
+            helper: {
+              idle: 'Tap digits or choose a contact to start dialing.',
+              number: 'Press Call to connect or Erase to edit the number.',
+              onCall: 'You are connected. Use Hold or Speaker as needed.',
+              onHold: 'Call is on hold. Tap Hold to resume.',
+              missing: 'Enter a number or choose a contact first.',
+              nothingToErase: 'Nothing to erase.'
+            }
+          },
+          extensions: {
+            heading: 'Extensions',
+            subtitle: 'Tap a contact to call automatically.',
+            empty: 'No saved extensions yet.',
+            extensionPrefix: 'Ext. {{extension}}'
+          }
+        }
+      };
+
+      const state = {
+        lang: 'fr'
+      };
+
+      const listeners = new Set();
+      const langButtons = document.querySelectorAll('.lang-btn');
+
+      const getPreferredLanguage = () => {
+        try {
+          return localStorage.getItem('preferredLang');
+        } catch (error) {
+          console.warn('Unable to read preferred language', error);
+          return null;
+        }
+      };
+
+      const format = (template, replacements = {}) => {
+        return (template || '').replace(/\{\{(\w+)\}\}/g, (_, token) => {
+          return Object.prototype.hasOwnProperty.call(replacements, token)
+            ? replacements[token]
+            : '';
+        });
+      };
+
+      const translate = (key, replacements) => {
+        if (!key) {
+          return '';
+        }
+
+        const value = key.split('.').reduce((acc, part) => {
+          if (acc && Object.prototype.hasOwnProperty.call(acc, part)) {
+            return acc[part];
+          }
+          return undefined;
+        }, translations[state.lang]);
+
+        if (typeof value === 'string') {
+          return format(value, replacements);
+        }
+
+        return value === undefined ? '' : value;
+      };
+
+      const applyStaticTranslations = () => {
+        document.querySelectorAll('[data-i18n]').forEach((node) => {
+          const key = node.dataset.i18n;
+          const value = translate(key);
+
+          if (typeof value === 'string') {
+            node.innerHTML = value;
+          }
+        });
+
+        document.querySelectorAll('[data-i18n-placeholder]').forEach((node) => {
+          const key = node.dataset.i18nPlaceholder;
+          const value = translate(key);
+
+          if (typeof value === 'string') {
+            node.setAttribute('placeholder', value);
+          }
+        });
+
+        document.querySelectorAll('[data-i18n-aria-label]').forEach((node) => {
+          const key = node.dataset.i18nAriaLabel;
+          const value = translate(key);
+
+          if (typeof value === 'string') {
+            node.setAttribute('aria-label', value);
+          }
+        });
+
+        document.title = translate('meta.title') || document.title;
+      };
+
+      const setLanguage = (lang) => {
+        if (!translations[lang]) {
+          return;
+        }
+
+        state.lang = lang;
+        document.documentElement.lang = lang;
+
+        langButtons.forEach((button) => {
+          const isActive = button.dataset.lang === lang;
+          button.classList.toggle('active', isActive);
+          button.setAttribute('aria-pressed', String(isActive));
+        });
+
+        applyStaticTranslations();
+
+        listeners.forEach((callback) => {
+          try {
+            callback(lang);
+          } catch (error) {
+            console.error('Language listener failed', error);
+          }
+        });
+
+        try {
+          localStorage.setItem('preferredLang', lang);
+        } catch (error) {
+          console.warn('Unable to persist language preference', error);
+        }
+      };
+
+      const subscribe = (callback) => {
+        if (typeof callback !== 'function') {
+          return () => {};
+        }
+
+        listeners.add(callback);
+        return () => listeners.delete(callback);
+      };
+
+      window.beaverPhoneLocale = {
+        translate,
+        setLanguage,
+        subscribe,
+        getLanguage: () => state.lang
+      };
+
+      langButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+          const { lang } = button.dataset;
+          setLanguage(lang);
+        });
+      });
+
+      const savedLanguage = getPreferredLanguage();
+      if (savedLanguage && translations[savedLanguage]) {
+        setLanguage(savedLanguage);
+      } else {
+        setLanguage(state.lang);
+      }
+    })();
+  </script>
+
   <script type="module">
   const BEAVERPHONE_DIALPAD_EVENT_KEY = "beaverphone:dialpad";
+
+  const locale = window.beaverPhoneLocale ?? {};
+  const translate = (key, replacements) => {
+    if (typeof locale.translate === 'function') {
+      return locale.translate(key, replacements);
+    }
+    return key;
+  };
+  const getLanguage = () => {
+    if (typeof locale.getLanguage === 'function') {
+      return locale.getLanguage();
+    }
+    return 'fr';
+  };
 
   const currentDialpadState = {
     dialedNumber: "",
@@ -711,10 +993,38 @@
       { label: "*" }, { label: "0", subtext: "+" }, { label: "#" },
     ],
     contacts: [
-      { name: "Ontario Provincial Police", subtitle: "Internal line", details: "Office 101", extension: "1201", image: "/contact/Police.png" },
-      { name: "SPCA Niagara", subtitle: "Paws Law", details: "Office 3434", extension: "3434", image: "/contact/SPCA.png" },
-      { name: "Mom", subtitle: "Mom", details: "Complaints Office", extension: "22", image: null },
-      { name: "Services Ontario", subtitle: "Government of Ontario", details: "Desktop *1345", extension: "1345", image: "/contact/ontario.svg" },
+      {
+        id: 'opp',
+        name: { fr: 'Police provinciale de l’Ontario', en: 'Ontario Provincial Police' },
+        subtitle: { fr: 'Ligne interne', en: 'Internal line' },
+        details: { fr: 'Bureau 101', en: 'Office 101' },
+        extension: '1201',
+        image: '/contact/Police.png'
+      },
+      {
+        id: 'spca',
+        name: { fr: 'SPCA Niagara', en: 'SPCA Niagara' },
+        subtitle: { fr: 'Programme Paws Law', en: 'Paws Law program' },
+        details: { fr: 'Bureau 3434', en: 'Office 3434' },
+        extension: '3434',
+        image: '/contact/SPCA.png'
+      },
+      {
+        id: 'mom',
+        name: { fr: 'Maman', en: 'Mom' },
+        subtitle: { fr: 'Contact direct', en: 'Direct line' },
+        details: { fr: 'Bureau des plaintes', en: 'Complaints Office' },
+        extension: '22',
+        image: null
+      },
+      {
+        id: 'serviceOntario',
+        name: { fr: 'Services Ontario', en: 'Services Ontario' },
+        subtitle: { fr: 'Gouvernement de l’Ontario', en: 'Government of Ontario' },
+        details: { fr: 'Poste *1345', en: 'Desktop *1345' },
+        extension: '1345',
+        image: '/contact/ontario.svg'
+      }
     ],
     dialpadEventKey: BEAVERPHONE_DIALPAD_EVENT_KEY,
   };
@@ -737,10 +1047,23 @@
   const holdBtnLabel = holdBtn.querySelector(".btn-label");
   const speakerBtnLabel = speakerBtn.querySelector(".btn-label");
 
-  const setWsIndicator = (state, label) => {
+  const getLocalizedText = (value) => {
+    if (!value) {
+      return '';
+    }
+
+    if (typeof value === 'string') {
+      return value;
+    }
+
+    const lang = getLanguage();
+    return value?.[lang] ?? value?.en ?? '';
+  };
+
+  const setWsIndicator = (state) => {
     if (!wsIndicator || !wsLabel) return;
     wsIndicator.dataset.state = state;
-    wsLabel.textContent = label;
+    wsLabel.textContent = translate(`dialpad.ws.${state}`);
   };
 
   // 🔹 Dispatcher d’événements enrichi avec "action"
@@ -754,27 +1077,35 @@
   const updateUI = () => {
     composerInput.value = currentDialpadState.dialedNumber;
     callBtn.dataset.active = currentDialpadState.isOnCall;
-    callBtnLabel.textContent = currentDialpadState.isOnCall ? "End" : "Call";
+    callBtnLabel.textContent = translate(
+      `dialpad.actions.call.${currentDialpadState.isOnCall ? 'active' : 'idle'}`
+    );
     holdBtn.disabled = !currentDialpadState.isOnCall;
     holdBtn.dataset.active = currentDialpadState.isOnHold;
-    holdBtnLabel.textContent = currentDialpadState.isOnHold ? "Resume" : "Hold";
+    holdBtnLabel.textContent = translate(
+      `dialpad.actions.hold.${currentDialpadState.isOnHold ? 'active' : 'idle'}`
+    );
     speakerBtn.dataset.active = currentDialpadState.isSpeakerEnabled;
-    speakerBtnLabel.textContent = currentDialpadState.isSpeakerEnabled ? "Mute" : "Speaker";
+    speakerBtnLabel.textContent = translate(
+      `dialpad.actions.speaker.${currentDialpadState.isSpeakerEnabled ? 'active' : 'idle'}`
+    );
 
     if (currentDialpadState.isOnCall) {
       statusPill.dataset.active = "true";
-      statusText.textContent = currentDialpadState.isOnHold ? "On Hold" : "On Call";
-      helperText.textContent = currentDialpadState.isOnHold
-        ? "Call is on hold. Tap Hold to resume."
-        : "You are connected. Use Hold or Speaker as needed.";
+      statusText.textContent = translate(
+        `dialpad.status.${currentDialpadState.isOnHold ? 'onHold' : 'onCall'}`
+      );
+      helperText.textContent = translate(
+        currentDialpadState.isOnHold ? 'dialpad.helper.onHold' : 'dialpad.helper.onCall'
+      );
     } else if (currentDialpadState.dialedNumber.length > 0) {
       statusPill.dataset.active = "false";
-      statusText.textContent = "Ready";
-      helperText.textContent = "Press Call to connect or erase to edit the number.";
+      statusText.textContent = translate('dialpad.status.ready');
+      helperText.textContent = translate('dialpad.helper.number');
     } else {
       statusPill.dataset.active = "false";
-      statusText.textContent = "Ready";
-      helperText.textContent = "Tap digits or choose a contact to start dialing.";
+      statusText.textContent = translate('dialpad.status.ready');
+      helperText.textContent = translate('dialpad.helper.idle');
     }
   };
 
@@ -815,7 +1146,7 @@
   // 🔹 Bouton Call → envoie "dial" ou "hangup"
   callBtn.addEventListener("click", () => {
     if (!currentDialpadState.isOnCall && currentDialpadState.dialedNumber.length === 0) {
-      helperText.textContent = "Enter a number or choose a contact first.";
+      helperText.textContent = translate('dialpad.helper.missing');
       return;
     }
     currentDialpadState.isOnCall = !currentDialpadState.isOnCall;
@@ -842,7 +1173,7 @@
 
   eraseBtn.addEventListener("click", () => {
     if (currentDialpadState.dialedNumber.length === 0) {
-      helperText.textContent = "Nothing to erase.";
+      helperText.textContent = translate('dialpad.helper.nothingToErase');
       return;
     }
     eraseDigit();
@@ -873,79 +1204,103 @@
 
     switch (status) {
       case "connected":
-        setWsIndicator("connected", "Connected");
+        setWsIndicator("connected");
         break;
       case "disconnected":
-        setWsIndicator("disconnected", "Offline");
+        setWsIndicator("disconnected");
         break;
       case "connecting":
       default:
-        setWsIndicator("connecting", "Connecting…");
+        setWsIndicator("connecting");
         break;
     }
   });
 
-  // 🔹 Extensions → appellent direct avec "dial"
-  beaverPhoneConfig.contacts.forEach((contact) => {
-    const card = document.createElement("article");
-    card.className = "extension-card";
-
-    const avatar = document.createElement("div");
-    avatar.className = "avatar";
-    avatar.setAttribute("aria-hidden", "true");
-
-    if (contact.image) {
-      const img = document.createElement("img");
-      img.src = contact.image;
-      img.alt = `${contact.name} avatar`;
-      img.addEventListener("error", () => {
-        img.remove();
-        avatar.classList.add("avatar--fallback");
-        avatar.textContent = contact.name.slice(0, 1).toUpperCase();
-      });
-      avatar.appendChild(img);
-    } else {
-      avatar.classList.add("avatar--fallback");
-      avatar.textContent = contact.name.slice(0, 1).toUpperCase();
+  const renderExtensions = () => {
+    if (!extensionList) {
+      return;
     }
 
-    const info = document.createElement("div");
-    const nameEl = document.createElement("h3");
-    nameEl.textContent = contact.name;
-    const subtitleEl = document.createElement("div");
-    subtitleEl.className = "subtitle";
-    subtitleEl.textContent = contact.subtitle;
-    const detailsEl = document.createElement("div");
-    detailsEl.className = "details";
-    detailsEl.textContent = contact.details;
-    info.appendChild(nameEl);
-    info.appendChild(subtitleEl);
-    info.appendChild(detailsEl);
+    extensionList.innerHTML = '';
 
-    const extension = document.createElement("div");
-    extension.className = "extension";
-    extension.textContent = `Ext. ${contact.extension}`;
+    if (beaverPhoneConfig.contacts.length === 0) {
+      const emptyState = document.createElement('p');
+      emptyState.className = 'empty-hint';
+      emptyState.textContent = translate('extensions.empty');
+      extensionList.appendChild(emptyState);
+      return;
+    }
 
-    card.appendChild(avatar);
-    card.appendChild(info);
-    card.appendChild(extension);
+    beaverPhoneConfig.contacts.forEach((contact) => {
+      const card = document.createElement('article');
+      card.className = 'extension-card';
 
-    card.addEventListener("click", () => {
-      currentDialpadState.dialedNumber = contact.extension;
-      currentDialpadState.isOnCall = true;
-      currentDialpadState.isOnHold = false;
-      dispatchDialpadEvent("dial", contact.extension);
-      updateUI();
+      const avatar = document.createElement('div');
+      avatar.className = 'avatar';
+      avatar.setAttribute('aria-hidden', 'true');
+
+      const localizedName = getLocalizedText(contact.name);
+
+      if (contact.image) {
+        const img = document.createElement('img');
+        img.src = contact.image;
+        img.alt = `${localizedName} avatar`;
+        img.addEventListener('error', () => {
+          img.remove();
+          avatar.classList.add('avatar--fallback');
+          avatar.textContent = (localizedName || '').slice(0, 1).toUpperCase();
+        });
+        avatar.appendChild(img);
+      } else {
+        avatar.classList.add('avatar--fallback');
+        avatar.textContent = (localizedName || '').slice(0, 1).toUpperCase();
+      }
+
+      const info = document.createElement('div');
+      const nameEl = document.createElement('h3');
+      nameEl.textContent = localizedName;
+      const subtitleEl = document.createElement('div');
+      subtitleEl.className = 'subtitle';
+      subtitleEl.textContent = getLocalizedText(contact.subtitle);
+      const detailsEl = document.createElement('div');
+      detailsEl.className = 'details';
+      detailsEl.textContent = getLocalizedText(contact.details);
+      info.appendChild(nameEl);
+      info.appendChild(subtitleEl);
+      info.appendChild(detailsEl);
+
+      const extension = document.createElement('div');
+      extension.className = 'extension';
+      extension.textContent = translate('extensions.extensionPrefix', {
+        extension: contact.extension
+      });
+
+      card.appendChild(avatar);
+      card.appendChild(info);
+      card.appendChild(extension);
+
+      card.addEventListener('click', () => {
+        currentDialpadState.dialedNumber = contact.extension;
+        currentDialpadState.isOnCall = true;
+        currentDialpadState.isOnHold = false;
+        dispatchDialpadEvent('dial', contact.extension);
+        updateUI();
+      });
+      extensionList.appendChild(card);
     });
-    extensionList.appendChild(card);
-  });
+  };
 
-  if (beaverPhoneConfig.contacts.length === 0) {
-    const emptyState = document.createElement("p");
-    emptyState.className = "empty-hint";
-    emptyState.textContent = "No saved extensions yet.";
-    extensionList.appendChild(emptyState);
+  const refreshLocalizedUI = () => {
+    renderExtensions();
+    setWsIndicator(wsIndicator?.dataset.state || 'connecting');
+    updateUI();
+  };
+
+  if (typeof locale.subscribe === 'function') {
+    locale.subscribe(() => {
+      refreshLocalizedUI();
+    });
   }
 
-  updateUI();
+  refreshLocalizedUI();
 </script>
