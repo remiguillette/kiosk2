@@ -305,7 +305,8 @@ async function initializeSessionPersistence() {
 }
 
 const menuUrl = `http://127.0.0.1:${CONTENT_SERVER_PORT}/`;
-const menuOrigin = new URL(menuUrl).origin;
+const menuLocation = new URL(menuUrl);
+const menuOrigin = menuLocation.origin;
 
 function createWindow() {
   win = new BrowserWindow({
@@ -326,170 +327,85 @@ function createWindow() {
     return { action: 'deny' };
   });
 
-  // Injecter un bouton de retour uniquement pour les pages distantes (ex: BeaverNet)
-  win.webContents.on('did-finish-load', () => {
-    const script = `(() => {
-      const MENU_URL = ${JSON.stringify(menuUrl)};
-      const MENU_ORIGIN = ${JSON.stringify(menuOrigin)};
-      const LOCAL_SERVICE_PREFIX = 'http://localhost:9090/';
-      const BRAND_COLOR = '#ff0000';
-      const BRAND_COLOR_HOVER = '#cc0000';
-      const existing = document.getElementById('backToMenu');
-      const onLocalOrigin = window.location.origin === MENU_ORIGIN;
+  const buildBackButtonInjection = () => `(() => {
+    const MENU_URL = ${JSON.stringify(menuUrl)};
+    const MENU_ORIGIN = ${JSON.stringify(menuOrigin)};
+    const existing = document.getElementById('backToMenu');
+    const onMenuOrigin = window.location.origin === MENU_ORIGIN;
 
-      if (window.location.href.startsWith(LOCAL_SERVICE_PREFIX)) {
-        try {
-          const ensureLocalServiceBranding = () => {
-            const root = document.documentElement;
-            if (!root) return;
+    if (onMenuOrigin) {
+      if (existing) existing.remove();
+      return;
+    }
 
-            const styleId = 'beaver-local-service-branding';
-            // Align Cockpit branding variables with Beaver brand red.
-            root.style.setProperty('--ct-color-host-accent', BRAND_COLOR);
-            root.style.setProperty('--pf-t--global--color--brand--default', BRAND_COLOR);
-            root.style.setProperty('--pf-t--global--color--brand--hover', BRAND_COLOR_HOVER);
-            root.style.setProperty('--pf-t--global--text--color--brand--default', BRAND_COLOR);
-            root.style.setProperty('--pf-t--global--text--color--link--default', BRAND_COLOR);
-            root.style.setProperty('--pf-global--primary-color--100', BRAND_COLOR);
-            root.style.setProperty('--pf-global--primary-color--200', BRAND_COLOR_HOVER);
-            root.style.setProperty('--pf-global--link--Color', BRAND_COLOR);
-            root.style.setProperty('--pf-global--link--Color--hover', BRAND_COLOR_HOVER);
-            root.style.setProperty('--pf-global--active-color--100', BRAND_COLOR);
-            root.style.setProperty('--pf-global--active-color--200', BRAND_COLOR_HOVER);
+    if (existing) {
+      return;
+    }
 
-            const css = [
-              ':root {',
-              '  --beaver-brand-color: ' + BRAND_COLOR + ';',
-              '  --beaver-brand-color-hover: ' + BRAND_COLOR_HOVER + ';',
-              '  --ct-color-host-accent: var(--beaver-brand-color) !important;',
-              '  --pf-t--global--color--brand--default: var(--beaver-brand-color) !important;',
-              '  --pf-t--global--color--brand--hover: var(--beaver-brand-color-hover) !important;',
-              '  --pf-t--global--text--color--brand--default: var(--beaver-brand-color) !important;',
-              '  --pf-t--global--text--color--link--default: var(--beaver-brand-color) !important;',
-              '  --pf-global--link--Color: var(--beaver-brand-color) !important;',
-              '  --pf-global--link--Color--hover: var(--beaver-brand-color-hover) !important;',
-              '  --pf-global--primary-color--100: var(--beaver-brand-color) !important;',
-              '  --pf-global--primary-color--200: var(--beaver-brand-color-hover) !important;',
-              '  --pf-global--active-color--100: var(--beaver-brand-color) !important;',
-              '  --pf-global--active-color--200: var(--beaver-brand-color-hover) !important;',
-              '}',
-              '',
-              '.pf-c-button.pf-m-primary,',
-              '.pf-c-button.pf-m-primary:disabled,',
-              '.pf-c-button.pf-m-primary.pf-m-disabled {',
-              '  background-color: var(--beaver-brand-color) !important;',
-              '  border-color: var(--beaver-brand-color) !important;',
-              '}',
-              '',
-              '.pf-c-button.pf-m-primary:hover,',
-              '.pf-c-button.pf-m-primary:focus {',
-              '  background-color: var(--beaver-brand-color-hover) !important;',
-              '  border-color: var(--beaver-brand-color-hover) !important;',
-              '}',
-              '',
-              'a,',
-              'a:visited {',
-              '  color: var(--beaver-brand-color) !important;',
-              '}',
-              '',
-              'a:hover,',
-              'a:focus {',
-              '  color: var(--beaver-brand-color-hover) !important;',
-              '}',
-              '',
-              '.login-pf-page .login-pf-brand,',
-              '.login-pf-page .login-pf-header h1,',
-              '.login-pf-page .login-pf-header h2 {',
-              '  color: var(--beaver-brand-color) !important;',
-              '}',
-            ].join('\n');
+    const container = document.body || document.documentElement;
+    if (!container) {
+      return;
+    }
 
-            const target = document.head || document.body;
-            if (!target) return;
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.id = 'backToMenu';
+    btn.setAttribute('aria-label', 'Return to menu');
 
-            let styleEl = document.getElementById(styleId);
-            if (!styleEl) {
-              styleEl = document.createElement('style');
-              styleEl.id = styleId;
-              styleEl.setAttribute('data-origin', 'beaver-kiosk');
-              target.appendChild(styleEl);
-            }
+    Object.assign(btn.style, {
+      position: 'fixed',
+      top: '20px',
+      left: '20px',
+      zIndex: 9999,
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: '0.5rem',
+      background: 'rgba(9, 12, 20, 0.85)',
+      color: '#f2f2f7',
+      fontWeight: '600',
+      fontSize: '15px',
+      padding: '10px 16px',
+      border: '1px solid rgba(255, 255, 255, 0.18)',
+      borderRadius: '14px',
+      cursor: 'pointer',
+      boxShadow: '0 8px 24px rgba(0, 0, 0, 0.35)',
+      backdropFilter: 'blur(12px)'
+    });
 
-            if (styleEl.textContent !== css) {
-              styleEl.textContent = css;
-            }
-          };
+    const icon = document.createElement('span');
+    icon.setAttribute('aria-hidden', 'true');
+    icon.textContent = '\\ud83c\\udfe0';
+    Object.assign(icon.style, {
+      fontSize: '1.1rem',
+      lineHeight: '1'
+    });
 
-          if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', ensureLocalServiceBranding, { once: true });
-          } else {
-            ensureLocalServiceBranding();
-          }
-        } catch (error) {
-          console.warn('[BeaverKiosk] Unable to set accent color for local service:', error);
-        }
+    const text = document.createElement('span');
+    text.textContent = 'Menu';
+
+    btn.appendChild(icon);
+    btn.appendChild(text);
+
+    btn.addEventListener('click', () => {
+      if (window.electronAPI?.goHome) {
+        window.electronAPI.goHome();
+      } else {
+        window.location.href = MENU_URL;
       }
+    });
 
-      if (onLocalOrigin) {
-        if (existing) existing.remove();
-        return;
-      }
+    container.appendChild(btn);
+  })();`;
 
-      if (!existing) {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.id = 'backToMenu';
-        btn.setAttribute('aria-label', 'Return to menu');
-
-        Object.assign(btn.style, {
-          position: 'fixed',
-          top: '20px',
-          left: '20px',
-          zIndex: 9999,
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '0.5rem',
-          background: 'rgba(9, 12, 20, 0.85)',
-          color: '#f2f2f7',
-          fontWeight: '600',
-          fontSize: '15px',
-          padding: '10px 16px',
-          border: '1px solid rgba(255, 255, 255, 0.18)',
-          borderRadius: '14px',
-          cursor: 'pointer',
-          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.35)',
-          backdropFilter: 'blur(12px)'
-        });
-
-        const icon = document.createElement('span');
-        icon.setAttribute('aria-hidden', 'true');
-        icon.textContent = '\\ud83c\\udfe0';
-        Object.assign(icon.style, {
-          fontSize: '1.1rem',
-          lineHeight: '1'
-        });
-
-        const text = document.createElement('span');
-        text.textContent = 'Menu';
-
-        btn.appendChild(icon);
-        btn.appendChild(text);
-
-        btn.addEventListener('click', () => {
-          if (window.electronAPI?.goHome) {
-            window.electronAPI.goHome();
-          } else {
-            window.location.href = MENU_URL;
-          }
-        });
-        document.body.appendChild(btn);
-      }
-    })();`;
-
+  const injectBackButton = () => {
+    const script = buildBackButtonInjection();
     win.webContents.executeJavaScript(script).catch(() => {
       // Ignorer les erreurs d'injection (ex : pages sans autorisation)
     });
-  });
+  };
+
+  win.webContents.on('did-finish-load', injectBackButton);
+  win.webContents.on('did-navigate-in-page', injectBackButton);
 }
 
 function adjustZoom(delta) {
