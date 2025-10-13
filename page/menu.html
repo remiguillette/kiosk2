@@ -238,6 +238,11 @@
         <span class="app-label" data-i18n="beaverdocTitle">BeaverDoc</span>
       </a>
 
+      <a class="app-tile" data-app="beaverdebian" href="http://localhost:9090/">
+        <span class="app-icon"><img src="../icon/arrow-big-left-dash.svg" alt="Debian icon" /></span>
+        <span class="app-label" data-i18n="beaverdebianTitle">BeaverDebian</span>
+      </a>
+
       <a class="app-tile" href="https://rgbeavernet.ca">
         <span class="app-icon"><img src="../icon/beaver.png" alt="Beaver logo" /></span>
         <span class="app-label" data-i18n="beavernetTitle">BeaverNet</span>
@@ -263,6 +268,18 @@
       beaverDocLink.href = getBeaverDocURL();
     }
 
+    function getBeaverDebianURL() {
+      const userAgent = navigator.userAgent.toLowerCase();
+      const isElectron = userAgent.includes("electron");
+      if (isElectron) return "http://localhost:9090/";
+      return "http://192.168.1.76:9090/";
+    }
+
+    const beaverDebianLink = document.querySelector('a[data-app="beaverdebian"]');
+    if (beaverDebianLink) {
+      beaverDebianLink.href = getBeaverDebianURL();
+    }
+
     const translations = {
       fr: {
         heroTitle:
@@ -271,6 +288,7 @@
         beaverhomeTitle: "BeaverHome",
         beaveralarmTitle: "BeaverAlarm",
         beaverdocTitle: "BeaverDoc",
+        beaverdebianTitle: "BeaverDebian",
         beavernetTitle: "BeaverNet",
       },
       en: {
@@ -280,6 +298,7 @@
         beaverhomeTitle: "BeaverHome",
         beaveralarmTitle: "BeaverAlarm",
         beaverdocTitle: "BeaverDoc",
+        beaverdebianTitle: "BeaverDebian",
         beavernetTitle: "BeaverNet",
       },
     };
