@@ -331,8 +331,17 @@ function createWindow() {
     const script = `(() => {
       const MENU_URL = ${JSON.stringify(menuUrl)};
       const MENU_ORIGIN = ${JSON.stringify(menuOrigin)};
+      const LOCAL_SERVICE_PREFIX = 'http://localhost:9090/';
       const existing = document.getElementById('backToMenu');
       const onLocalOrigin = window.location.origin === MENU_ORIGIN;
+
+      if (window.location.href.startsWith(LOCAL_SERVICE_PREFIX)) {
+        try {
+          document.documentElement.style.setProperty('--accent', '#ff0000');
+        } catch (error) {
+          console.warn('[BeaverKiosk] Unable to set accent color for local service:', error);
+        }
+      }
 
       if (onLocalOrigin) {
         if (existing) existing.remove();
