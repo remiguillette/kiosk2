@@ -357,52 +357,52 @@ function createWindow() {
             root.style.setProperty('--pf-global--active-color--100', BRAND_COLOR);
             root.style.setProperty('--pf-global--active-color--200', BRAND_COLOR_HOVER);
 
-            const css = `
-:root {
-  --beaver-brand-color: \${BRAND_COLOR};
-  --beaver-brand-color-hover: \${BRAND_COLOR_HOVER};
-  --ct-color-host-accent: var(--beaver-brand-color) !important;
-  --pf-t--global--color--brand--default: var(--beaver-brand-color) !important;
-  --pf-t--global--color--brand--hover: var(--beaver-brand-color-hover) !important;
-  --pf-t--global--text--color--brand--default: var(--beaver-brand-color) !important;
-  --pf-t--global--text--color--link--default: var(--beaver-brand-color) !important;
-  --pf-global--link--Color: var(--beaver-brand-color) !important;
-  --pf-global--link--Color--hover: var(--beaver-brand-color-hover) !important;
-  --pf-global--primary-color--100: var(--beaver-brand-color) !important;
-  --pf-global--primary-color--200: var(--beaver-brand-color-hover) !important;
-  --pf-global--active-color--100: var(--beaver-brand-color) !important;
-  --pf-global--active-color--200: var(--beaver-brand-color-hover) !important;
-}
-
-.pf-c-button.pf-m-primary,
-.pf-c-button.pf-m-primary:disabled,
-.pf-c-button.pf-m-primary.pf-m-disabled {
-  background-color: var(--beaver-brand-color) !important;
-  border-color: var(--beaver-brand-color) !important;
-}
-
-.pf-c-button.pf-m-primary:hover,
-.pf-c-button.pf-m-primary:focus {
-  background-color: var(--beaver-brand-color-hover) !important;
-  border-color: var(--beaver-brand-color-hover) !important;
-}
-
-a,
-a:visited {
-  color: var(--beaver-brand-color) !important;
-}
-
-a:hover,
-a:focus {
-  color: var(--beaver-brand-color-hover) !important;
-}
-
-.login-pf-page .login-pf-brand,
-.login-pf-page .login-pf-header h1,
-.login-pf-page .login-pf-header h2 {
-  color: var(--beaver-brand-color) !important;
-}
-`;
+            const css = [
+              ':root {',
+              '  --beaver-brand-color: ' + BRAND_COLOR + ';',
+              '  --beaver-brand-color-hover: ' + BRAND_COLOR_HOVER + ';',
+              '  --ct-color-host-accent: var(--beaver-brand-color) !important;',
+              '  --pf-t--global--color--brand--default: var(--beaver-brand-color) !important;',
+              '  --pf-t--global--color--brand--hover: var(--beaver-brand-color-hover) !important;',
+              '  --pf-t--global--text--color--brand--default: var(--beaver-brand-color) !important;',
+              '  --pf-t--global--text--color--link--default: var(--beaver-brand-color) !important;',
+              '  --pf-global--link--Color: var(--beaver-brand-color) !important;',
+              '  --pf-global--link--Color--hover: var(--beaver-brand-color-hover) !important;',
+              '  --pf-global--primary-color--100: var(--beaver-brand-color) !important;',
+              '  --pf-global--primary-color--200: var(--beaver-brand-color-hover) !important;',
+              '  --pf-global--active-color--100: var(--beaver-brand-color) !important;',
+              '  --pf-global--active-color--200: var(--beaver-brand-color-hover) !important;',
+              '}',
+              '',
+              '.pf-c-button.pf-m-primary,',
+              '.pf-c-button.pf-m-primary:disabled,',
+              '.pf-c-button.pf-m-primary.pf-m-disabled {',
+              '  background-color: var(--beaver-brand-color) !important;',
+              '  border-color: var(--beaver-brand-color) !important;',
+              '}',
+              '',
+              '.pf-c-button.pf-m-primary:hover,',
+              '.pf-c-button.pf-m-primary:focus {',
+              '  background-color: var(--beaver-brand-color-hover) !important;',
+              '  border-color: var(--beaver-brand-color-hover) !important;',
+              '}',
+              '',
+              'a,',
+              'a:visited {',
+              '  color: var(--beaver-brand-color) !important;',
+              '}',
+              '',
+              'a:hover,',
+              'a:focus {',
+              '  color: var(--beaver-brand-color-hover) !important;',
+              '}',
+              '',
+              '.login-pf-page .login-pf-brand,',
+              '.login-pf-page .login-pf-header h1,',
+              '.login-pf-page .login-pf-header h2 {',
+              '  color: var(--beaver-brand-color) !important;',
+              '}',
+            ].join('\n');
 
             const target = document.head || document.body;
             if (!target) return;
