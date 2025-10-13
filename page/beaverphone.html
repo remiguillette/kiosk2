@@ -20,6 +20,10 @@
       --shadow: 0 28px 40px rgba(0, 0, 0, 0.45);
     }
 
+    html {
+      font-size: clamp(13px, 0.95vw, 16px);
+    }
+
     * {
       box-sizing: border-box;
       margin: 0;
@@ -40,7 +44,7 @@
     }
 
     .beaverphone {
-      width: min(1200px, 100%);
+      width: min(1040px, 100%);
       display: grid;
       gap: 2.6rem;
     }
@@ -707,10 +711,10 @@
       { label: "*" }, { label: "0", subtext: "+" }, { label: "#" },
     ],
     contacts: [
-      { name: "Ontario Provincial Police", subtitle: "Internal line", details: "Office 101", extension: "1201", image: "../contact/Police.png" },
-      { name: "SPCA Niagara", subtitle: "Paws Law", details: "Office 3434", extension: "3434", image: "../contact/SPCA.png" },
+      { name: "Ontario Provincial Police", subtitle: "Internal line", details: "Office 101", extension: "1201", image: "/contact/Police.png" },
+      { name: "SPCA Niagara", subtitle: "Paws Law", details: "Office 3434", extension: "3434", image: "/contact/SPCA.png" },
       { name: "Mom", subtitle: "Mom", details: "Complaints Office", extension: "22", image: null },
-      { name: "Services Ontario", subtitle: "Government of Ontario", details: "Desktop *1345", extension: "1345", image: "../contact/ontario.svg" },
+      { name: "Services Ontario", subtitle: "Government of Ontario", details: "Desktop *1345", extension: "1345", image: "/contact/ontario.svg" },
     ],
     dialpadEventKey: BEAVERPHONE_DIALPAD_EVENT_KEY,
   };
