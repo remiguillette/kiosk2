@@ -1,281 +1,78 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>BeaverTask – BeaverKiosk</title>
-    <style>
-      :root {
-        color-scheme: dark;
-        --bg-gradient: radial-gradient(circle at top, #1e1e2f, #09090f 65%);
-        --accent: #f89422;
-        --accent-soft: rgba(248, 148, 34, 0.16);
-        --card-bg: rgba(24, 24, 32, 0.92);
-        --text-main: #f2f2f7;
-        --text-muted: #c1c1d0;
-        --border: rgba(255, 255, 255, 0.06);
-      }
+<!-- Onglets BeaverTask -->
+<section class="cards" aria-label="Task interface">
+  <div class="tab-header" style="display:flex; gap:1rem; margin-bottom:1rem;">
+    <button class="tab-btn active" data-tab="list">Liste des tâches</button>
+    <button class="tab-btn" data-tab="add">Ajouter une tâche</button>
+    <button class="tab-btn" data-tab="calendar">Calendrier</button>
+  </div>
 
-      * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
+  <div class="tab-content">
+    <div class="tab-panel" id="list">
+      <p>Affiche ici toutes les tâches créées avec leur priorité, échéance et statut.</p>
+      <!-- Ici tu pourras générer dynamiquement les cartes ou lignes de tâches depuis SQLite -->
+    </div>
+    <div class="tab-panel" id="add" style="display:none;">
+      <p>Formulaire pour créer une nouvelle tâche :</p>
+      <form id="add-task-form">
+        <label>Titre: <input type="text" name="title" required></label><br>
+        <label>Responsable: <input type="text" name="assignee"></label><br>
+        <label>Date d'échéance: <input type="date" name="dueDate"></label><br>
+        <label>Priorité:
+          <select name="priority">
+            <option>Élevé</option>
+            <option>Moyen</option>
+            <option>Faible</option>
+          </select>
+        </label><br>
+        <label>Notes / Liens: <textarea name="notes"></textarea></label><br>
+        <label>Image: <input type="file" name="image"></label><br>
+        <button type="submit">Ajouter</button>
+      </form>
+    </div>
+    <div class="tab-panel" id="calendar" style="display:none;">
+      <p>Vue calendrier : ici on affichera un calendrier avec toutes les tâches par date d'échéance.</p>
+      <!-- Tu pourras intégrer FullCalendar ou une librairie JS calendrier -->
+    </div>
+  </div>
+</section>
 
-      body {
-        font-family: "Inter", "Segoe UI", sans-serif;
-        background: var(--bg-gradient);
-        color: var(--text-main);
-        min-height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: flex-start;
-        padding: 3rem 1.5rem 4rem;
-      }
+<script>
+  const tabs = document.querySelectorAll('.tab-btn');
+  const panels = document.querySelectorAll('.tab-panel');
 
-      main {
-        width: min(960px, 100%);
-        display: flex;
-        flex-direction: column;
-        gap: 2.5rem;
-      }
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      // Reset active
+      tabs.forEach(t => t.classList.remove('active'));
+      panels.forEach(p => p.style.display = 'none');
 
-      header {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-        text-align: center;
-      }
+      // Activer le tab cliqué
+      tab.classList.add('active');
+      document.getElementById(tab.dataset.tab).style.display = 'block';
+    });
+  });
+</script>
 
-      header h1 {
-        font-size: clamp(2.4rem, 4vw, 3rem);
-        letter-spacing: 0.04em;
-      }
+<style>
+  .tab-btn {
+    padding: 0.5rem 1rem;
+    border-radius: 12px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    color: var(--text-main);
+    cursor: pointer;
+    font-weight: 600;
+  }
+  .tab-btn.active {
+    background: var(--accent);
+    color: #fff;
+  }
+  .tab-panel {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 1.5rem;
+    box-shadow: 0 20px 32px rgba(0,0,0,0.45);
+  }
+</style>
 
-      header p {
-        color: var(--text-muted);
-        font-size: 1.05rem;
-        line-height: 1.6;
-        max-width: 720px;
-        margin: 0 auto;
-      }
-
-      .cards {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 1.5rem;
-      }
-
-      .card {
-        background: var(--card-bg);
-        border: 1px solid var(--border);
-        border-radius: 24px;
-        padding: 1.75rem;
-        display: flex;
-        flex-direction: column;
-        gap: 0.75rem;
-        box-shadow: 0 22px 36px rgba(0, 0, 0, 0.45);
-      }
-
-      .card h2 {
-        font-size: 1.25rem;
-        color: var(--accent);
-        letter-spacing: 0.02em;
-      }
-
-      .card p,
-      .card li {
-        color: var(--text-muted);
-        line-height: 1.6;
-        font-size: 0.98rem;
-      }
-
-      ul {
-        list-style: none;
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-      }
-
-      ul li::before {
-        content: "•";
-        color: var(--accent);
-        margin-right: 0.5rem;
-      }
-
-      .data-structure {
-        background: var(--card-bg);
-        border: 1px solid var(--border);
-        border-radius: 28px;
-        padding: 2rem;
-        box-shadow: 0 28px 40px rgba(0, 0, 0, 0.5);
-        display: grid;
-        gap: 1.5rem;
-      }
-
-      .field-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1.25rem;
-      }
-
-      .field {
-        border: 1px solid var(--border);
-        border-radius: 20px;
-        padding: 1rem 1.25rem;
-        background: rgba(12, 12, 18, 0.6);
-      }
-
-      .field h3 {
-        color: var(--accent);
-        font-size: 1.05rem;
-        margin-bottom: 0.35rem;
-      }
-
-      .field p {
-        color: var(--text-muted);
-        font-size: 0.95rem;
-        line-height: 1.55;
-      }
-
-      .badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.4rem;
-        padding: 0.35rem 0.8rem;
-        border-radius: 999px;
-        background: var(--accent-soft);
-        color: var(--accent);
-        font-weight: 600;
-        font-size: 0.85rem;
-        letter-spacing: 0.03em;
-      }
-
-      .cta {
-        text-align: center;
-        font-size: 0.95rem;
-        color: var(--text-muted);
-      }
-
-      .cta strong {
-        color: var(--accent);
-      }
-
-      @media (max-width: 640px) {
-        body {
-          padding: 2rem 1rem 3rem;
-        }
-
-        header p {
-          font-size: 1rem;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <main>
-      <header>
-        <span class="badge">Nouveau service BeaverKiosk</span>
-        <h1>BeaverTask</h1>
-        <p>
-          BeaverTask centralise la gestion des tâches pour les équipes locales. Il propose une
-          liste d'actions claire, un calendrier des échéances et un partage rapide grâce aux codes QR,
-          le tout propulsé par une base de données SQLite hors ligne.
-        </p>
-      </header>
-
-      <section class="cards" aria-label="Core features">
-        <article class="card">
-          <h2>To-Do List</h2>
-          <p>
-            Visualisez l'ensemble des tâches dans un flux principal. Chaque carte affiche le titre,
-            la priorité et l'échéance pour aider les équipes à prioriser les actions critiques en un clin d'œil.
-          </p>
-        </article>
-        <article class="card">
-          <h2>Add Task Menu</h2>
-          <p>
-            Un formulaire tactile simplifié permet de définir un responsable, une priorité et une date limite.
-            La date de création et l'identifiant BeaverTask sont générés automatiquement pour assurer la traçabilité.
-          </p>
-        </article>
-        <article class="card">
-          <h2>Calendar Tab</h2>
-          <p>
-            Les tâches sont projetées sur un calendrier dédié, offrant une vue d'ensemble des échéances. Les filtres par statut
-            facilitent la planification et la répartition de la charge de travail.
-          </p>
-        </article>
-      </section>
-
-      <section class="cards" aria-label="Technical requirements">
-        <article class="card">
-          <h2>SQLite Local Storage</h2>
-          <p>
-            Toutes les informations sont persistées dans SQLite, garantissant des opérations rapides et un fonctionnement
-            hors ligne complet sur les bornes BeaverKiosk.
-          </p>
-        </article>
-        <article class="card">
-          <h2>Task Sharing</h2>
-          <p>
-            Chaque tâche génère un code QR. Un simple scan permet d'importer les détails sur un autre kiosk ou appareil,
-            simplifiant la collaboration inter-sites.
-          </p>
-        </article>
-      </section>
-
-      <section class="data-structure" aria-labelledby="structure-title">
-        <div>
-          <h2 id="structure-title">Structure des données BeaverTask</h2>
-          <p>
-            Chaque entrée est identifiée par un code unique respectant le format <strong>BV-TS-001</strong>. Les champs ci-dessous
-            couvrent l'ensemble des métadonnées nécessaires pour suivre, filtrer et partager les tâches.
-          </p>
-        </div>
-        <div class="field-grid">
-          <div class="field">
-            <h3>Task Title</h3>
-            <p>Description concise de l'action à réaliser.</p>
-          </div>
-          <div class="field">
-            <h3>Assignee</h3>
-            <p>Personne ou équipe responsable de l'exécution.</p>
-          </div>
-          <div class="field">
-            <h3>Created Date</h3>
-            <p>Date d'enregistrement automatique pour l'historique.</p>
-          </div>
-          <div class="field">
-            <h3>Due Date</h3>
-            <p>Échéance cible, utilisée pour le calendrier et les alertes.</p>
-          </div>
-          <div class="field">
-            <h3>Priority</h3>
-            <p>Indice d'urgence (High, Medium, Low) pour organiser le travail.</p>
-          </div>
-          <div class="field">
-            <h3>Status</h3>
-            <p>État courant (Not Started, In Progress, Completed) pour le suivi.</p>
-          </div>
-          <div class="field">
-            <h3>Notes &amp; Links</h3>
-            <p>Espace libre pour instructions, commentaires ou URL utiles.</p>
-          </div>
-          <div class="field">
-            <h3>Image</h3>
-            <p>Pièce jointe optionnelle (photo de terrain, croquis, etc.).</p>
-          </div>
-          <div class="field">
-            <h3>Unique ID</h3>
-            <p>Code généré automatiquement au format <strong>BV-TS-[###]</strong> pour tracer chaque tâche.</p>
-          </div>
-        </div>
-      </section>
-
-      <p class="cta">
-        Prêt à commencer? Ajoutez BeaverTask à votre kiosque et centralisez l'ensemble des suivis opérationnels en un seul endroit.
-      </p>
-    </main>
-  </body>
-</html>
