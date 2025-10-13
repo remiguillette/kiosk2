@@ -332,12 +332,99 @@ function createWindow() {
       const MENU_URL = ${JSON.stringify(menuUrl)};
       const MENU_ORIGIN = ${JSON.stringify(menuOrigin)};
       const LOCAL_SERVICE_PREFIX = 'http://localhost:9090/';
+      const BRAND_COLOR = '#ff0000';
+      const BRAND_COLOR_HOVER = '#cc0000';
       const existing = document.getElementById('backToMenu');
       const onLocalOrigin = window.location.origin === MENU_ORIGIN;
 
       if (window.location.href.startsWith(LOCAL_SERVICE_PREFIX)) {
         try {
-          document.documentElement.style.setProperty('--accent', '#ff0000');
+          const ensureLocalServiceBranding = () => {
+            const root = document.documentElement;
+            if (!root) return;
+
+            const styleId = 'beaver-local-service-branding';
+            // Align Cockpit branding variables with Beaver brand red.
+            root.style.setProperty('--ct-color-host-accent', BRAND_COLOR);
+            root.style.setProperty('--pf-t--global--color--brand--default', BRAND_COLOR);
+            root.style.setProperty('--pf-t--global--color--brand--hover', BRAND_COLOR_HOVER);
+            root.style.setProperty('--pf-t--global--text--color--brand--default', BRAND_COLOR);
+            root.style.setProperty('--pf-t--global--text--color--link--default', BRAND_COLOR);
+            root.style.setProperty('--pf-global--primary-color--100', BRAND_COLOR);
+            root.style.setProperty('--pf-global--primary-color--200', BRAND_COLOR_HOVER);
+            root.style.setProperty('--pf-global--link--Color', BRAND_COLOR);
+            root.style.setProperty('--pf-global--link--Color--hover', BRAND_COLOR_HOVER);
+            root.style.setProperty('--pf-global--active-color--100', BRAND_COLOR);
+            root.style.setProperty('--pf-global--active-color--200', BRAND_COLOR_HOVER);
+
+            const css = `
+:root {
+  --beaver-brand-color: \${BRAND_COLOR};
+  --beaver-brand-color-hover: \${BRAND_COLOR_HOVER};
+  --ct-color-host-accent: var(--beaver-brand-color) !important;
+  --pf-t--global--color--brand--default: var(--beaver-brand-color) !important;
+  --pf-t--global--color--brand--hover: var(--beaver-brand-color-hover) !important;
+  --pf-t--global--text--color--brand--default: var(--beaver-brand-color) !important;
+  --pf-t--global--text--color--link--default: var(--beaver-brand-color) !important;
+  --pf-global--link--Color: var(--beaver-brand-color) !important;
+  --pf-global--link--Color--hover: var(--beaver-brand-color-hover) !important;
+  --pf-global--primary-color--100: var(--beaver-brand-color) !important;
+  --pf-global--primary-color--200: var(--beaver-brand-color-hover) !important;
+  --pf-global--active-color--100: var(--beaver-brand-color) !important;
+  --pf-global--active-color--200: var(--beaver-brand-color-hover) !important;
+}
+
+.pf-c-button.pf-m-primary,
+.pf-c-button.pf-m-primary:disabled,
+.pf-c-button.pf-m-primary.pf-m-disabled {
+  background-color: var(--beaver-brand-color) !important;
+  border-color: var(--beaver-brand-color) !important;
+}
+
+.pf-c-button.pf-m-primary:hover,
+.pf-c-button.pf-m-primary:focus {
+  background-color: var(--beaver-brand-color-hover) !important;
+  border-color: var(--beaver-brand-color-hover) !important;
+}
+
+a,
+a:visited {
+  color: var(--beaver-brand-color) !important;
+}
+
+a:hover,
+a:focus {
+  color: var(--beaver-brand-color-hover) !important;
+}
+
+.login-pf-page .login-pf-brand,
+.login-pf-page .login-pf-header h1,
+.login-pf-page .login-pf-header h2 {
+  color: var(--beaver-brand-color) !important;
+}
+`;
+
+            const target = document.head || document.body;
+            if (!target) return;
+
+            let styleEl = document.getElementById(styleId);
+            if (!styleEl) {
+              styleEl = document.createElement('style');
+              styleEl.id = styleId;
+              styleEl.setAttribute('data-origin', 'beaver-kiosk');
+              target.appendChild(styleEl);
+            }
+
+            if (styleEl.textContent !== css) {
+              styleEl.textContent = css;
+            }
+          };
+
+          if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', ensureLocalServiceBranding, { once: true });
+          } else {
+            ensureLocalServiceBranding();
+          }
         } catch (error) {
           console.warn('[BeaverKiosk] Unable to set accent color for local service:', error);
         }
