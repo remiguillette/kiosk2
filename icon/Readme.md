@@ -27,6 +27,12 @@ document.body.append('<i data-lucide="phone"></i>');
   <img src="./beaver.png" alt="Beavernet logo" width="48" />
 </p>
 
+<h3>Beavertask</h3>
+<p>
+  <a href="./check-square.svg">check-square.svg</a><br />
+  <img src="./check-square.svg" alt="Task icon" width="48" height="48" />
+</p>
+
 <h2>Beaverphone</h2>
 
 <h3>Return menu</h3>
