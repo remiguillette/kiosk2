@@ -843,17 +843,16 @@
         }
       }
 
-      const storageKey = "beaverTasks";
       const state = {
         tasks: [],
         filter: "all",
         search: "",
         calendar: null,
+        emptyMessage: "",
       };
 
-      const listView = document.getElementById("list");
-      const addView = document.getElementById("add");
-      const calendarView = document.getElementById("calendar");
+      const API_ENDPOINT = "/api/tasks";
+
       const calendarBoard = document.getElementById("calendar-board");
       const tabs = document.querySelectorAll(".tab-btn");
       const taskList = document.getElementById("task-list");
@@ -870,19 +869,8 @@
       const qrDescription = document.getElementById("qr-description");
       const qrTitle = document.getElementById("qr-title");
 
-      const loadTasks = () => {
-        try {
-          const data = JSON.parse(localStorage.getItem(storageKey));
-          state.tasks = Array.isArray(data) ? data : [];
-        } catch (error) {
-          console.warn("Unable to parse stored tasks", error);
-          state.tasks = [];
-        }
-      };
-
-      const persistTasks = () => {
-        localStorage.setItem(storageKey, JSON.stringify(state.tasks));
-      };
+      const defaultEmptyMessage = emptyState ? emptyState.textContent : "";
+      state.emptyMessage = defaultEmptyMessage;
 
       const changeTab = (tab) => {
         document.querySelectorAll("section.view").forEach((section) => {
@@ -910,6 +898,28 @@
         return "pending";
       };
 
+      const normalizeTask = (task) => {
+        if (!task || typeof task !== "object") {
+          return null;
+        }
+
+        const createdAt =
+          typeof task.createdAt === "string" ? task.createdAt : new Date().toISOString();
+        const updatedAt =
+          typeof task.updatedAt === "string" ? task.updatedAt : createdAt;
+
+        return {
+          id: task.id,
+          title: task.title ?? "",
+          description: task.description ?? "",
+          dueDate: typeof task.dueDate === "string" && task.dueDate ? task.dueDate : null,
+          tag: task.tag ?? "",
+          completed: Boolean(task.completed),
+          createdAt,
+          updatedAt,
+        };
+      };
+
       const updateSummary = () => {
         const total = state.tasks.length;
         const completed = state.tasks.filter((task) => task.completed).length;
@@ -918,16 +928,25 @@
         completedCount.textContent = `${completed} completed · ${pending} pending`;
       };
 
+      const formatDueLabel = (task) => {
+        if (!task.dueDate) {
+          return "No due date";
+        }
+
+        return new Date(`${task.dueDate}T00:00:00`).toLocaleDateString(undefined, {
+          weekday: "short",
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        });
+      };
+
       const generateTaskHTML = (task) => {
         const status = statusFromTask(task);
-        const dueLabel = task.dueDate
-          ? new Date(task.dueDate + "T00:00:00").toLocaleDateString(undefined, {
-              weekday: "short",
-              year: "numeric",
-              month: "short",
-              day: "numeric",
-            })
-          : "No due date";
+        const dueLabel = formatDueLabel(task);
+        const description = task.description && task.description.length
+          ? task.description
+          : "No description provided.";
 
         return `
           <article class="task-card" data-id="${task.id}">
@@ -938,7 +957,7 @@
               </div>
               <span class="status ${status}">${status}</span>
             </header>
-            <p class="task-desc">${task.description || "No description provided."}</p>
+            <p class="task-desc">${description}</p>
             <div class="task-meta">
               <span>Due ${dueLabel}</span>
               <span>Created ${new Date(task.createdAt).toLocaleString()}</span>
@@ -955,6 +974,8 @@
       };
 
       const renderTasks = () => {
+        emptyState.textContent = state.emptyMessage || defaultEmptyMessage;
+
         const filtered = state.tasks.filter((task) => {
           const status = statusFromTask(task);
           const matchesFilter =
@@ -975,7 +996,7 @@
 
         if (state.calendar) {
           const events = state.tasks
-            .filter((task) => task.dueDate)
+            .filter((task) => typeof task.dueDate === "string" && task.dueDate)
             .map((task) => ({
               id: task.id,
               title: task.title,
@@ -988,44 +1009,109 @@
         updateSummary();
       };
 
-      const addTask = (task) => {
-        state.tasks.push(task);
-        persistTasks();
+      const fetchTasks = async () => {
+        try {
+          const response = await fetch(API_ENDPOINT, {
+            headers: { Accept: "application/json" },
+          });
+
+          if (!response.ok) {
+            throw new Error(`Unexpected status ${response.status}`);
+          }
+
+          const data = await response.json();
+          const tasks = Array.isArray(data.tasks) ? data.tasks : [];
+          state.tasks = tasks
+            .map((task) => normalizeTask(task))
+            .filter((task) => task && typeof task.id === "string");
+          state.emptyMessage = defaultEmptyMessage;
+        } catch (error) {
+          console.error("Failed to load tasks:", error);
+          state.tasks = [];
+          state.emptyMessage = "Unable to load tasks from server.";
+        }
+
         renderTasks();
       };
 
-      const updateTask = (id, updates) => {
-        const index = state.tasks.findIndex((task) => task.id === id);
-        if (index >= 0) {
-          state.tasks[index] = { ...state.tasks[index], ...updates };
-          persistTasks();
+      const addTask = async (taskInput) => {
+        const response = await fetch(API_ENDPOINT, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(taskInput),
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to create task (${response.status})`);
+        }
+
+        const created = normalizeTask(await response.json());
+        if (created) {
+          state.tasks.push(created);
+          state.emptyMessage = defaultEmptyMessage;
           renderTasks();
         }
       };
 
-      const deleteTask = (id) => {
+      const updateTask = async (id, updates) => {
+        const response = await fetch(`${API_ENDPOINT}/${encodeURIComponent(id)}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updates),
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to update task (${response.status})`);
+        }
+
+        const updated = normalizeTask(await response.json());
+        const index = state.tasks.findIndex((task) => task.id === id);
+        if (updated && index >= 0) {
+          state.tasks[index] = updated;
+          state.emptyMessage = defaultEmptyMessage;
+          renderTasks();
+        }
+      };
+
+      const deleteTask = async (id) => {
+        const response = await fetch(`${API_ENDPOINT}/${encodeURIComponent(id)}`, {
+          method: "DELETE",
+        });
+
+        if (!response.ok && response.status !== 204) {
+          throw new Error(`Failed to delete task (${response.status})`);
+        }
+
         state.tasks = state.tasks.filter((task) => task.id !== id);
-        persistTasks();
+        state.emptyMessage = defaultEmptyMessage;
         renderTasks();
       };
 
-      const handleAction = (event) => {
+      const handleAction = async (event) => {
         const button = event.target.closest("button[data-action]");
         if (!button) return;
         const card = button.closest(".task-card");
         const id = card?.dataset.id;
         if (!id) return;
 
-        if (button.dataset.action === "toggle") {
-          const task = state.tasks.find((t) => t.id === id);
-          updateTask(id, { completed: !task.completed });
-        } else if (button.dataset.action === "delete") {
-          if (confirm("Delete this task?")) {
-            deleteTask(id);
+        const task = state.tasks.find((t) => t.id === id);
+        if (!task) {
+          return;
+        }
+
+        try {
+          if (button.dataset.action === "toggle") {
+            await updateTask(id, { completed: !task.completed });
+          } else if (button.dataset.action === "delete") {
+            if (confirm("Delete this task?")) {
+              await deleteTask(id);
+            }
+          } else if (button.dataset.action === "qr") {
+            openQRModal(task);
           }
-        } else if (button.dataset.action === "qr") {
-          const task = state.tasks.find((t) => t.id === id);
-          openQRModal(task);
+        } catch (error) {
+          console.error("Task action failed:", error);
+          alert("Unable to update the task. Please try again.");
         }
       };
 
@@ -1044,7 +1130,9 @@
         qrTitle.textContent = task.title;
         qrDescription.textContent = task.description || "No description";
         qrCanvas.innerHTML = "";
-        const dueLabel = new Date(task.dueDate + "T00:00:00").toLocaleDateString();
+        const dueLabel = task.dueDate
+          ? new Date(`${task.dueDate}T00:00:00`).toLocaleDateString()
+          : "No due date";
         const shareText = [
           `Task: ${task.title}`,
           `Due: ${dueLabel}`,
@@ -1091,34 +1179,40 @@
         })
       );
 
-      form.addEventListener("submit", (event) => {
+      form.addEventListener("submit", async (event) => {
         event.preventDefault();
         const data = new FormData(form);
-        const task = {
-          id: crypto.randomUUID(),
-          title: data.get("title").trim(),
-          description: data.get("description").trim(),
-          dueDate: data.get("due-date"),
-          tag: data.get("tag").trim(),
-          completed: false,
-          createdAt: new Date().toISOString(),
+        const taskInput = {
+          title: (data.get("title") || "").toString().trim(),
+          description: (data.get("description") || "").toString().trim(),
+          dueDate: (data.get("due-date") || "").toString().trim(),
+          tag: (data.get("tag") || "").toString().trim(),
         };
 
-        if (!task.title) {
+        if (!taskInput.title) {
           alert("Please provide a title");
           return;
         }
 
-        addTask(task);
-        resetForm();
-        changeTab("list");
+        try {
+          await addTask(taskInput);
+          resetForm();
+          changeTab("list");
+        } catch (error) {
+          console.error("Failed to create task:", error);
+          alert("Unable to save the task. Please try again.");
+        }
       });
 
       form.addEventListener("reset", () => {
         setTimeout(setDefaultDueDate, 0);
       });
 
-      taskList.addEventListener("click", handleAction);
+      taskList.addEventListener("click", (event) => {
+        handleAction(event).catch((error) => {
+          console.error("Unhandled task action error:", error);
+        });
+      });
 
       qrClose.addEventListener("click", closeQRModal);
       qrModal.addEventListener("click", (event) => {
@@ -1135,8 +1229,7 @@
 
       document.addEventListener("visibilitychange", () => {
         if (!document.hidden) {
-          loadTasks();
-          renderTasks();
+          fetchTasks();
         }
       });
 
@@ -1144,14 +1237,15 @@
         state.calendar = new SimpleCalendar(calendarBoard);
       };
 
-      const init = () => {
+      const init = async () => {
         resetForm();
-        loadTasks();
         initCalendar();
-        renderTasks();
+        await fetchTasks();
       };
 
-      init();
+      init().catch((error) => {
+        console.error("Failed to initialize Beavertask UI:", error);
+      });
     </script>
   </body>
 </html>
