@@ -556,6 +556,53 @@
         }
       }
 
+      .tasklist-section {
+        flex: 1;
+        display: none;
+        flex-direction: column;
+        padding: 40px;
+        overflow-y: auto;
+      }
+
+      .tasklist-section.active {
+        display: flex;
+      }
+
+      .tasklist-header {
+        font-size: 24px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin-bottom: 40px;
+      }
+
+      .tasklist-content {
+        flex: 1;
+      }
+
+      .tasklist-group {
+        margin-bottom: 30px;
+      }
+
+      .tasklist-group-title {
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 12px;
+      }
+
+      .tasklist-empty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 300px;
+        gap: 20px;
+        text-align: center;
+      }
+
       @media (max-width: 768px) {
         .app-container {
           flex-direction: column;
@@ -588,6 +635,10 @@
           border-left: none;
           border-top: 1px solid var(--border);
         }
+
+        .tasklist-section {
+          padding: 20px;
+        }
       }
     </style>
   </head>
@@ -613,6 +664,16 @@
             <line x1="16" y1="2" x2="16" y2="6"></line>
             <line x1="8" y1="2" x2="8" y2="6"></line>
             <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+        </div>
+        <div class="sidebar-icon" id="tasklist-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="8" y1="6" x2="21" y2="6"></line>
+            <line x1="8" y1="12" x2="21" y2="12"></line>
+            <line x1="8" y1="18" x2="21" y2="18"></line>
+            <line x1="3" y1="6" x2="3.01" y2="6"></line>
+            <line x1="3" y1="12" x2="3.01" y2="12"></line>
+            <line x1="3" y1="18" x2="3.01" y2="18"></line>
           </svg>
         </div>
       </aside>
@@ -657,7 +718,7 @@
 
         <section class="details-panel">
           <div class="details-header" id="details-header">14 Oct.</div>
-          
+
           <div class="details-content" id="details-content">
             <div class="empty-state">
               <div class="empty-icon">☺</div>
@@ -672,6 +733,16 @@
             placeholder="Ajout évén. le 14 oct."
           />
         </section>
+
+        <section class="tasklist-section" id="tasklist-section">
+          <div class="tasklist-header">TASK LIST</div>
+          <div class="tasklist-content" id="tasklist-content">
+            <div class="tasklist-empty">
+              <div class="empty-icon">📋</div>
+              <div class="empty-text">No tasks yet. Add your first task!</div>
+            </div>
+          </div>
+        </section>
       </div>
 
       <button class="fab" id="add-btn">
@@ -681,7 +752,7 @@
       <div class="modal-overlay" id="task-modal" hidden>
         <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="task-modal-title">
           <h2 class="modal-title" id="task-modal-title">Nouvel événement</h2>
-          <p class="modal-description">
+          <p class="modal-description" id="task-modal-description">
             Ajoutez un rappel personnalisé à votre calendrier BeaverTask.
           </p>
           <form class="modal-form" id="task-form">
@@ -696,11 +767,6 @@
                 required
                 autocomplete="off"
               />
-            </div>
-
-            <div class="modal-field">
-              <label class="modal-label" for="task-date">Date</label>
-              <input class="modal-input" type="date" id="task-date" name="date" required />
             </div>
 
             <div class="modal-field">
@@ -732,12 +798,32 @@
           </form>
         </div>
       </div>
+
+      <div class="modal-overlay" id="date-jump-modal" hidden>
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="date-jump-title">
+          <h2 class="modal-title" id="date-jump-title">Aller à une date</h2>
+          <p class="modal-description">
+            Sélectionnez une date pour y accéder rapidement.
+          </p>
+          <form class="modal-form" id="date-jump-form">
+            <div class="modal-field">
+              <label class="modal-label" for="jump-date">Date</label>
+              <input class="modal-input" type="date" id="jump-date" name="date" required />
+            </div>
+
+            <div class="modal-actions">
+              <button type="button" class="modal-btn secondary" id="date-jump-cancel">Annuler</button>
+              <button type="submit" class="modal-btn primary">Aller</button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
     <script>
       const STORAGE_KEY = "beavertask_tasks";
-      
+
       const state = {
         tasks: [],
         currentYear: new Date().getFullYear(),
@@ -792,7 +878,7 @@
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         });
-        
+
         if (created) {
           state.tasks.push(created);
           saveTasks();
@@ -851,19 +937,19 @@
       const renderCalendar = () => {
         const grid = document.getElementById('calendar-grid');
         const monthDisplay = document.getElementById('month-display');
-        
+
         monthDisplay.textContent = monthNames[state.currentMonth];
-        
+
         grid.innerHTML = '';
-        
+
         const firstDay = new Date(state.currentYear, state.currentMonth, 1);
         const lastDay = new Date(state.currentYear, state.currentMonth + 1, 0);
         const startDay = firstDay.getDay();
         const totalDays = lastDay.getDate();
-        
+
         const today = new Date();
         const todayKey = getDateKey(today);
-        
+
         const taskMap = state.tasks.reduce((map, task) => {
           if (task.dueDate) {
             if (!map.has(task.dueDate)) {
@@ -873,19 +959,19 @@
           }
           return map;
         }, new Map());
-        
+
         for (let i = 0; i < startDay; i++) {
           const prevMonthDay = new Date(state.currentYear, state.currentMonth, -startDay + i + 1);
           const cell = createCalendarCell(prevMonthDay, true, taskMap);
           grid.appendChild(cell);
         }
-        
+
         for (let day = 1; day <= totalDays; day++) {
           const date = new Date(state.currentYear, state.currentMonth, day);
           const cell = createCalendarCell(date, false, taskMap);
           grid.appendChild(cell);
         }
-        
+
         const cellsCount = grid.children.length;
         const remainingCells = Math.ceil(cellsCount / 7) * 7 - cellsCount;
         for (let i = 1; i <= remainingCells; i++) {
@@ -898,38 +984,38 @@
       const createCalendarCell = (date, inactive, taskMap) => {
         const cell = document.createElement('div');
         cell.className = 'calendar-cell';
-        
+
         const dateKey = getDateKey(date);
         const today = new Date();
         const todayKey = getDateKey(today);
-        
+
         if (inactive) {
           cell.classList.add('inactive');
         }
-        
+
         if (dateKey === todayKey) {
           cell.classList.add('today');
         }
-        
+
         if (state.selectedDate && getDateKey(state.selectedDate) === dateKey) {
           cell.classList.add('selected');
         }
-        
+
         if (taskMap.has(dateKey)) {
           cell.classList.add('has-events');
         }
-        
+
         const dateSpan = document.createElement('span');
         dateSpan.className = 'cell-date';
         dateSpan.textContent = date.getDate();
         cell.appendChild(dateSpan);
-        
+
         cell.addEventListener('click', () => {
           state.selectedDate = date;
           renderCalendar();
           renderDetails();
         });
-        
+
         return cell;
       };
 
@@ -937,18 +1023,18 @@
         const detailsHeader = document.getElementById('details-header');
         const detailsContent = document.getElementById('details-content');
         const eventInput = document.getElementById('event-input');
-        
+
         ensureSelectedDate();
 
         const dateKey = getDateKey(state.selectedDate);
         const day = state.selectedDate.getDate();
         const month = monthNamesFull[state.selectedDate.getMonth()].substring(0, 3);
-        
+
         detailsHeader.textContent = `${day} ${month}.`;
         eventInput.placeholder = `Ajout évén. le ${day} ${month.toLowerCase()}.`;
-        
+
         const tasksForDate = state.tasks.filter(task => task.dueDate === dateKey);
-        
+
         if (tasksForDate.length === 0) {
           detailsContent.innerHTML = `
             <div class="empty-state">
@@ -969,9 +1055,9 @@
               </div>
             </div>
           `).join('');
-          
+
           detailsContent.innerHTML = `<div class="task-list">${taskListHTML}</div>`;
-          
+
           detailsContent.querySelectorAll('.task-checkbox').forEach(checkbox => {
             checkbox.addEventListener('click', (e) => {
               const id = e.target.dataset.id;
@@ -981,7 +1067,7 @@
               }
             });
           });
-          
+
           detailsContent.querySelectorAll('.task-action-btn.delete').forEach(btn => {
             btn.addEventListener('click', (e) => {
               const id = e.target.dataset.id;
@@ -1016,26 +1102,23 @@
       const taskModal = document.getElementById('task-modal');
       const taskForm = document.getElementById('task-form');
       const taskTitleInput = document.getElementById('task-title');
-      const taskDateInput = document.getElementById('task-date');
       const taskTagInput = document.getElementById('task-tag');
       const taskDescriptionInput = document.getElementById('task-description');
       const taskCancelBtn = document.getElementById('task-cancel');
-
-      const updateModalDateInput = () => {
-        if (!taskDateInput) {
-          return;
-        }
-
-        ensureSelectedDate();
-        taskDateInput.value = getDateKey(state.selectedDate);
-      };
+      const taskModalDescription = document.getElementById('task-modal-description');
 
       const openTaskModal = () => {
         if (!taskModal) {
           return;
         }
 
-        updateModalDateInput();
+        ensureSelectedDate();
+        const day = state.selectedDate.getDate();
+        const month = monthNamesFull[state.selectedDate.getMonth()];
+        const year = state.selectedDate.getFullYear();
+        
+        taskModalDescription.textContent = `Ajouter un événement pour le ${day} ${month} ${year}.`;
+        
         taskModal.removeAttribute('hidden');
         requestAnimationFrame(() => {
           taskTitleInput?.focus();
@@ -1049,7 +1132,6 @@
 
         taskModal.setAttribute('hidden', '');
         taskForm?.reset();
-        updateModalDateInput();
       };
 
       document.getElementById('prev-month').addEventListener('click', () => changeMonth(-1));
@@ -1075,16 +1157,12 @@
         }
 
         ensureSelectedDate();
-        const dueDateValue = taskDateInput?.value || getDateKey(state.selectedDate);
         const descriptionValue = taskDescriptionInput?.value.trim() ?? '';
         const tagValue = taskTagInput?.value.trim() ?? '';
 
-        const selectedDate = parseDateInput(dueDateValue);
-        state.selectedDate = selectedDate;
-
         addTask({
           title,
-          dueDate: getDateKey(selectedDate),
+          dueDate: getDateKey(state.selectedDate),
           description: descriptionValue,
           tag: tagValue,
           completed: false,
@@ -1094,8 +1172,12 @@
       });
 
       document.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape' && taskModal && !taskModal.hasAttribute('hidden')) {
-          closeTaskModal();
+        if (event.key === 'Escape') {
+          if (taskModal && !taskModal.hasAttribute('hidden')) {
+            closeTaskModal();
+          } else if (dateJumpModal && !dateJumpModal.hasAttribute('hidden')) {
+            closeDateJumpModal();
+          }
         }
       });
 
@@ -1113,19 +1195,210 @@
             tag: '',
             completed: false,
           });
-          
+
           e.target.value = '';
         }
       });
 
-      document.getElementById('search-btn').addEventListener('click', () => {
-        const today = new Date();
-        state.currentYear = today.getFullYear();
-        state.currentMonth = today.getMonth();
-        state.selectedDate = today;
+      const dateJumpModal = document.getElementById('date-jump-modal');
+      const dateJumpForm = document.getElementById('date-jump-form');
+      const jumpDateInput = document.getElementById('jump-date');
+      const dateJumpCancelBtn = document.getElementById('date-jump-cancel');
+
+      const openDateJumpModal = () => {
+        if (!dateJumpModal) {
+          return;
+        }
+
+        ensureSelectedDate();
+        jumpDateInput.value = getDateKey(state.selectedDate);
+        
+        dateJumpModal.removeAttribute('hidden');
+        requestAnimationFrame(() => {
+          jumpDateInput?.focus();
+        });
+      };
+
+      const closeDateJumpModal = () => {
+        if (!dateJumpModal) {
+          return;
+        }
+
+        dateJumpModal.setAttribute('hidden', '');
+        dateJumpForm?.reset();
+      };
+
+      document.getElementById('search-btn').addEventListener('click', openDateJumpModal);
+
+      dateJumpCancelBtn?.addEventListener('click', closeDateJumpModal);
+
+      dateJumpModal?.addEventListener('click', (event) => {
+        if (event.target === dateJumpModal) {
+          closeDateJumpModal();
+        }
+      });
+
+      dateJumpForm?.addEventListener('submit', (event) => {
+        event.preventDefault();
+
+        const dateValue = jumpDateInput?.value;
+        if (!dateValue) {
+          return;
+        }
+
+        const targetDate = parseDateInput(dateValue);
+        state.currentYear = targetDate.getFullYear();
+        state.currentMonth = targetDate.getMonth();
+        state.selectedDate = targetDate;
+        
         renderCalendar();
         renderDetails();
+        closeDateJumpModal();
       });
+
+      const showCalendarView = () => {
+        document.querySelector('.calendar-section').style.display = 'flex';
+        document.querySelector('.details-panel').style.display = 'flex';
+        document.getElementById('tasklist-section').classList.remove('active');
+        document.getElementById('calendar-icon').classList.add('active');
+        document.getElementById('tasklist-icon').classList.remove('active');
+      };
+
+      const showTaskListView = () => {
+        document.querySelector('.calendar-section').style.display = 'none';
+        document.querySelector('.details-panel').style.display = 'none';
+        document.getElementById('tasklist-section').classList.add('active');
+        document.getElementById('calendar-icon').classList.remove('active');
+        document.getElementById('tasklist-icon').classList.add('active');
+        renderTaskList();
+      };
+
+      const renderTaskList = () => {
+        const tasklistContent = document.getElementById('tasklist-content');
+        
+        if (state.tasks.length === 0) {
+          tasklistContent.innerHTML = `
+            <div class="tasklist-empty">
+              <div class="empty-icon">📋</div>
+              <div class="empty-text">No tasks yet. Add your first task!</div>
+            </div>
+          `;
+          return;
+        }
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        const incomplete = state.tasks.filter(t => !t.completed);
+        const completed = state.tasks.filter(t => t.completed);
+        
+        const upcoming = incomplete.filter(t => {
+          if (!t.dueDate) return false;
+          const taskDate = new Date(t.dueDate);
+          return taskDate >= today;
+        }).sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+
+        const overdue = incomplete.filter(t => {
+          if (!t.dueDate) return false;
+          const taskDate = new Date(t.dueDate);
+          return taskDate < today;
+        }).sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+
+        const noDueDate = incomplete.filter(t => !t.dueDate);
+        
+        let html = '';
+
+        if (overdue.length > 0) {
+          html += `
+            <div class="tasklist-group">
+              <div class="tasklist-group-title">Overdue (${overdue.length})</div>
+              <div class="task-list">
+                ${overdue.map(task => renderTaskListItem(task)).join('')}
+              </div>
+            </div>
+          `;
+        }
+
+        if (upcoming.length > 0) {
+          html += `
+            <div class="tasklist-group">
+              <div class="tasklist-group-title">Upcoming (${upcoming.length})</div>
+              <div class="task-list">
+                ${upcoming.map(task => renderTaskListItem(task)).join('')}
+              </div>
+            </div>
+          `;
+        }
+
+        if (noDueDate.length > 0) {
+          html += `
+            <div class="tasklist-group">
+              <div class="tasklist-group-title">No Due Date (${noDueDate.length})</div>
+              <div class="task-list">
+                ${noDueDate.map(task => renderTaskListItem(task)).join('')}
+              </div>
+            </div>
+          `;
+        }
+
+        if (completed.length > 0) {
+          html += `
+            <div class="tasklist-group">
+              <div class="tasklist-group-title">Completed (${completed.length})</div>
+              <div class="task-list">
+                ${completed.map(task => renderTaskListItem(task)).join('')}
+              </div>
+            </div>
+          `;
+        }
+
+        tasklistContent.innerHTML = html;
+
+        tasklistContent.querySelectorAll('.task-checkbox').forEach(checkbox => {
+          checkbox.addEventListener('click', (e) => {
+            const id = e.target.dataset.id;
+            const task = state.tasks.find(t => t.id === id);
+            if (task) {
+              updateTask(id, { completed: !task.completed });
+              renderTaskList();
+            }
+          });
+        });
+
+        tasklistContent.querySelectorAll('.task-action-btn.delete').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const id = e.target.dataset.id;
+            if (confirm('Delete this task?')) {
+              deleteTask(id);
+              renderTaskList();
+            }
+          });
+        });
+      };
+
+      const renderTaskListItem = (task) => {
+        const formattedDate = task.dueDate 
+          ? new Date(task.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+          : 'No due date';
+        
+        const tagDisplay = task.tag ? ` • ${task.tag}` : '';
+        
+        return `
+          <div class="task-item">
+            <div class="task-checkbox ${task.completed ? 'completed' : ''}" data-id="${task.id}"></div>
+            <div class="task-info">
+              <div class="task-title">${task.title}</div>
+              <div class="task-meta">${formattedDate}${tagDisplay}</div>
+            </div>
+            <div class="task-actions">
+              <button class="task-action-btn delete" data-id="${task.id}">🗑️</button>
+            </div>
+          </div>
+        `;
+      };
+
+      document.getElementById('calendar-icon').addEventListener('click', showCalendarView);
+      document.getElementById('tasklist-icon').addEventListener('click', showTaskListView);
 
       const init = () => {
         state.tasks = loadTasks();
