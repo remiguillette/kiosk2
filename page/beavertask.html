@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Beavertask - Beaver Kiosk</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/main.min.css"
+      integrity="sha256-JcUtU3B8eCmF2xZp6qSNBR6tehXHm0fXP04laAWim3M="
+      crossorigin="anonymous"
+    />
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: radial-gradient(circle at top, #1d1d2d, #090912 70%);
+        --card: rgba(24, 24, 36, 0.92);
+        --card-soft: rgba(24, 24, 36, 0.6);
+        --accent: #f89422;
+        --accent-strong: #ffb347;
+        --text-main: #f2f3f7;
+        --text-muted: #bfc0d2;
+        --danger: #f45c84;
+        --success: #26d9a6;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: "Inter", "Segoe UI", sans-serif;
+        background: var(--bg);
+        color: var(--text-main);
+        min-height: 100vh;
+        padding: clamp(1.2rem, 2vw, 2.5rem);
+        display: flex;
+        justify-content: center;
+      }
+
+      main {
+        width: min(1200px, 100%);
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+
+      header h1 {
+        font-size: clamp(2rem, 5vw, 3rem);
+        font-weight: 700;
+        display: flex;
+        flex-direction: column;
+        line-height: 1.1;
+      }
+
+      header h1 span:nth-child(2) {
+        color: var(--accent);
+        font-size: clamp(1rem, 3vw, 1.15rem);
+        font-weight: 500;
+        margin-top: 0.4rem;
+      }
+
+      .status-pill {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.07);
+        padding: 0.75rem 1.2rem;
+        border-radius: 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+        font-size: 0.9rem;
+        max-width: 260px;
+      }
+
+      .status-pill strong {
+        color: var(--accent-strong);
+        font-size: 1.1rem;
+      }
+
+      nav.tabs {
+        display: inline-flex;
+        background: rgba(24, 24, 36, 0.65);
+        border-radius: 999px;
+        padding: 0.4rem;
+        gap: 0.2rem;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        width: fit-content;
+      }
+
+      .tab-btn {
+        border: none;
+        background: transparent;
+        color: var(--text-muted);
+        padding: 0.65rem 1.3rem;
+        border-radius: 999px;
+        font-weight: 600;
+        letter-spacing: 0.01em;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .tab-btn.active {
+        background: var(--accent);
+        color: #121219;
+        box-shadow: 0 10px 24px rgba(248, 148, 34, 0.35);
+      }
+
+      section.view {
+        background: var(--card);
+        border-radius: 26px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        padding: clamp(1.25rem, 2vw, 2rem);
+        display: none;
+        flex-direction: column;
+        gap: 1.5rem;
+        backdrop-filter: blur(16px);
+      }
+
+      section.view.active {
+        display: flex;
+      }
+
+      .list-header {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .search-box {
+        display: flex;
+        align-items: center;
+        background: var(--card-soft);
+        border-radius: 999px;
+        padding: 0.4rem 0.8rem;
+        gap: 0.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+      }
+
+      .search-box input {
+        background: transparent;
+        border: none;
+        color: inherit;
+        outline: none;
+        min-width: 220px;
+      }
+
+      .filters {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+      }
+
+      .filters button {
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(255, 255, 255, 0.06);
+        color: var(--text-muted);
+        padding: 0.45rem 1rem;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-weight: 600;
+        font-size: 0.85rem;
+      }
+
+      .filters button.active {
+        background: var(--accent);
+        color: #121219;
+        border-color: transparent;
+      }
+
+      .task-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 1.2rem;
+      }
+
+      .task-card {
+        background: rgba(16, 16, 26, 0.9);
+        border-radius: 20px;
+        padding: 1.1rem;
+        border: 1px solid rgba(255, 255, 255, 0.07);
+        display: flex;
+        flex-direction: column;
+        gap: 0.9rem;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .task-card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(248, 148, 34, 0.1), transparent 40%);
+        pointer-events: none;
+      }
+
+      .task-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        display: flex;
+        justify-content: space-between;
+        gap: 0.5rem;
+      }
+
+      .task-title span {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--text-muted);
+      }
+
+      .task-title .status {
+        color: var(--success);
+        font-weight: 600;
+      }
+
+      .task-title .status.pending {
+        color: var(--accent-strong);
+      }
+
+      .task-title .status.overdue {
+        color: var(--danger);
+      }
+
+      .task-desc {
+        color: rgba(255, 255, 255, 0.75);
+        font-size: 0.95rem;
+        line-height: 1.5;
+      }
+
+      .task-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.8rem;
+        color: var(--text-muted);
+      }
+
+      .task-actions {
+        display: flex;
+        gap: 0.6rem;
+        flex-wrap: wrap;
+      }
+
+      .task-actions button {
+        flex: 1 1 110px;
+        border-radius: 10px;
+        padding: 0.55rem 0.8rem;
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .task-actions button.primary {
+        background: var(--accent);
+        color: #121219;
+      }
+
+      .task-actions button.secondary {
+        background: rgba(255, 255, 255, 0.06);
+        color: var(--text-main);
+      }
+
+      .task-actions button.delete {
+        background: rgba(244, 92, 132, 0.15);
+        color: var(--danger);
+      }
+
+      .task-actions button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25);
+      }
+
+      form#task-form {
+        display: grid;
+        gap: 1.1rem;
+      }
+
+      .form-row {
+        display: grid;
+        gap: 0.6rem;
+      }
+
+      label {
+        font-weight: 600;
+        color: var(--text-muted);
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+      }
+
+      input,
+      textarea,
+      select {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        padding: 0.8rem 1rem;
+        border-radius: 12px;
+        color: var(--text-main);
+        font-size: 1rem;
+        resize: vertical;
+        min-height: 48px;
+      }
+
+      textarea {
+        min-height: 120px;
+      }
+
+      .form-actions {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+
+      .btn {
+        border: none;
+        padding: 0.8rem 1.4rem;
+        border-radius: 12px;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        cursor: pointer;
+      }
+
+      .btn.primary {
+        background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+        color: #121219;
+      }
+
+      .btn.secondary {
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--text-main);
+      }
+
+      #calendar {
+        width: 100%;
+      }
+
+      .empty-state {
+        padding: 2rem;
+        border: 1px dashed rgba(255, 255, 255, 0.18);
+        border-radius: 18px;
+        text-align: center;
+        color: var(--text-muted);
+      }
+
+      .qr-modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.65);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+        visibility: hidden;
+        opacity: 0;
+        transition: opacity 0.25s ease;
+        z-index: 50;
+      }
+
+      .qr-modal.active {
+        visibility: visible;
+        opacity: 1;
+      }
+
+      .qr-content {
+        background: rgba(18, 18, 28, 0.95);
+        padding: 2rem;
+        border-radius: 22px;
+        max-width: 360px;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 1.2rem;
+        align-items: center;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      .qr-content h2 {
+        font-size: 1.2rem;
+      }
+
+      .qr-close {
+        align-self: flex-end;
+        background: transparent;
+        border: none;
+        color: var(--text-muted);
+        font-size: 1.5rem;
+        cursor: pointer;
+      }
+
+      .qr-canvas canvas {
+        width: 200px !important;
+        height: 200px !important;
+      }
+
+      @media (max-width: 720px) {
+        body {
+          padding: 1.2rem;
+        }
+
+        .task-meta {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 0.4rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>
+          <span>Beavertask</span>
+          <span>Plan, track, and share your tasks effortlessly.</span>
+        </h1>
+        <div class="status-pill">
+          <strong id="task-count">0 tasks</strong>
+          <span id="completed-count">0 completed · 0 pending</span>
+        </div>
+      </header>
+
+      <nav class="tabs" aria-label="Task views">
+        <button class="tab-btn active" data-tab="list">Task list</button>
+        <button class="tab-btn" data-tab="add">Add task</button>
+        <button class="tab-btn" data-tab="calendar">Calendar</button>
+      </nav>
+
+      <section id="list" class="view active" aria-labelledby="Task list">
+        <div class="list-header">
+          <div class="search-box">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input
+              type="search"
+              id="search-input"
+              placeholder="Search tasks by title, description, or tag"
+              aria-label="Search tasks"
+            />
+          </div>
+          <div class="filters" role="group" aria-label="Task filters">
+            <button class="active" data-filter="all">All</button>
+            <button data-filter="pending">Pending</button>
+            <button data-filter="completed">Completed</button>
+            <button data-filter="overdue">Overdue</button>
+          </div>
+        </div>
+        <div id="task-list" class="task-grid"></div>
+        <p id="empty-list" class="empty-state" hidden>
+          No tasks match your filters yet. Add one from the "Add task" tab!
+        </p>
+      </section>
+
+      <section id="add" class="view" aria-labelledby="Add task">
+        <form id="task-form">
+          <div class="form-row">
+            <label for="title">Title</label>
+            <input
+              type="text"
+              id="title"
+              name="title"
+              placeholder="Plan sprint review"
+              required
+            />
+          </div>
+          <div class="form-row">
+            <label for="description">Description</label>
+            <textarea
+              id="description"
+              name="description"
+              placeholder="Add context, notes, or a checklist"
+            ></textarea>
+          </div>
+          <div class="form-row">
+            <label for="due-date">Due date</label>
+            <input type="date" id="due-date" name="due-date" required />
+          </div>
+          <div class="form-row">
+            <label for="tag">Tag</label>
+            <input
+              type="text"
+              id="tag"
+              name="tag"
+              placeholder="Design, marketing, chores…"
+            />
+          </div>
+          <div class="form-actions">
+            <button type="reset" class="btn secondary">Reset</button>
+            <button type="submit" class="btn primary">Save task</button>
+          </div>
+        </form>
+      </section>
+
+      <section id="calendar" class="view" aria-labelledby="Calendar view">
+        <div id="calendar-board"></div>
+      </section>
+    </main>
+
+    <div class="qr-modal" id="qr-modal" role="dialog" aria-modal="true">
+      <div class="qr-content">
+        <button class="qr-close" id="qr-close" aria-label="Close QR viewer">
+          &times;
+        </button>
+        <h2 id="qr-title">Task QR code</h2>
+        <div class="qr-canvas" id="qr-canvas"></div>
+        <p class="task-desc" id="qr-description"></p>
+      </div>
+    </div>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"
+      integrity="sha256-yeaLq5nVLyEohFqiiOeVDEXi/UrLXruOGn32QRDz+WQ="
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"
+      integrity="sha256-L8f/QgHXdlOaFL+V50xTH0eQwikA9A5Qa4dFwdW2xLU="
+      crossorigin="anonymous"
+    ></script>
+    <script>
+      const storageKey = "beaverTasks";
+      const state = {
+        tasks: [],
+        filter: "all",
+        search: "",
+        calendar: null,
+      };
+
+      const listView = document.getElementById("list");
+      const addView = document.getElementById("add");
+      const calendarView = document.getElementById("calendar");
+      const calendarBoard = document.getElementById("calendar-board");
+      const tabs = document.querySelectorAll(".tab-btn");
+      const taskList = document.getElementById("task-list");
+      const emptyState = document.getElementById("empty-list");
+      const taskCount = document.getElementById("task-count");
+      const completedCount = document.getElementById("completed-count");
+      const searchInput = document.getElementById("search-input");
+      const filterButtons = document.querySelectorAll(".filters button");
+      const form = document.getElementById("task-form");
+      const qrModal = document.getElementById("qr-modal");
+      const qrClose = document.getElementById("qr-close");
+      const qrCanvas = document.getElementById("qr-canvas");
+      const qrDescription = document.getElementById("qr-description");
+      const qrTitle = document.getElementById("qr-title");
+
+      const loadTasks = () => {
+        try {
+          const data = JSON.parse(localStorage.getItem(storageKey));
+          state.tasks = Array.isArray(data) ? data : [];
+        } catch (error) {
+          console.warn("Unable to parse stored tasks", error);
+          state.tasks = [];
+        }
+      };
+
+      const persistTasks = () => {
+        localStorage.setItem(storageKey, JSON.stringify(state.tasks));
+      };
+
+      const changeTab = (tab) => {
+        document.querySelectorAll("section.view").forEach((section) => {
+          section.classList.toggle("active", section.id === tab);
+        });
+
+        tabs.forEach((button) => {
+          button.classList.toggle("active", button.dataset.tab === tab);
+        });
+
+        if (tab === "calendar" && state.calendar) {
+          state.calendar.render();
+        }
+      };
+
+      const statusFromTask = (task) => {
+        if (task.completed) return "completed";
+        if (task.dueDate) {
+          const due = new Date(task.dueDate);
+          const today = new Date();
+          if (due < new Date(today.getFullYear(), today.getMonth(), today.getDate())) {
+            return "overdue";
+          }
+        }
+        return "pending";
+      };
+
+      const updateSummary = () => {
+        const total = state.tasks.length;
+        const completed = state.tasks.filter((task) => task.completed).length;
+        const pending = total - completed;
+        taskCount.textContent = `${total} ${total === 1 ? "task" : "tasks"}`;
+        completedCount.textContent = `${completed} completed · ${pending} pending`;
+      };
+
+      const generateTaskHTML = (task) => {
+        const status = statusFromTask(task);
+        const dueLabel = task.dueDate
+          ? new Date(task.dueDate + "T00:00:00").toLocaleDateString(undefined, {
+              weekday: "short",
+              year: "numeric",
+              month: "short",
+              day: "numeric",
+            })
+          : "No due date";
+
+        return `
+          <article class="task-card" data-id="${task.id}">
+            <header class="task-title">
+              <div>
+                ${task.title}
+                ${task.tag ? `<span>${task.tag}</span>` : ""}
+              </div>
+              <span class="status ${status}">${status}</span>
+            </header>
+            <p class="task-desc">${task.description || "No description provided."}</p>
+            <div class="task-meta">
+              <span>Due ${dueLabel}</span>
+              <span>Created ${new Date(task.createdAt).toLocaleString()}</span>
+            </div>
+            <div class="task-actions">
+              <button class="secondary" data-action="qr">Share QR</button>
+              <button class="primary" data-action="toggle">
+                ${task.completed ? "Mark pending" : "Mark complete"}
+              </button>
+              <button class="delete" data-action="delete">Delete</button>
+            </div>
+          </article>
+        `;
+      };
+
+      const renderTasks = () => {
+        const filtered = state.tasks.filter((task) => {
+          const status = statusFromTask(task);
+          const matchesFilter =
+            state.filter === "all" ? true : state.filter === status;
+          const inSearch = `${task.title} ${task.description} ${task.tag}`
+            .toLowerCase()
+            .includes(state.search.toLowerCase());
+          return matchesFilter && inSearch;
+        });
+
+        if (!filtered.length) {
+          taskList.innerHTML = "";
+          emptyState.hidden = false;
+        } else {
+          taskList.innerHTML = filtered.map(generateTaskHTML).join("");
+          emptyState.hidden = true;
+        }
+
+        if (state.calendar) {
+          const events = state.tasks.map((task) => ({
+            id: task.id,
+            title: task.title,
+            start: task.dueDate,
+            backgroundColor: task.completed ? "#26d9a6" : "#f89422",
+            borderColor: task.completed ? "#26d9a6" : "#f89422",
+          }));
+          state.calendar.removeAllEvents();
+          state.calendar.addEventSource(events.filter((event) => event.start));
+        }
+
+        updateSummary();
+      };
+
+      const addTask = (task) => {
+        state.tasks.push(task);
+        persistTasks();
+        renderTasks();
+      };
+
+      const updateTask = (id, updates) => {
+        const index = state.tasks.findIndex((task) => task.id === id);
+        if (index >= 0) {
+          state.tasks[index] = { ...state.tasks[index], ...updates };
+          persistTasks();
+          renderTasks();
+        }
+      };
+
+      const deleteTask = (id) => {
+        state.tasks = state.tasks.filter((task) => task.id !== id);
+        persistTasks();
+        renderTasks();
+      };
+
+      const handleAction = (event) => {
+        const button = event.target.closest("button[data-action]");
+        if (!button) return;
+        const card = button.closest(".task-card");
+        const id = card?.dataset.id;
+        if (!id) return;
+
+        if (button.dataset.action === "toggle") {
+          const task = state.tasks.find((t) => t.id === id);
+          updateTask(id, { completed: !task.completed });
+        } else if (button.dataset.action === "delete") {
+          if (confirm("Delete this task?")) {
+            deleteTask(id);
+          }
+        } else if (button.dataset.action === "qr") {
+          const task = state.tasks.find((t) => t.id === id);
+          openQRModal(task);
+        }
+      };
+
+      const resetForm = () => {
+        form.reset();
+        const today = new Date().toISOString().split("T")[0];
+        document.getElementById("due-date").value = today;
+      };
+
+      const openQRModal = (task) => {
+        qrTitle.textContent = task.title;
+        qrDescription.textContent = task.description || "No description";
+        qrCanvas.innerHTML = "";
+        const dueLabel = new Date(task.dueDate + "T00:00:00").toLocaleDateString();
+        const shareText = [
+          `Task: ${task.title}`,
+          `Due: ${dueLabel}`,
+          task.tag ? `Tag: ${task.tag}` : null,
+          task.description ? `Notes: ${task.description}` : null,
+        ]
+          .filter(Boolean)
+          .join("\n");
+
+        QRCode.toCanvas(
+          shareText,
+          { width: 200, margin: 1 },
+          (err, canvas) => {
+            if (err) {
+              qrCanvas.textContent = "Unable to create QR code";
+              return;
+            }
+            qrCanvas.appendChild(canvas);
+          }
+        );
+        qrModal.classList.add("active");
+      };
+
+      const closeQRModal = () => {
+        qrModal.classList.remove("active");
+      };
+
+      tabs.forEach((tab) =>
+        tab.addEventListener("click", () => changeTab(tab.dataset.tab))
+      );
+
+      searchInput.addEventListener("input", (event) => {
+        state.search = event.target.value;
+        renderTasks();
+      });
+
+      filterButtons.forEach((button) =>
+        button.addEventListener("click", () => {
+          state.filter = button.dataset.filter;
+          filterButtons.forEach((btn) =>
+            btn.classList.toggle("active", btn === button)
+          );
+          renderTasks();
+        })
+      );
+
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const data = new FormData(form);
+        const task = {
+          id: crypto.randomUUID(),
+          title: data.get("title").trim(),
+          description: data.get("description").trim(),
+          dueDate: data.get("due-date"),
+          tag: data.get("tag").trim(),
+          completed: false,
+          createdAt: new Date().toISOString(),
+        };
+
+        if (!task.title) {
+          alert("Please provide a title");
+          return;
+        }
+
+        addTask(task);
+        resetForm();
+        changeTab("list");
+      });
+
+      form.addEventListener("reset", () => {
+        setTimeout(resetForm, 0);
+      });
+
+      taskList.addEventListener("click", handleAction);
+
+      qrClose.addEventListener("click", closeQRModal);
+      qrModal.addEventListener("click", (event) => {
+        if (event.target === qrModal) {
+          closeQRModal();
+        }
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          closeQRModal();
+        }
+      });
+
+      document.addEventListener("visibilitychange", () => {
+        if (!document.hidden) {
+          loadTasks();
+          renderTasks();
+        }
+      });
+
+      const initCalendar = () => {
+        state.calendar = new FullCalendar.Calendar(calendarBoard, {
+          initialView: "dayGridMonth",
+          height: "auto",
+          headerToolbar: {
+            left: "prev,next today",
+            center: "title",
+            right: "dayGridMonth,listWeek",
+          },
+          eventDisplay: "block",
+          displayEventTime: false,
+        });
+      };
+
+      const init = () => {
+        resetForm();
+        loadTasks();
+        initCalendar();
+        renderTasks();
+      };
+
+      init();
+    </script>
+  </body>
+</html>
