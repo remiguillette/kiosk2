@@ -863,6 +863,7 @@
       const searchInput = document.getElementById("search-input");
       const filterButtons = document.querySelectorAll(".filters button");
       const form = document.getElementById("task-form");
+      const dueDateInput = document.getElementById("due-date");
       const qrModal = document.getElementById("qr-modal");
       const qrClose = document.getElementById("qr-close");
       const qrCanvas = document.getElementById("qr-canvas");
@@ -1028,10 +1029,15 @@
         }
       };
 
+      const setDefaultDueDate = () => {
+        if (!dueDateInput) return;
+        const today = new Date().toISOString().split("T")[0];
+        dueDateInput.value = today;
+      };
+
       const resetForm = () => {
         form.reset();
-        const today = new Date().toISOString().split("T")[0];
-        document.getElementById("due-date").value = today;
+        setDefaultDueDate();
       };
 
       const openQRModal = (task) => {
@@ -1109,7 +1115,7 @@
       });
 
       form.addEventListener("reset", () => {
-        setTimeout(resetForm, 0);
+        setTimeout(setDefaultDueDate, 0);
       });
 
       taskList.addEventListener("click", handleAction);
