@@ -44,23 +44,35 @@
 
       main {
         position: relative;
-        width: 100%;
-        height: 100%;
+        width: min(1200px, 100%);
+        min-height: 100vh;
         display: flex;
         flex-direction: column;
-        gap: 1.5rem;
-        padding: clamp(1.2rem, 3vw, 2.4rem);
+        margin: 0 auto;
         overflow: hidden;
       }
 
-      .primary-pane {
-        position: relative;
+      .layout {
         flex: 1;
         display: flex;
         flex-direction: column;
         gap: 1.5rem;
-        min-width: 0;
-        overflow: hidden;
+        padding: clamp(1rem, 3vw, 1.8rem)
+          clamp(1.2rem, 4vw, 2.5rem)
+          clamp(1.5rem, 4vw, 2.5rem);
+        min-height: 0;
+      }
+
+      .primary-pane {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        min-height: 0;
+        flex: 1;
+      }
+
+      .primary-pane.hidden {
+        display: none;
       }
 
       .views-stack {
@@ -84,33 +96,110 @@
       }
 
       header {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: rgba(18, 18, 28, 0.85);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        padding: clamp(0.8rem, 2vw, 1.2rem)
+          clamp(1.2rem, 4vw, 2.5rem);
         display: flex;
+        align-items: center;
         justify-content: space-between;
-        align-items: flex-start;
         flex-wrap: wrap;
         gap: 1rem;
       }
 
-      header h1 {
-        font-size: clamp(2rem, 5vw, 3rem);
-        font-weight: 700;
+      .title-group {
         display: flex;
         flex-direction: column;
-        line-height: 1.1;
+        gap: 0.35rem;
       }
 
-      header h1 span:nth-child(2) {
+      header h1 {
+        font-size: clamp(1.6rem, 4vw, 1.9rem);
+        font-weight: 700;
+        color: #fff;
+      }
+
+      .subtitle {
+        font-size: 0.95rem;
         color: var(--accent);
-        font-size: clamp(1rem, 3vw, 1.15rem);
-        font-weight: 500;
-        margin-top: 0.4rem;
+      }
+
+      .menu {
+        position: relative;
+      }
+
+      .menu-btn {
+        background: var(--accent);
+        color: #121219;
+        border: none;
+        padding: 0.6rem 1.2rem;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 8px 20px rgba(248, 148, 34, 0.35);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .menu-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 12px 28px rgba(248, 148, 34, 0.45);
+      }
+
+      .menu-btn:focus-visible {
+        outline: 2px solid var(--accent-strong);
+        outline-offset: 2px;
+      }
+
+      .dropdown {
+        position: absolute;
+        top: calc(100% + 0.5rem);
+        right: 0;
+        display: none;
+        flex-direction: column;
+        background: rgba(24, 24, 36, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        min-width: 180px;
+      }
+
+      .dropdown button {
+        border: none;
+        background: transparent;
+        color: var(--text-main);
+        padding: 0.8rem 1.2rem;
+        text-align: left;
+        cursor: pointer;
+        transition: background 0.2s ease;
+        font-weight: 600;
+        font-size: 0.95rem;
+      }
+
+      .dropdown button:hover,
+      .dropdown button:focus-visible {
+        background: rgba(255, 255, 255, 0.08);
+        outline: none;
+      }
+
+      .dropdown button.active {
+        background: rgba(255, 255, 255, 0.12);
+        color: var(--accent-strong);
+      }
+
+      .menu.open .dropdown {
+        display: flex;
       }
 
       .status-pill {
         background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.07);
-        padding: 0.75rem 1.2rem;
-        border-radius: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        padding: 0.6rem 1rem;
+        border-radius: 10px;
         display: flex;
         flex-direction: column;
         gap: 0.3rem;
@@ -121,34 +210,6 @@
       .status-pill strong {
         color: var(--accent-strong);
         font-size: 1.1rem;
-      }
-
-      nav.tabs {
-        display: inline-flex;
-        background: rgba(24, 24, 36, 0.65);
-        border-radius: 999px;
-        padding: 0.4rem;
-        gap: 0.2rem;
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        width: fit-content;
-      }
-
-      .tab-btn {
-        border: none;
-        background: transparent;
-        color: var(--text-muted);
-        padding: 0.65rem 1.3rem;
-        border-radius: 999px;
-        font-weight: 600;
-        letter-spacing: 0.01em;
-        cursor: pointer;
-        transition: all 0.2s ease;
-      }
-
-      .tab-btn.active {
-        background: var(--accent);
-        color: #121219;
-        box-shadow: 0 10px 24px rgba(248, 148, 34, 0.35);
       }
 
       section.view {
@@ -163,6 +224,7 @@
         flex: 1;
         min-height: 0;
         overflow-y: auto;
+        margin: 0;
       }
 
       section.view.active {
@@ -606,7 +668,7 @@
       }
 
       @media (orientation: landscape) {
-        main {
+        .layout {
           flex-direction: row;
           align-items: stretch;
           gap: clamp(1.2rem, 2vw, 2.4rem);
@@ -614,93 +676,32 @@
 
         .primary-pane {
           flex: 1 1 60%;
-          gap: clamp(1rem, 1.5vw, 1.5rem);
-        }
-
-        .views-stack {
-          flex: 1;
-          padding-top: clamp(7rem, 16vh, 11rem);
-        }
-
-        section.view {
-          margin: 0;
-          border-radius: 0;
-          padding: clamp(1.5rem, 2vw, 2rem);
-        }
-
-        .calendar-pane {
-          display: flex;
-          flex: 0 0 min(40%, 520px);
         }
 
         .calendar-pane.active {
           flex: 0 0 min(40%, 520px);
         }
 
-        .calendar-pane .view {
-          display: flex;
-          border-radius: 0;
-          margin: 0;
-          padding: clamp(1.5rem, 2vw, 2rem);
+        .primary-pane.hidden + .calendar-pane.active {
+          flex: 1 1 auto;
         }
 
-        .calendar-pane #calendar {
-          display: flex;
-        }
-
-        header {
-          position: absolute;
-          top: clamp(1.2rem, 2.2vw, 2.2rem);
-          left: clamp(1.2rem, 2.2vw, 2.2rem);
-          right: clamp(5.2rem, 12vw, 12rem);
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-start;
-          gap: 1.2rem;
-          background: rgba(24, 24, 36, 0.75);
+        section.view {
           border-radius: 24px;
-          padding: clamp(1rem, 1.8vw, 1.6rem);
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          box-shadow: 0 18px 36px rgba(0, 0, 0, 0.35);
-          backdrop-filter: blur(18px);
-          z-index: 5;
-        }
-
-        header h1 {
-          font-size: clamp(1.6rem, 3vw, 2.2rem);
-        }
-
-        header h1 span:nth-child(2) {
-          font-size: clamp(0.9rem, 1.6vw, 1.05rem);
-        }
-
-        nav.tabs {
-          position: absolute;
-          right: clamp(1.2rem, 2.5vw, 2.5rem);
-          top: clamp(1.2rem, 2.5vw, 2.5rem);
-          display: flex;
-          flex-direction: column;
-          background: rgba(24, 24, 36, 0.85);
-          border-radius: 22px;
-          padding: 0.75rem 0.6rem;
-          gap: 0.4rem;
-          border: 1px solid rgba(255, 255, 255, 0.12);
-          box-shadow: 0 18px 36px rgba(0, 0, 0, 0.45);
-          z-index: 4;
-        }
-
-        .tab-btn {
-          padding: 0.6rem 1.4rem;
-        }
-
-        .list-header {
-          align-items: flex-end;
         }
       }
 
       @media (max-width: 720px) {
-        main {
-          padding: 1.2rem;
+        header {
+          padding: 1rem 1.2rem;
+        }
+
+        .layout {
+          padding: 1rem 1.2rem 1.5rem;
+        }
+
+        .status-pill {
+          width: 100%;
         }
 
         .task-meta {
@@ -713,114 +714,125 @@
   </head>
   <body>
     <main>
-      <div class="primary-pane">
-        <header>
-          <h1>
-            <span>Beavertask</span>
-            <span>Plan, track, and share your tasks effortlessly.</span>
-          </h1>
-          <div class="status-pill">
-            <strong id="task-count">0 tasks</strong>
-            <span id="completed-count">0 completed · 0 pending</span>
-          </div>
-        </header>
-
-        <nav class="tabs" aria-label="Task views">
-          <button class="tab-btn active" data-tab="list">Task list</button>
-          <button class="tab-btn" data-tab="add">Add task</button>
-          <button class="tab-btn" data-tab="calendar">Calendar</button>
-        </nav>
-
-        <div class="views-stack">
-          <section id="list" class="view active" aria-labelledby="Task list">
-            <div class="list-header">
-              <div class="search-box">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <circle cx="11" cy="11" r="8"></circle>
-                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                </svg>
-                <input
-                  type="search"
-                  id="search-input"
-                  placeholder="Search tasks by title, description, or tag"
-                  aria-label="Search tasks"
-                />
-              </div>
-              <div class="list-tools">
-                <div class="filters" role="group" aria-label="Task filters">
-                  <button class="active" data-filter="all">All</button>
-                  <button data-filter="pending">Pending</button>
-                  <button data-filter="completed">Completed</button>
-                  <button data-filter="overdue">Overdue</button>
-                </div>
-                <button type="button" class="list-add" id="quick-add">
-                  New task
-                </button>
-              </div>
-            </div>
-            <div id="task-list" class="task-grid"></div>
-            <p id="empty-list" class="empty-state" hidden>
-              No tasks match your filters yet. Add one from the "Add task" tab!
-            </p>
-          </section>
-
-          <section id="add" class="view" aria-labelledby="Add task">
-            <form id="task-form">
-              <div class="form-row">
-                <label for="title">Title</label>
-                <input
-                  type="text"
-                  id="title"
-                  name="title"
-                  placeholder="Plan sprint review"
-                  required
-                />
-              </div>
-              <div class="form-row">
-                <label for="description">Description</label>
-                <textarea
-                  id="description"
-                  name="description"
-                  placeholder="Add context, notes, or a checklist"
-                ></textarea>
-              </div>
-              <div class="form-row">
-                <label for="due-date">Due date</label>
-                <input type="date" id="due-date" name="due-date" required />
-              </div>
-              <div class="form-row">
-                <label for="tag">Tag</label>
-                <input
-                  type="text"
-                  id="tag"
-                  name="tag"
-                  placeholder="Design, marketing, chores…"
-                />
-              </div>
-              <div class="form-actions">
-                <button type="reset" class="btn secondary">Reset</button>
-                <button type="submit" class="btn primary">Save task</button>
-              </div>
-            </form>
-          </section>
+      <header>
+        <div class="title-group">
+          <h1>Beavertask</h1>
+          <p class="subtitle">Plan, track, and share your tasks effortlessly.</p>
         </div>
-      </div>
+        <div class="menu">
+          <button
+            class="menu-btn"
+            type="button"
+            aria-haspopup="true"
+            aria-expanded="false"
+          >
+            Tasks ▾
+          </button>
+          <div class="dropdown" role="menu">
+            <button type="button" class="active" data-tab="list">Task list</button>
+            <button type="button" data-tab="add">Add task</button>
+            <button type="button" data-tab="calendar">Calendar</button>
+          </div>
+        </div>
+        <div class="status-pill">
+          <strong id="task-count">0 tasks</strong>
+          <span id="completed-count">0 completed · 0 pending</span>
+        </div>
+      </header>
 
-      <aside class="calendar-pane">
-        <section id="calendar" class="view" aria-labelledby="Calendar view">
-          <div id="calendar-board"></div>
-        </section>
-      </aside>
+        <div class="layout">
+          <div class="primary-pane">
+            <div class="views-stack">
+              <section id="list" class="view active" aria-labelledby="Task list">
+                <div class="list-header">
+                  <div class="search-box">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <circle cx="11" cy="11" r="8"></circle>
+                      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input
+                      type="search"
+                      id="search-input"
+                      placeholder="Search tasks by title, description, or tag"
+                      aria-label="Search tasks"
+                    />
+                  </div>
+                  <div class="list-tools">
+                    <div class="filters" role="group" aria-label="Task filters">
+                      <button class="active" data-filter="all">All</button>
+                      <button data-filter="pending">Pending</button>
+                      <button data-filter="completed">Completed</button>
+                      <button data-filter="overdue">Overdue</button>
+                    </div>
+                    <button type="button" class="list-add" id="quick-add">
+                      New task
+                    </button>
+                  </div>
+                </div>
+                <div id="task-list" class="task-grid"></div>
+                <p id="empty-list" class="empty-state" hidden>
+                  No tasks match your filters yet. Add one from the "Add task" view!
+                </p>
+              </section>
+
+              <section id="add" class="view" aria-labelledby="Add task">
+                <form id="task-form">
+                  <div class="form-row">
+                    <label for="title">Title</label>
+                    <input
+                      type="text"
+                      id="title"
+                      name="title"
+                      placeholder="Plan sprint review"
+                      required
+                    />
+                  </div>
+                  <div class="form-row">
+                    <label for="description">Description</label>
+                    <textarea
+                      id="description"
+                      name="description"
+                      placeholder="Add context, notes, or a checklist"
+                    ></textarea>
+                  </div>
+                  <div class="form-row">
+                    <label for="due-date">Due date</label>
+                    <input type="date" id="due-date" name="due-date" required />
+                  </div>
+                  <div class="form-row">
+                    <label for="tag">Tag</label>
+                    <input
+                      type="text"
+                      id="tag"
+                      name="tag"
+                      placeholder="Design, marketing, chores…"
+                    />
+                  </div>
+                  <div class="form-actions">
+                    <button type="reset" class="btn secondary">Reset</button>
+                    <button type="submit" class="btn primary">Save task</button>
+                  </div>
+                </form>
+              </section>
+            </div>
+          </div>
+
+          <aside class="calendar-pane">
+            <section id="calendar" class="view" aria-labelledby="Calendar view">
+              <div id="calendar-board"></div>
+            </section>
+          </aside>
+        </div>
     </main>
 
     <div class="qr-modal" id="qr-modal" role="dialog" aria-modal="true">
@@ -1038,7 +1050,12 @@
 
       const calendarBoard = document.getElementById("calendar-board");
       const calendarPane = document.querySelector(".calendar-pane");
-      const tabs = document.querySelectorAll(".tab-btn");
+      const primaryPane = document.querySelector(".primary-pane");
+      const menu = document.querySelector(".menu");
+      const menuBtn = document.querySelector(".menu-btn");
+      const tabButtons = Array.from(
+        document.querySelectorAll(".dropdown button")
+      );
       const taskList = document.getElementById("task-list");
       const emptyState = document.getElementById("empty-list");
       const taskCount = document.getElementById("task-count");
@@ -1057,18 +1074,44 @@
       const defaultEmptyMessage = emptyState ? emptyState.textContent : "";
       state.emptyMessage = defaultEmptyMessage;
 
+      const closeMenu = () => {
+        if (!menu || !menuBtn) return;
+        menu.classList.remove("open");
+        menuBtn.setAttribute("aria-expanded", "false");
+      };
+
+      const updateMenuButtonLabel = (tab) => {
+        if (!menuBtn) return;
+        const activeButton = tabButtons.find(
+          (button) => button.dataset.tab === tab
+        );
+        if (activeButton) {
+          menuBtn.setAttribute(
+            "aria-label",
+            `Select task view (current: ${activeButton.textContent.trim()})`
+          );
+        }
+      };
+
       const changeTab = (tab) => {
         document.querySelectorAll("section.view").forEach((section) => {
           section.classList.toggle("active", section.id === tab);
         });
 
-        tabs.forEach((button) => {
+        tabButtons.forEach((button) => {
           button.classList.toggle("active", button.dataset.tab === tab);
         });
+
+        if (primaryPane) {
+          primaryPane.classList.toggle("hidden", tab === "calendar");
+        }
 
         if (calendarPane) {
           calendarPane.classList.toggle("active", tab === "calendar");
         }
+
+        updateMenuButtonLabel(tab);
+        closeMenu();
 
         if (tab === "calendar" && state.calendar) {
           state.calendar.render();
@@ -1349,8 +1392,32 @@
         qrModal.classList.remove("active");
       };
 
-      tabs.forEach((tab) =>
-        tab.addEventListener("click", () => changeTab(tab.dataset.tab))
+      const initialTab =
+        document.querySelector("section.view.active")?.id ?? "list";
+      changeTab(initialTab);
+
+      if (menu && menuBtn) {
+        menuBtn.addEventListener("click", (event) => {
+          event.stopPropagation();
+          const isOpen = menu.classList.toggle("open");
+          menuBtn.setAttribute("aria-expanded", String(isOpen));
+        });
+
+        document.addEventListener("click", (event) => {
+          if (!menu.contains(event.target)) {
+            closeMenu();
+          }
+        });
+      }
+
+      tabButtons.forEach((button) =>
+        button.addEventListener("click", (event) => {
+          event.stopPropagation();
+          changeTab(button.dataset.tab);
+          if (menuBtn) {
+            menuBtn.focus();
+          }
+        })
       );
 
       searchInput.addEventListener("input", (event) => {
@@ -1422,6 +1489,7 @@
       document.addEventListener("keydown", (event) => {
         if (event.key === "Escape") {
           closeQRModal();
+          closeMenu();
         }
       });
 
