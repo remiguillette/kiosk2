@@ -3,6 +3,7 @@ const fs = require('fs');
 const http = require('http');
 const path = require('path');
 const { URL } = require('url');
+const { randomUUID } = require('crypto');
 
 const BATTERY_BASE_PATH = '/sys/class/power_supply/battery';
 const COOKIE_STORE_FILENAME = 'session-cookies.json';
@@ -15,9 +16,13 @@ const MAX_ZOOM_LEVEL = 5;
 let cookieStorePath;
 let cookiePersistTimer;
 let contentServer;
+let taskStorePath;
+let tasksCache;
+let tasksLoaded = false;
 
 const CONTENT_SERVER_PORT = Number.parseInt(process.env.PORT, 10) || 5000;
 const CONTENT_ROOT = path.join(__dirname, 'page');
+const TASKS_STORE_FILENAME = 'beavertask-tasks.json';
 
 const MIME_TYPES = {
   '.css': 'text/css',
@@ -34,6 +39,321 @@ const MIME_TYPES = {
 function getMimeType(filePath) {
   const extension = path.extname(filePath).toLowerCase();
   return MIME_TYPES[extension] || 'application/octet-stream';
+}
+
+function getTaskStorePath() {
+  if (!taskStorePath) {
+    taskStorePath = path.join(app.getPath('userData'), TASKS_STORE_FILENAME);
+  }
+
+  return taskStorePath;
+}
+
+function isValidDateString(value) {
+  return typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value);
+}
+
+async function ensureTasksLoaded() {
+  if (tasksLoaded && Array.isArray(tasksCache)) {
+    return tasksCache;
+  }
+
+  try {
+    const raw = await fs.promises.readFile(getTaskStorePath(), 'utf8');
+    const parsed = JSON.parse(raw);
+
+    if (Array.isArray(parsed)) {
+      tasksCache = parsed
+        .filter((task) => task && typeof task.id === 'string')
+        .map((task) => {
+          const createdAt =
+            typeof task.createdAt === 'string' ? task.createdAt : new Date().toISOString();
+          const updatedAt =
+            typeof task.updatedAt === 'string' ? task.updatedAt : createdAt;
+
+          return {
+            id: task.id,
+            title: typeof task.title === 'string' ? task.title : '',
+            description: typeof task.description === 'string' ? task.description : '',
+            dueDate: isValidDateString(task.dueDate) ? task.dueDate : null,
+            tag: typeof task.tag === 'string' ? task.tag : '',
+            completed: Boolean(task.completed),
+            createdAt,
+            updatedAt,
+          };
+        });
+    } else {
+      tasksCache = [];
+    }
+  } catch (error) {
+    if (error.code !== 'ENOENT') {
+      console.error('Failed to read Beavertask tasks:', error);
+    }
+
+    tasksCache = [];
+  }
+
+  tasksLoaded = true;
+  return tasksCache;
+}
+
+async function persistTasks() {
+  try {
+    await fs.promises.mkdir(path.dirname(getTaskStorePath()), { recursive: true });
+    await fs.promises.writeFile(
+      getTaskStorePath(),
+      JSON.stringify(Array.isArray(tasksCache) ? tasksCache : [], null, 2),
+      'utf8',
+    );
+  } catch (error) {
+    console.error('Failed to persist Beavertask tasks:', error);
+    throw createHttpError('Unable to persist tasks', 500);
+  }
+}
+
+function sendJson(res, statusCode, payload) {
+  res.writeHead(statusCode, {
+    'Content-Type': 'application/json',
+  });
+  res.end(JSON.stringify(payload));
+}
+
+function sendNoContent(res) {
+  res.writeHead(204, {
+    'Content-Type': 'application/json',
+  });
+  res.end();
+}
+
+function createHttpError(message, statusCode = 400) {
+  const error = new Error(message);
+  error.statusCode = statusCode;
+  return error;
+}
+
+function parseTaskPayload(payload) {
+  if (!payload || typeof payload !== 'object') {
+    throw createHttpError('Invalid payload', 400);
+  }
+
+  const title = typeof payload.title === 'string' ? payload.title.trim() : '';
+
+  if (!title) {
+    throw createHttpError('Title is required', 400);
+  }
+
+  const description =
+    typeof payload.description === 'string' ? payload.description.trim() : '';
+  const rawDueDate = typeof payload.dueDate === 'string' ? payload.dueDate.trim() : '';
+
+  if (rawDueDate && !isValidDateString(rawDueDate)) {
+    throw createHttpError('Invalid due date format', 400);
+  }
+
+  const tag = typeof payload.tag === 'string' ? payload.tag.trim() : '';
+  const now = new Date().toISOString();
+
+  return {
+    id: randomUUID(),
+    title,
+    description,
+    dueDate: rawDueDate || null,
+    tag,
+    completed: false,
+    createdAt: now,
+    updatedAt: now,
+  };
+}
+
+function parseTaskUpdates(payload) {
+  if (!payload || typeof payload !== 'object') {
+    throw createHttpError('Invalid payload', 400);
+  }
+
+  const updates = {};
+
+  if (Object.prototype.hasOwnProperty.call(payload, 'title')) {
+    const title = typeof payload.title === 'string' ? payload.title.trim() : '';
+    if (!title) {
+      throw createHttpError('Title is required', 400);
+    }
+    updates.title = title;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(payload, 'description')) {
+    if (typeof payload.description !== 'string') {
+      throw createHttpError('Description must be a string', 400);
+    }
+    updates.description = payload.description.trim();
+  }
+
+  if (Object.prototype.hasOwnProperty.call(payload, 'tag')) {
+    if (typeof payload.tag !== 'string') {
+      throw createHttpError('Tag must be a string', 400);
+    }
+    updates.tag = payload.tag.trim();
+  }
+
+  if (Object.prototype.hasOwnProperty.call(payload, 'dueDate')) {
+    if (
+      payload.dueDate === null ||
+      (typeof payload.dueDate === 'string' && payload.dueDate.trim() === '')
+    ) {
+      updates.dueDate = null;
+    } else if (typeof payload.dueDate === 'string' && isValidDateString(payload.dueDate)) {
+      updates.dueDate = payload.dueDate;
+    } else {
+      throw createHttpError('Invalid due date format', 400);
+    }
+  }
+
+  if (Object.prototype.hasOwnProperty.call(payload, 'completed')) {
+    if (typeof payload.completed !== 'boolean') {
+      throw createHttpError('Completed must be a boolean', 400);
+    }
+    updates.completed = payload.completed;
+  }
+
+  if (!Object.keys(updates).length) {
+    throw createHttpError('No valid fields to update', 400);
+  }
+
+  updates.updatedAt = new Date().toISOString();
+  return updates;
+}
+
+function readJsonBody(req) {
+  return new Promise((resolve, reject) => {
+    let rawData = '';
+
+    req.on('data', (chunk) => {
+      rawData += chunk;
+
+      if (rawData.length > 1_000_000) {
+        reject(createHttpError('Payload too large', 413));
+        req.destroy();
+      }
+    });
+
+    req.on('end', () => {
+      if (!rawData) {
+        resolve({});
+        return;
+      }
+
+      try {
+        resolve(JSON.parse(rawData));
+      } catch (error) {
+        reject(createHttpError('Invalid JSON payload', 400));
+      }
+    });
+
+    req.on('error', (error) => {
+      reject(createHttpError(error.message || 'Failed to read payload', 400));
+    });
+  });
+}
+
+async function handleTasksApi(req, res, requestUrl) {
+  const segments = requestUrl.pathname.split('/').filter(Boolean);
+
+  if (segments.length < 2 || segments[0] !== 'api' || segments[1] !== 'tasks') {
+    return false;
+  }
+
+  await ensureTasksLoaded();
+
+  try {
+    if (segments.length === 2) {
+      if (req.method === 'GET') {
+        sendJson(res, 200, { tasks: tasksCache });
+        return true;
+      }
+
+      if (req.method === 'POST') {
+        const payload = await readJsonBody(req);
+        const task = parseTaskPayload(payload);
+        tasksCache.push(task);
+        await persistTasks();
+        sendJson(res, 201, task);
+        return true;
+      }
+
+      if (req.method === 'HEAD') {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end();
+        return true;
+      }
+
+      if (req.method === 'OPTIONS') {
+        res.writeHead(204, {
+          'Access-Control-Allow-Methods': 'GET,POST,HEAD,OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type',
+        });
+        res.end();
+        return true;
+      }
+
+      throw createHttpError('Method Not Allowed', 405);
+    }
+
+    if (segments.length === 3) {
+      const taskId = segments[2];
+      const index = tasksCache.findIndex((task) => task.id === taskId);
+
+      if (index === -1) {
+        throw createHttpError('Task not found', 404);
+      }
+
+      if (req.method === 'PATCH') {
+        const payload = await readJsonBody(req);
+        const updates = parseTaskUpdates(payload);
+        tasksCache[index] = { ...tasksCache[index], ...updates };
+        await persistTasks();
+        sendJson(res, 200, tasksCache[index]);
+        return true;
+      }
+
+      if (req.method === 'DELETE') {
+        tasksCache.splice(index, 1);
+        await persistTasks();
+        sendNoContent(res);
+        return true;
+      }
+
+      if (req.method === 'GET') {
+        sendJson(res, 200, tasksCache[index]);
+        return true;
+      }
+
+      if (req.method === 'OPTIONS') {
+        res.writeHead(204, {
+          'Access-Control-Allow-Methods': 'GET,PATCH,DELETE,OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type',
+        });
+        res.end();
+        return true;
+      }
+
+      throw createHttpError('Method Not Allowed', 405);
+    }
+
+    throw createHttpError('Not Found', 404);
+  } catch (error) {
+    if (error.statusCode === 413) {
+      res.writeHead(413, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: error.message }));
+      return true;
+    }
+
+    const statusCode = error.statusCode || 500;
+    if (statusCode >= 500) {
+      console.error('Task API error:', error);
+    }
+
+    sendJson(res, statusCode, { error: error.message || 'Internal Server Error' });
+    return true;
+  }
 }
 
 function resolveContentPath(requestUrl) {
@@ -91,6 +411,20 @@ function startContentServer() {
     if (!req.url) {
       res.writeHead(400, { 'Content-Type': 'text/plain' });
       res.end('Bad Request');
+      return;
+    }
+
+    let requestUrl;
+    try {
+      requestUrl = new URL(req.url, `http://localhost:${CONTENT_SERVER_PORT}`);
+    } catch (error) {
+      res.writeHead(400, { 'Content-Type': 'text/plain' });
+      res.end('Bad Request');
+      return;
+    }
+
+    const handled = await handleTasksApi(req, res, requestUrl);
+    if (handled) {
       return;
     }
 
