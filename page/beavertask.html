@@ -331,6 +331,129 @@
         transform: scale(1.1);
       }
 
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.65);
+        backdrop-filter: blur(4px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 20;
+        padding: 24px;
+      }
+
+      .modal-overlay[hidden] {
+        display: none;
+      }
+
+      .modal-card {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 32px;
+        width: min(420px, 100%);
+        box-shadow: 0 18px 42px rgba(0, 0, 0, 0.45);
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .modal-title {
+        font-size: 20px;
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+
+      .modal-description {
+        font-size: 14px;
+        color: var(--text-secondary);
+        line-height: 1.5;
+      }
+
+      .modal-form {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+      }
+
+      .modal-field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .modal-label {
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .modal-input,
+      .modal-textarea,
+      .modal-select {
+        width: 100%;
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 14px 16px;
+        color: var(--text-primary);
+        font-size: 15px;
+        transition: border-color 0.2s ease;
+      }
+
+      .modal-textarea {
+        resize: vertical;
+        min-height: 90px;
+      }
+
+      .modal-input:focus,
+      .modal-textarea:focus,
+      .modal-select:focus {
+        outline: none;
+        border-color: var(--accent);
+      }
+
+      .modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+      }
+
+      .modal-btn {
+        border: none;
+        border-radius: 999px;
+        padding: 12px 22px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s ease, background 0.2s ease;
+      }
+
+      .modal-btn.primary {
+        background: var(--accent);
+        color: var(--bg-primary);
+      }
+
+      .modal-btn.secondary {
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--text-primary);
+      }
+
+      .modal-btn:hover {
+        transform: translateY(-1px);
+      }
+
+      .modal-btn.primary:hover {
+        background: #ffa648;
+      }
+
+      .modal-btn.secondary:hover {
+        background: rgba(255, 255, 255, 0.12);
+      }
+
       .task-list {
         display: flex;
         flex-direction: column;
@@ -554,6 +677,61 @@
       <button class="fab" id="add-btn">
         <span>+</span>
       </button>
+
+      <div class="modal-overlay" id="task-modal" hidden>
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="task-modal-title">
+          <h2 class="modal-title" id="task-modal-title">Nouvel événement</h2>
+          <p class="modal-description">
+            Ajoutez un rappel personnalisé à votre calendrier BeaverTask.
+          </p>
+          <form class="modal-form" id="task-form">
+            <div class="modal-field">
+              <label class="modal-label" for="task-title">Titre</label>
+              <input
+                class="modal-input"
+                type="text"
+                id="task-title"
+                name="title"
+                placeholder="Ex. Rendez-vous"
+                required
+                autocomplete="off"
+              />
+            </div>
+
+            <div class="modal-field">
+              <label class="modal-label" for="task-date">Date</label>
+              <input class="modal-input" type="date" id="task-date" name="date" required />
+            </div>
+
+            <div class="modal-field">
+              <label class="modal-label" for="task-tag">Catégorie</label>
+              <input
+                class="modal-input"
+                type="text"
+                id="task-tag"
+                name="tag"
+                placeholder="Ex. Santé, Travail, Famille"
+                autocomplete="off"
+              />
+            </div>
+
+            <div class="modal-field">
+              <label class="modal-label" for="task-description">Notes</label>
+              <textarea
+                class="modal-textarea"
+                id="task-description"
+                name="description"
+                placeholder="Ajoutez des détails importants..."
+              ></textarea>
+            </div>
+
+            <div class="modal-actions">
+              <button type="button" class="modal-btn secondary" id="task-cancel">Annuler</button>
+              <button type="submit" class="modal-btn primary">Ajouter</button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
@@ -651,6 +829,25 @@
         return `${year}-${month}-${day}`;
       };
 
+      const ensureSelectedDate = () => {
+        if (!(state.selectedDate instanceof Date)) {
+          state.selectedDate = new Date();
+        }
+      };
+
+      const parseDateInput = (value) => {
+        if (!value || typeof value !== 'string') {
+          return new Date();
+        }
+
+        const [year, month, day] = value.split('-').map(Number);
+        if (!year || !month || !day) {
+          return new Date();
+        }
+
+        return new Date(year, month - 1, day);
+      };
+
       const renderCalendar = () => {
         const grid = document.getElementById('calendar-grid');
         const monthDisplay = document.getElementById('month-display');
@@ -741,10 +938,8 @@
         const detailsContent = document.getElementById('details-content');
         const eventInput = document.getElementById('event-input');
         
-        if (!state.selectedDate) {
-          state.selectedDate = new Date();
-        }
-        
+        ensureSelectedDate();
+
         const dateKey = getDateKey(state.selectedDate);
         const day = state.selectedDate.getDate();
         const month = monthNamesFull[state.selectedDate.getMonth()].substring(0, 3);
@@ -817,19 +1012,100 @@
         badge.textContent = today.getDate();
       };
 
+      const addBtn = document.getElementById('add-btn');
+      const taskModal = document.getElementById('task-modal');
+      const taskForm = document.getElementById('task-form');
+      const taskTitleInput = document.getElementById('task-title');
+      const taskDateInput = document.getElementById('task-date');
+      const taskTagInput = document.getElementById('task-tag');
+      const taskDescriptionInput = document.getElementById('task-description');
+      const taskCancelBtn = document.getElementById('task-cancel');
+
+      const updateModalDateInput = () => {
+        if (!taskDateInput) {
+          return;
+        }
+
+        ensureSelectedDate();
+        taskDateInput.value = getDateKey(state.selectedDate);
+      };
+
+      const openTaskModal = () => {
+        if (!taskModal) {
+          return;
+        }
+
+        updateModalDateInput();
+        taskModal.removeAttribute('hidden');
+        requestAnimationFrame(() => {
+          taskTitleInput?.focus();
+        });
+      };
+
+      const closeTaskModal = () => {
+        if (!taskModal) {
+          return;
+        }
+
+        taskModal.setAttribute('hidden', '');
+        taskForm?.reset();
+        updateModalDateInput();
+      };
+
       document.getElementById('prev-month').addEventListener('click', () => changeMonth(-1));
       document.getElementById('next-month').addEventListener('click', () => changeMonth(1));
-      
-      document.getElementById('add-btn').addEventListener('click', () => {
-        const input = document.getElementById('event-input');
-        input.focus();
+
+      addBtn?.addEventListener('click', openTaskModal);
+
+      taskCancelBtn?.addEventListener('click', closeTaskModal);
+
+      taskModal?.addEventListener('click', (event) => {
+        if (event.target === taskModal) {
+          closeTaskModal();
+        }
       });
 
-      document.getElementById('event-input').addEventListener('keypress', (e) => {
+      taskForm?.addEventListener('submit', (event) => {
+        event.preventDefault();
+
+        const title = taskTitleInput?.value.trim();
+        if (!title) {
+          taskTitleInput?.focus();
+          return;
+        }
+
+        ensureSelectedDate();
+        const dueDateValue = taskDateInput?.value || getDateKey(state.selectedDate);
+        const descriptionValue = taskDescriptionInput?.value.trim() ?? '';
+        const tagValue = taskTagInput?.value.trim() ?? '';
+
+        const selectedDate = parseDateInput(dueDateValue);
+        state.selectedDate = selectedDate;
+
+        addTask({
+          title,
+          dueDate: getDateKey(selectedDate),
+          description: descriptionValue,
+          tag: tagValue,
+          completed: false,
+        });
+
+        closeTaskModal();
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && taskModal && !taskModal.hasAttribute('hidden')) {
+          closeTaskModal();
+        }
+      });
+
+      const quickAddInput = document.getElementById('event-input');
+      quickAddInput?.addEventListener('keypress', (e) => {
         if (e.key === 'Enter' && e.target.value.trim()) {
           const title = e.target.value.trim();
+          ensureSelectedDate();
           const dateKey = getDateKey(state.selectedDate);
-          
+
           addTask({
             title: title,
             dueDate: dateKey,
