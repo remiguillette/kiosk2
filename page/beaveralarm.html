@@ -9,181 +9,899 @@
       color-scheme: dark;
       --bg: #060608;
       --panel: #0f1018;
-      --panel-glow: rgba(248,148,34,0.12);
-      --border: rgba(255,255,255,0.08);
-      --text-main: #fff;
-      --text-muted: rgba(255,255,255,0.68);
-      --text-soft: rgba(255,255,255,0.42);
+      --panel-glow: rgba(248, 148, 34, 0.12);
+      --border: rgba(255, 255, 255, 0.08);
+      --text-main: #ffffff;
+      --text-muted: rgba(255, 255, 255, 0.68);
+      --text-soft: rgba(255, 255, 255, 0.42);
       --accent: #f89422;
       --accent-strong: #ff9f33;
       --success: #47d17b;
       --danger: #ff7b7b;
       --warning: #ffd166;
-      --shadow: 0 28px 40px rgba(0,0,0,0.45);
+      --shadow: 0 28px 40px rgba(0, 0, 0, 0.45);
       --font: "Inter", "Segoe UI", system-ui, sans-serif;
     }
 
-    *, *::before, *::after { box-sizing: border-box; }
-    html, body { margin:0; height:100%; }
-    body {
-      min-height: 100vh;
-      display:flex; justify-content:center;
-      font-family: var(--font);
-      background:
-        radial-gradient(circle at 15% 20%, rgba(248,148,34,0.12), transparent 55%),
-        radial-gradient(circle at 85% 10%, rgba(248,148,34,0.08), transparent 50%),
-        var(--bg);
-      color: var(--text-main);
-      padding: clamp(1.5rem, 3vw, 2rem);
+    *, *::before, *::after {
+      box-sizing: border-box;
     }
 
-    main { width:min(1220px, 100%); display:grid; gap:1.6rem; }
+    body {
+      min-height: 100vh;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      font-family: var(--font);
+      background:
+        radial-gradient(circle at 15% 20%, rgba(248, 148, 34, 0.12), transparent 55%),
+        radial-gradient(circle at 85% 10%, rgba(248, 148, 34, 0.08), transparent 50%),
+        var(--bg);
+      color: var(--text-main);
+      padding: clamp(2rem, 4vw, 3rem) clamp(1.5rem, 4vw, 3rem);
+    }
 
-    header { display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
-    .brand { display:flex; gap:.75rem; align-items:center; font-weight:800; letter-spacing:.02em; }
-    .brand-badge { width:40px; height:40px; border-radius:12px; display:grid; place-items:center; background:rgba(248,148,34,.15); border:1px solid rgba(248,148,34,.35); }
+    main {
+      width: min(1280px, 100%);
+      display: flex;
+      flex-direction: column;
+      gap: clamp(1.8rem, 3vw, 2.6rem);
+    }
 
-    .toolbar { display:flex; gap:.6rem; flex-wrap:wrap; }
-    .chip { padding:.4rem .7rem; border-radius:999px; background:rgba(255,255,255,.06); border:1px solid var(--border); font-weight:600; font-size:.95rem; }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1.25rem;
+    }
 
-    .panel { background:var(--panel); border:1px solid var(--border); border-radius:26px; padding:1.4rem; box-shadow:var(--shadow); position:relative; overflow:hidden; isolation:isolate; }
-    .panel::after{ content:""; position:absolute; inset:0; background:var(--panel-glow); opacity:0; transition:opacity .18s ease; pointer-events:none; z-index:-1; }
-    .panel:hover::after{ opacity:1; }
+    .header-title {
+      display: inline-flex;
+      align-items: center;
+      gap: 1rem;
+      flex: 1 1 auto;
+      min-width: min(260px, 100%);
+    }
 
-    .grid { display:grid; gap:1.2rem; grid-template-columns: 1.2fr 1fr .9fr; }
-    @media (max-width:1100px){ .grid{ grid-template-columns: 1fr 1fr; } }
-    @media (max-width:780px){ .grid{ grid-template-columns: 1fr; } }
+    .menu-return {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-muted);
+      transition: color 160ms ease, border 160ms ease, background 160ms ease, transform 160ms ease;
+    }
 
-    .section-title { margin:0 0 .8rem; font-size:1.2rem; font-weight:700; }
-    .panel-heading{ display:flex; align-items:center; justify-content:space-between; gap:.8rem; flex-wrap:wrap; margin-bottom:.6rem; }
-    .panel-heading .section-title{ margin:0; }
-    .system-inline{ display:flex; align-items:center; gap:.5rem; }
-    .system-inline .system-label{ font-size:.95rem; color:var(--text-muted); font-weight:600; letter-spacing:.02em; }
+    .menu-return:hover,
+    .menu-return:focus-visible {
+      color: var(--accent);
+      border-color: var(--accent);
+      background: rgba(248, 148, 34, 0.16);
+      transform: translateY(-2px);
+      outline: none;
+    }
 
-    .status-chip { composes: chip; }
-    .status-chip { display:inline-flex; align-items:center; gap:.45rem; }
-    .status-chip--disarmed { background: rgba(71,209,123,.16); color:var(--success); border-color: rgba(71,209,123,.38); }
-    .status-chip--exit { background: rgba(248,148,34,.18); color:var(--accent-strong); border-color: rgba(248,148,34,.4); }
-    .status-chip--stay { background: rgba(248,148,34,.18); color:var(--accent-strong); border-color: rgba(248,148,34,.4); }
-    .status-chip--away { background: rgba(248,148,34,.18); color:var(--accent-strong); border-color: rgba(248,148,34,.4); }
-    .status-chip--entry { background: rgba(248,148,34,.18); color:var(--warning); border-color: rgba(255,209,102,.45); }
-    .status-chip--alarm { background: rgba(255,107,107,.18); color:var(--danger); border-color: rgba(255,107,107,.55); }
+    .btn-icon svg {
+      width: 24px;
+      height: 24px;
+      stroke-width: 1.8;
+    }
 
-    .msg { color:var(--text-muted); min-height:1.5rem; margin-bottom:.8rem; }
-    .msg--ok{ color:var(--success); }
-    .msg--warn{ color:var(--accent-strong); }
-    .msg--err{ color:var(--danger); }
+    .app-title {
+      font-size: clamp(1.9rem, 4vw, 2.5rem);
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
 
-    /* Keypad */
-    .code { font-size:2rem; letter-spacing:.4rem; font-weight:700; text-align:center; padding:.6rem .9rem; border-radius:18px; border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.04); }
-    .keygrid { display:grid; grid-template-columns: repeat(3, minmax(56px, 1fr)); gap:.6rem; margin-top:.6rem; }
-    .key, .action { appearance:none; border:none; border-radius:16px; font-weight:700; font-size:1.05rem; padding:.85rem; cursor:pointer; color:var(--text-main); background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08); transition: transform .16s, background .16s, border .16s, box-shadow .16s; }
-    .key:hover, .key:focus-visible, .action:hover, .action:focus-visible{ transform: translateY(-2px); border-color:var(--accent); background:rgba(248,148,34,.16); outline:none; box-shadow:0 10px 24px rgba(248,148,34,.18); }
-    .action-row{ display:flex; gap:.6rem; margin-top:.6rem; flex-wrap:wrap; }
-    .action--stay{ background: rgba(248,148,34,.16); border-color: rgba(248,148,34,.4); }
-    .action--away{ background: rgba(255,107,107,.16); border-color: rgba(255,107,107,.38); }
-    .action--disarm{ background: rgba(71,209,123,.16); border-color: rgba(71,209,123,.38); color:var(--success); }
+    .app-subtitle {
+      margin: 0.1rem 0 0;
+      color: var(--text-muted);
+      font-size: 1rem;
+    }
 
-    /* Zones */
-    .zone-list{ display:grid; gap:.6rem; }
-    .zone{ display:grid; grid-template-columns: 1fr auto; gap:.6rem; align-items:center; padding:.8rem 1rem; border-radius:16px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); }
-    .zone:hover{ border-color:var(--accent); background:rgba(248,148,34,.12); }
-    .z-left{ display:flex; align-items:center; gap:.65rem; font-weight:700; }
-    .dot{ width:12px; height:12px; border-radius:999px; background:rgba(71,209,123,.65); box-shadow:0 0 0 4px rgba(71,209,123,.14); }
-    .dot.open{ background:rgba(255,107,107,.9); box-shadow:0 0 0 4px rgba(255,107,107,.2); }
-    .z-badges{ display:flex; gap:.4rem; }
-    .badge{ font-size:.75rem; letter-spacing:.02em; padding:.15rem .45rem; border-radius:999px; border:1px solid rgba(255,255,255,.14); color:var(--text-soft); }
-    .badge--type{ }
-    .badge--bypass{ color:var(--warning); border-color: rgba(255,209,102,.4); background: rgba(255,209,102,.12); }
-    .badge--fault{ color:var(--danger); border-color: rgba(255,107,107,.45); background: rgba(255,107,107,.12); }
+    .lang-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(24, 24, 32, 0.6);
+      padding: 0.4rem 0.6rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+    }
 
-    .zone-controls{ display:flex; gap:.5rem; align-items:center; }
-    .zone-controls input[type="checkbox"]{ transform: translateY(1px); }
-    .zone-state{ font-size:.9rem; color:var(--text-muted); }
+    .lang-btn {
+      border: none;
+      background: transparent;
+      color: var(--text-soft);
+      font-weight: 600;
+      font-size: 0.95rem;
+      padding: 0.45rem 0.9rem;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: color 160ms ease, background 160ms ease;
+    }
 
-    /* Log */
-    .log{ list-style:none; margin:0; padding:0; display:grid; gap:.5rem; }
-    .log li{ display:flex; justify-content:space-between; gap:.8rem; padding:.6rem .8rem; border-radius:14px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.06); font-size:.95rem; }
-    .log-time{ color:var(--text-soft); font-feature-settings:"tnum" 1, "lnum" 1; min-width:64px; }
-    .log-msg{ flex:1; text-align:right; color:var(--text-muted); }
+    .lang-btn.active {
+      background: rgba(248, 148, 34, 0.18);
+      color: var(--accent-strong);
+      box-shadow: 0 8px 18px rgba(248, 148, 34, 0.22);
+    }
 
-    /* Sim controls */
-    .sim-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:.6rem; }
-    @media (max-width:780px){ .sim-grid{ grid-template-columns: 1fr; } }
-    .select, .input { width:100%; padding:.6rem .8rem; border-radius:12px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); color:var(--text-main); }
-    .row{ display:flex; gap:.6rem; align-items:center; }
+    .grid {
+      display: grid;
+      gap: clamp(1.2rem, 2vw, 1.8rem);
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 0.9fr);
+      align-items: stretch;
+    }
 
-    .muted{ color:var(--text-soft); font-size:.92rem; }
+    @media (max-width: 1100px) {
+      .grid {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      }
+    }
+
+    @media (max-width: 820px) {
+      .grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 26px;
+      padding: clamp(1.2rem, 2vw, 1.6rem);
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+    }
+
+    .panel::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: var(--panel-glow);
+      opacity: 0;
+      transition: opacity 180ms ease;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .panel:hover::after {
+      opacity: 1;
+    }
+
+    .panel-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      margin-bottom: 0.2rem;
+    }
+
+    .section-title {
+      margin: 0;
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+
+    .system-inline {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .system-label {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    .chip {
+      padding: 0.45rem 0.8rem;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border);
+      font-weight: 600;
+      font-size: 0.95rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    .status-chip--disarmed {
+      background: rgba(71, 209, 123, 0.16);
+      color: var(--success);
+      border-color: rgba(71, 209, 123, 0.38);
+    }
+
+    .status-chip--exit,
+    .status-chip--stay,
+    .status-chip--away {
+      background: rgba(248, 148, 34, 0.18);
+      color: var(--accent-strong);
+      border-color: rgba(248, 148, 34, 0.4);
+    }
+
+    .status-chip--entry {
+      background: rgba(248, 148, 34, 0.18);
+      color: var(--warning);
+      border-color: rgba(255, 209, 102, 0.45);
+    }
+
+    .status-chip--alarm {
+      background: rgba(255, 107, 107, 0.18);
+      color: var(--danger);
+      border-color: rgba(255, 107, 107, 0.55);
+    }
+
+    .msg {
+      color: var(--text-muted);
+      min-height: 1.5rem;
+      margin: 0;
+      font-size: 0.98rem;
+    }
+
+    .msg--ok {
+      color: var(--success);
+    }
+
+    .msg--warn {
+      color: var(--accent-strong);
+    }
+
+    .msg--err {
+      color: var(--danger);
+    }
+
+    .code {
+      font-size: 2rem;
+      letter-spacing: 0.4rem;
+      font-weight: 700;
+      text-align: center;
+      padding: 0.6rem 0.9rem;
+      border-radius: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .keygrid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(56px, 1fr));
+      gap: 0.6rem;
+      margin-top: 0.6rem;
+    }
+
+    .key,
+    .action {
+      appearance: none;
+      border: none;
+      border-radius: 16px;
+      font-weight: 700;
+      font-size: 1.05rem;
+      padding: 0.85rem;
+      cursor: pointer;
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      transition: transform 160ms ease, background 160ms ease, border 160ms ease, box-shadow 160ms ease;
+    }
+
+    .key:hover,
+    .key:focus-visible,
+    .action:hover,
+    .action:focus-visible {
+      transform: translateY(-2px);
+      border-color: var(--accent);
+      background: rgba(248, 148, 34, 0.16);
+      outline: none;
+      box-shadow: 0 10px 24px rgba(248, 148, 34, 0.18);
+    }
+
+    .action-row {
+      display: flex;
+      gap: 0.6rem;
+      margin-top: 0.6rem;
+      flex-wrap: wrap;
+    }
+
+    .action--stay {
+      background: rgba(248, 148, 34, 0.16);
+      border-color: rgba(248, 148, 34, 0.4);
+    }
+
+    .action--away {
+      background: rgba(255, 107, 107, 0.16);
+      border-color: rgba(255, 107, 107, 0.38);
+    }
+
+    .action--disarm {
+      background: rgba(71, 209, 123, 0.16);
+      border-color: rgba(71, 209, 123, 0.38);
+      color: var(--success);
+    }
+
+    .action--ghost {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .zone-list {
+      display: grid;
+      gap: 0.6rem;
+    }
+
+    .zone {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 0.6rem;
+      align-items: center;
+      padding: 0.85rem 1rem;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .zone:hover {
+      border-color: var(--accent);
+      background: rgba(248, 148, 34, 0.12);
+    }
+
+    .z-left {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      font-weight: 700;
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      background: rgba(71, 209, 123, 0.65);
+      box-shadow: 0 0 0 4px rgba(71, 209, 123, 0.14);
+      transition: background 160ms ease, box-shadow 160ms ease;
+    }
+
+    .dot.open {
+      background: rgba(255, 107, 107, 0.9);
+      box-shadow: 0 0 0 4px rgba(255, 107, 107, 0.2);
+    }
+
+    .z-badges {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      font-size: 0.75rem;
+      letter-spacing: 0.02em;
+      padding: 0.18rem 0.5rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      color: var(--text-soft);
+    }
+
+    .badge--bypass {
+      color: var(--warning);
+      border-color: rgba(255, 209, 102, 0.4);
+      background: rgba(255, 209, 102, 0.12);
+    }
+
+    .badge--fault {
+      color: var(--danger);
+      border-color: rgba(255, 107, 107, 0.45);
+      background: rgba(255, 107, 107, 0.12);
+    }
+
+    .zone-controls {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .zone-state {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .row {
+      display: inline-flex;
+      gap: 0.35rem;
+      align-items: center;
+      font-size: 0.85rem;
+      color: var(--text-soft);
+    }
+
+    .panel--simulation {
+      gap: 1rem;
+    }
+
+    .sim-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.8rem;
+      flex-wrap: wrap;
+    }
+
+    .countdown {
+      font-weight: 700;
+      color: var(--accent-strong);
+      min-height: 1.2rem;
+    }
+
+    .sim-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .control-label {
+      font-size: 0.9rem;
+      color: var(--text-soft);
+      font-weight: 600;
+    }
+
+    .select {
+      width: 100%;
+      padding: 0.65rem 0.85rem;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    .sim-actions {
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+
+    .log-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      max-height: 320px;
+      overflow-y: auto;
+      padding-right: 0.2rem;
+    }
+
+    .log {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 0.5rem;
+    }
+
+    .log li {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.8rem;
+      padding: 0.6rem 0.8rem;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      font-size: 0.95rem;
+    }
+
+    .log-time {
+      color: var(--text-soft);
+      font-feature-settings: "tnum" 1, "lnum" 1;
+      min-width: 64px;
+    }
+
+    .log-msg {
+      flex: 1;
+      text-align: right;
+      color: var(--text-muted);
+    }
+
+    .empty-log {
+      margin: 0;
+      color: var(--text-soft);
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 600px) {
+      header {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .header-title {
+        width: 100%;
+      }
+
+      .menu-return {
+        width: 44px;
+        height: 44px;
+      }
+
+      .grid {
+        gap: 1rem;
+      }
+    }
   </style>
 </head>
 <body>
   <main>
     <header>
-      <div class="brand">
-        <span class="brand-badge">🦫</span>
+      <div class="header-title">
+        <a class="menu-return" href="menu.html" aria-label="Retour au menu" data-i18n-aria-label="header.menuAria">
+          <span class="btn-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 9l9-7 9 7"></path>
+              <path d="M9 22V12h6v10"></path>
+              <path d="M21 10v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V10"></path>
+            </svg>
+          </span>
+        </a>
         <div>
-          <div>BeaverAlarm</div>
-          <div class="muted">Simulateur complet (sans serveur)</div>
+          <div class="app-title" data-i18n="header.brand">BeaverAlarm</div>
+          <p class="app-subtitle" data-i18n="header.subtitle">Simulateur complet (hors ligne)</p>
         </div>
+      </div>
+      <div class="lang-toggle" role="group" aria-label="Sélecteur de langue" data-i18n-aria-label="header.languageLabel">
+        <button type="button" class="lang-btn active" data-lang="fr" aria-pressed="true">FR</button>
+        <button type="button" class="lang-btn" data-lang="en" aria-pressed="false">EN</button>
       </div>
     </header>
 
     <section class="grid">
-      <!-- Keypad / actions -->
-      <article class="panel">
+      <article class="panel panel--keypad">
         <div class="panel-heading">
-          <h3 class="section-title">Clavier</h3>
+          <h2 class="section-title" data-i18n="sections.keypad.heading">Clavier</h2>
           <div class="system-inline">
-            <span class="system-label">État du système</span>
-            <span id="stateChip" class="chip status-chip status-chip--disarmed">Désarmée</span>
+            <span class="system-label" data-i18n="sections.keypad.systemLabel">État du système</span>
+            <span id="stateChip" class="chip status-chip status-chip--disarmed" data-i18n="states.DISARMED">Désarmée</span>
           </div>
         </div>
-        <div id="statusMsg" class="msg">Système prêt à être armé.</div>
+        <p id="statusMsg" class="msg" data-i18n="messages.ready">Système prêt à être armé.</p>
         <div id="codeDisplay" class="code">----</div>
-        <div class="keygrid" id="digits"></div>
+        <div class="keygrid" id="digits" aria-label="Clavier" data-i18n-aria-label="sections.keypad.heading"></div>
         <div class="action-row">
-          <button class="action action--stay" id="btnStay">Armement présence</button>
-          <button class="action action--away" id="btnAway">Armement absence</button>
-          <button class="action action--disarm" id="btnDisarm">Désarmer</button>
-          <button class="action" id="btnClear">Effacer</button>
+          <button class="action action--stay" id="btnStay" data-i18n="sections.keypad.buttons.stay">Armement présence</button>
+          <button class="action action--away" id="btnAway" data-i18n="sections.keypad.buttons.away">Armement absence</button>
+          <button class="action action--disarm" id="btnDisarm" data-i18n="sections.keypad.buttons.disarm">Désarmer</button>
+          <button class="action" id="btnClear" data-i18n="sections.keypad.buttons.clear">Effacer</button>
         </div>
         <div class="action-row">
-          <button class="action" id="btnPanic">PANIC 🚨</button>
-          <button class="action" id="btnFire">FEU 🔥 (24h)</button>
-          <button class="action" id="btnMedical">Médical ⛑️ (24h)</button>
+          <button class="action" id="btnPanic" data-i18n="sections.keypad.buttons.panic">PANIC 🚨</button>
+          <button class="action" id="btnFire" data-i18n="sections.keypad.buttons.fire">FEU 🔥 (24h)</button>
+          <button class="action" id="btnMedical" data-i18n="sections.keypad.buttons.medical">Médical ⛑️ (24h)</button>
         </div>
       </article>
 
-      <!-- Zones -->
       <article class="panel">
-        <h3 class="section-title">Zones surveillées</h3>
+        <div class="panel-heading">
+          <h2 class="section-title" data-i18n="sections.zones.heading">Zones surveillées</h2>
+        </div>
         <div class="zone-list" id="zoneList"></div>
       </article>
 
+      <article class="panel panel--simulation">
+        <div class="panel-heading">
+          <h2 class="section-title" data-i18n="sections.simulation.heading">Simulation & événements</h2>
+          <div class="countdown" id="countdown"></div>
+        </div>
+        <div class="sim-controls">
+          <div class="control-group">
+            <label class="control-label" for="timeScale" data-i18n="sections.simulation.speed">Vitesse</label>
+            <select id="timeScale" class="select">
+              <option value="0.5">0.5×</option>
+              <option value="1">1×</option>
+              <option value="2">2×</option>
+              <option value="4">4×</option>
+            </select>
+          </div>
+          <div class="control-group">
+            <label class="control-label" for="scenario" data-i18n="sections.simulation.scenariosLabel">Scénario automatique</label>
+            <select id="scenario" class="select">
+              <option value="none" data-i18n="sections.simulation.scenarios.none">Choisir...</option>
+              <option value="night" data-i18n="sections.simulation.scenarios.night">Routine soirée</option>
+              <option value="away" data-i18n="sections.simulation.scenarios.away">Départ journée</option>
+              <option value="forgetDoor" data-i18n="sections.simulation.scenarios.forgetDoor">Porte oubliée</option>
+              <option value="powerDown" data-i18n="sections.simulation.scenarios.powerDown">Panne secteur</option>
+              <option value="netFail" data-i18n="sections.simulation.scenarios.netFail">Perte réseau</option>
+              <option value="smoke24h" data-i18n="sections.simulation.scenarios.smoke24h">Détection fumée (24h)</option>
+            </select>
+          </div>
+          <div class="sim-actions">
+            <button class="action" id="btnRunScenario" data-i18n="sections.simulation.run">Lancer</button>
+            <button class="action action--ghost" id="btnStopScenario" data-i18n="sections.simulation.stop">Arrêter</button>
+          </div>
+        </div>
+        <div class="log-wrapper">
+          <p id="emptyLog" class="empty-log" data-i18n="sections.simulation.empty">Aucun événement pour le moment.</p>
+          <ul id="log" class="log" aria-live="polite"></ul>
+        </div>
+      </article>
     </section>
   </main>
 
   <script>
   (() => {
-    // =====================
-    // Configuration & modèle
-    // =====================
-    const CONFIG = {
-      entryDelay: 30,      // s
-      exitDelay: 45,       // s
-      alarmDuration: 120,  // s (auto-silence)
-      codes: [
-        { label: 'Maître', code: '1234', level: 'master' },
-        { label: 'Utilisateur', code: '4321', level: 'user' },
-      ],
-      zones: [
-        // type: 'perimeter' (retard entrée), 'interior' (suivi), 'instant', '24h'
-        { id: 'frontDoor',  labelFR: 'Porte principale', type: 'perimeter' },
-        { id: 'garage',     labelFR: 'Garage',           type: 'perimeter' },
-        { id: 'livingRoom', labelFR: 'Salon (mouvement)',type: 'interior' },
-        { id: 'basement',   labelFR: 'Sous-sol',         type: 'instant' },
-        { id: 'smoke',      labelFR: 'Fumée (24h)',      type: '24h' },
-      ],
+    const translations = {
+      fr: {
+        meta: { title: 'BeaverAlarm – Simulateur complet' },
+        header: {
+          brand: 'BeaverAlarm',
+          subtitle: 'Simulateur complet (hors ligne)',
+          menuAria: 'Retour au menu',
+          languageLabel: 'Sélecteur de langue'
+        },
+        sections: {
+          keypad: {
+            heading: 'Clavier',
+            systemLabel: 'État du système',
+            buttons: {
+              stay: 'Armement présence',
+              away: 'Armement absence',
+              disarm: 'Désarmer',
+              clear: 'Effacer',
+              panic: 'PANIC 🚨',
+              fire: 'FEU 🔥 (24h)',
+              medical: 'Médical ⛑️ (24h)'
+            }
+          },
+          zones: {
+            heading: 'Zones surveillées',
+            state: { open: 'Ouverte', closed: 'Sécurisée' },
+            toggle: { open: 'Ouvrir', close: 'Fermer' },
+            badges: { bypass: 'Bypass', fault: 'Défaut' },
+            types: { perimeter: 'Périmètre', interior: 'Intérieur', instant: 'Instant', '24h': '24h' }
+          },
+          simulation: {
+            heading: 'Simulation & événements',
+            empty: 'Aucun événement pour le moment.',
+            speed: 'Vitesse',
+            scenariosLabel: 'Scénario automatique',
+            scenarios: {
+              none: 'Choisir...',
+              night: 'Routine soirée',
+              away: 'Départ journée',
+              forgetDoor: 'Porte oubliée',
+              powerDown: 'Panne secteur',
+              netFail: 'Perte réseau',
+              smoke24h: 'Détection fumée (24h)'
+            },
+            run: 'Lancer',
+            stop: 'Arrêter'
+          }
+        },
+        states: {
+          DISARMED: 'Désarmée',
+          EXIT_DELAY: 'Sortie',
+          ARMED_STAY: 'Armée (présence)',
+          ARMED_AWAY: 'Armée (absence)',
+          ENTRY_DELAY: 'Entrée',
+          ALARM: 'ALERTE'
+        },
+        modes: {
+          stay: 'Présence',
+          away: 'Absence'
+        },
+        codes: {
+          master: { label: 'Code maître' },
+          user: { label: 'Code utilisateur' },
+          force: { label: 'Intervention' }
+        },
+        zones: {
+          frontDoor: { label: 'Porte principale' },
+          garage: { label: 'Garage' },
+          livingRoom: { label: 'Salon (mouvement)' },
+          basement: { label: 'Sous-sol' },
+          smoke: { label: 'Fumée (24h)' }
+        },
+        messages: {
+          ready: 'Système prêt à être armé.',
+          enterValidCode: 'Entrez un code valide.',
+          armBlockedZones: 'Armement impossible : zones ouvertes.',
+          exitDelay: 'Sortie : {{seconds}}s',
+          invalidCode: 'Code invalide.',
+          disarmed: 'Système désarmé.',
+          zoneOpened: 'Zone ouverte : {{zone}}',
+          zoneClosed: 'Zone refermée : {{zone}}',
+          entryDelay: 'Entrée : {{seconds}}s (zone {{zone}})',
+          armedStay: 'Surveillance périmétrique active.',
+          armedAway: 'Toutes les zones sont surveillées.',
+          alarmSilenced: 'Alarme auto-silencée. Mémoire active.',
+          powerOutage: 'Panne secteur détectée.',
+          powerRestored: 'Secteur rétabli.',
+          netDown: 'Réseau perdu.',
+          netUp: 'Réseau rétabli.'
+        },
+        countdown: {
+          exit: 'Sortie : {{seconds}}s',
+          entry: 'Entrée : {{seconds}}s',
+          alarm: 'Sirène : {{seconds}}s'
+        },
+        alarmMessages: {
+          zoneInstant: 'ALERTE : Zone instantanée : {{zone}}',
+          zone24h: 'ALERTE : Alarme 24h : {{zone}}',
+          interior: 'ALERTE : Mouvement intérieur : {{zone}}',
+          entryExpired: 'ALERTE : Délai d’entrée expiré',
+          panic: 'ALERTE : Panic',
+          medical: 'ALERTE : Médical',
+          fire: 'ALERTE : Feu détecté (24h)'
+        },
+        logs: {
+          'arm.blockedZones': 'Blocage armement (zones ouvertes).',
+          'arm.initiated': 'Armement initialisé (mode {{mode}}) – délai sortie {{seconds}}s.',
+          'system.armed': 'Système armé (mode {{mode}}).',
+          'system.disarmed': 'Désarmement ({{code}}) depuis {{state}}.',
+          'zone.opened': 'Ouverture zone : {{zone}}',
+          'zone.closed': 'Fermeture zone : {{zone}}',
+          'delay.entry': 'Délai d’entrée déclenché ({{zone}}) {{seconds}}s.',
+          'alarm.zoneInstant': 'Alarme zone instantanée : {{zone}}',
+          'alarm.zone24h': 'Alarme 24h : {{zone}}',
+          'alarm.interior': 'Mouvement intérieur : {{zone}}',
+          'alarm.entryExpired': 'Délai d’entrée expiré.',
+          'alarm.panic': 'Déclenchement bouton panique.',
+          'alarm.medical': 'Déclenchement alerte médicale.',
+          'alarm.fire': 'Déclenchement alerte feu (24h).',
+          'power.outage': 'Panne secteur.',
+          'power.restored': 'Secteur rétabli.',
+          'net.down': 'Perte réseau.',
+          'net.up': 'Réseau rétabli.',
+          'zone.bypass.enabled': 'Zone {{zone}} bypassée.',
+          'zone.bypass.disabled': 'Zone {{zone}} réactivée.',
+          legacy: '{{text}}'
+        }
+      },
+      en: {
+        meta: { title: 'BeaverAlarm – Full simulator' },
+        header: {
+          brand: 'BeaverAlarm',
+          subtitle: 'Full simulator (offline)',
+          menuAria: 'Back to menu',
+          languageLabel: 'Language selector'
+        },
+        sections: {
+          keypad: {
+            heading: 'Keypad',
+            systemLabel: 'System status',
+            buttons: {
+              stay: 'Stay arming',
+              away: 'Away arming',
+              disarm: 'Disarm',
+              clear: 'Clear',
+              panic: 'PANIC 🚨',
+              fire: 'FIRE 🔥 (24h)',
+              medical: 'Medical ⛑️ (24h)'
+            }
+          },
+          zones: {
+            heading: 'Monitored areas',
+            state: { open: 'Open', closed: 'Secured' },
+            toggle: { open: 'Open', close: 'Close' },
+            badges: { bypass: 'Bypass', fault: 'Fault' },
+            types: { perimeter: 'Perimeter', interior: 'Interior', instant: 'Instant', '24h': '24h' }
+          },
+          simulation: {
+            heading: 'Simulation & events',
+            empty: 'No events yet.',
+            speed: 'Speed',
+            scenariosLabel: 'Automatic scenario',
+            scenarios: {
+              none: 'Choose...',
+              night: 'Evening routine',
+              away: 'Workday departure',
+              forgetDoor: 'Door left open',
+              powerDown: 'Power outage',
+              netFail: 'Network failure',
+              smoke24h: 'Smoke detection (24h)'
+            },
+            run: 'Run',
+            stop: 'Stop'
+          }
+        },
+        states: {
+          DISARMED: 'Disarmed',
+          EXIT_DELAY: 'Exit',
+          ARMED_STAY: 'Armed (stay)',
+          ARMED_AWAY: 'Armed (away)',
+          ENTRY_DELAY: 'Entry',
+          ALARM: 'ALARM'
+        },
+        modes: {
+          stay: 'Stay',
+          away: 'Away'
+        },
+        codes: {
+          master: { label: 'Master code' },
+          user: { label: 'User code' },
+          force: { label: 'Manual override' }
+        },
+        zones: {
+          frontDoor: { label: 'Main door' },
+          garage: { label: 'Garage' },
+          livingRoom: { label: 'Living room (motion)' },
+          basement: { label: 'Basement' },
+          smoke: { label: 'Smoke (24h)' }
+        },
+        messages: {
+          ready: 'System ready to arm.',
+          enterValidCode: 'Enter a valid code.',
+          armBlockedZones: 'Arming blocked: open zones.',
+          exitDelay: 'Exit: {{seconds}}s',
+          invalidCode: 'Invalid code.',
+          disarmed: 'System disarmed.',
+          zoneOpened: 'Zone opened: {{zone}}',
+          zoneClosed: 'Zone closed: {{zone}}',
+          entryDelay: 'Entry: {{seconds}}s (zone {{zone}})',
+          armedStay: 'Perimeter watch active.',
+          armedAway: 'All zones are now monitored.',
+          alarmSilenced: 'Alarm auto-silenced. Memory active.',
+          powerOutage: 'Mains power failure detected.',
+          powerRestored: 'Mains restored.',
+          netDown: 'Network lost.',
+          netUp: 'Network restored.'
+        },
+        countdown: {
+          exit: 'Exit: {{seconds}}s',
+          entry: 'Entry: {{seconds}}s',
+          alarm: 'Siren: {{seconds}}s'
+        },
+        alarmMessages: {
+          zoneInstant: 'ALERT: Instant zone: {{zone}}',
+          zone24h: 'ALERT: 24h alarm: {{zone}}',
+          interior: 'ALERT: Interior motion: {{zone}}',
+          entryExpired: 'ALERT: Entry delay expired',
+          panic: 'ALERT: Panic',
+          medical: 'ALERT: Medical',
+          fire: 'ALERT: Fire detected (24h)'
+        },
+        logs: {
+          'arm.blockedZones': 'Arming blocked (open zones).',
+          'arm.initiated': 'Arming started ({{mode}} mode) – exit delay {{seconds}}s.',
+          'system.armed': 'System armed ({{mode}} mode).',
+          'system.disarmed': 'System disarmed ({{code}}) from {{state}}.',
+          'zone.opened': 'Zone opened: {{zone}}',
+          'zone.closed': 'Zone closed: {{zone}}',
+          'delay.entry': 'Entry delay started ({{zone}}) {{seconds}}s.',
+          'alarm.zoneInstant': 'Instant zone alarm: {{zone}}',
+          'alarm.zone24h': '24h alarm: {{zone}}',
+          'alarm.interior': 'Interior motion: {{zone}}',
+          'alarm.entryExpired': 'Entry delay expired.',
+          'alarm.panic': 'Panic button pressed.',
+          'alarm.medical': 'Medical alert triggered.',
+          'alarm.fire': 'Fire alert triggered (24h).',
+          'power.outage': 'Power outage.',
+          'power.restored': 'Power restored.',
+          'net.down': 'Network down.',
+          'net.up': 'Network restored.',
+          'zone.bypass.enabled': 'Zone {{zone}} bypassed.',
+          'zone.bypass.disabled': 'Zone {{zone}} re-enabled.',
+          legacy: '{{text}}'
+        }
+      }
     };
 
     const STATE = {
@@ -192,49 +910,83 @@
       ARMED_STAY: 'ARMED_STAY',
       ARMED_AWAY: 'ARMED_AWAY',
       ENTRY_DELAY: 'ENTRY_DELAY',
-      ALARM: 'ALARM',
+      ALARM: 'ALARM'
     };
 
-    // =====================
-    // Persistant simple (localStorage)
-    // =====================
+    const CONFIG = {
+      entryDelay: 30,
+      exitDelay: 45,
+      alarmDuration: 120,
+      codes: [
+        { id: 'master', code: '1234', level: 'master' },
+        { id: 'user', code: '4321', level: 'user' }
+      ],
+      zones: [
+        { id: 'frontDoor', type: 'perimeter' },
+        { id: 'garage', type: 'perimeter' },
+        { id: 'livingRoom', type: 'interior' },
+        { id: 'basement', type: 'instant' },
+        { id: 'smoke', type: '24h' }
+      ]
+    };
+
     const store = {
-      get k(){ return 'beaveralarm.sim.v1'; },
-      load(){ try{ return JSON.parse(localStorage.getItem(this.k))||{} }catch{ return {} } },
-      save(v){ try{ localStorage.setItem(this.k, JSON.stringify(v)); }catch{} },
+      key: 'beaveralarm.sim.v2',
+      load() {
+        try { return JSON.parse(localStorage.getItem(this.key)) || {}; }
+        catch { return {}; }
+      },
+      save(payload) {
+        try { localStorage.setItem(this.key, JSON.stringify(payload)); }
+        catch { /* ignore quota */ }
+      }
     };
 
     const persisted = store.load();
 
-    // =====================
-    // Runtime
-    // =====================
     const runtime = {
-      lang: 'fr',
+      lang: translations[persisted.lang] ? persisted.lang : 'fr',
       system: STATE.DISARMED,
       input: '',
-      zones: CONFIG.zones.map(z => ({...z, open:false, bypass:false, fault:false})),
-      timers: { entry:0, exit:0, alarm:0 },
-      powerOK: true,
-      netOK: true,
-      timeScale: Number(persisted.timeScale||1),
-      log: persisted.log || [],
+      zones: CONFIG.zones.map(z => ({ ...z, open: false, bypass: false, fault: false })),
+      timers: { entry: 0, exit: 0, alarm: 0 },
+      timeScale: Number(persisted.timeScale || 1),
+      log: Array.isArray(persisted.log) ? persisted.log : [],
+      pendingArm: null,
       scenario: null,
-      siren: { active:false, node:null, ctx:null, stop:()=>{} },
+      siren: { active: false, node: null, ctx: null, stop: () => {} },
+      statusMessage: { key: 'messages.ready', params: {}, cls: '' },
+      countdown: null,
+      powerOK: true,
+      netOK: true
     };
 
-    // Restore open/bypass from persistence if any
-    if (persisted.zones){
+    if (persisted.zones) {
       runtime.zones.forEach(z => {
-        const p = persisted.zones[z.id];
-        if (p){ z.open=!!p.open; z.bypass=!!p.bypass; z.fault=!!p.fault; }
+        const saved = persisted.zones[z.id];
+        if (saved) {
+          z.open = !!saved.open;
+          z.bypass = !!saved.bypass;
+          z.fault = !!saved.fault;
+        }
       });
     }
 
-    // =====================
-    // DOM refs
-    // =====================
+    runtime.log = runtime.log.map(entry => {
+      if (entry && typeof entry === 'object' && 'key' in entry) {
+        return entry;
+      }
+      if (entry && typeof entry === 'object' && entry.text) {
+        return { ts: entry.ts || Date.now(), key: 'legacy', params: { text: entry.text } };
+      }
+      if (typeof entry === 'string') {
+        return { ts: Date.now(), key: 'legacy', params: { text: entry } };
+      }
+      return null;
+    }).filter(Boolean);
+
     const el = {
+      langButtons: Array.from(document.querySelectorAll('.lang-btn')),
       stateChip: document.getElementById('stateChip'),
       statusMsg: document.getElementById('statusMsg'),
       codeDisplay: document.getElementById('codeDisplay'),
@@ -253,352 +1005,622 @@
       runScenario: document.getElementById('btnRunScenario'),
       stopScenario: document.getElementById('btnStopScenario'),
       timeScale: document.getElementById('timeScale'),
-      countdown: document.getElementById('countdown'),
+      countdown: document.getElementById('countdown')
     };
 
-    // =====================
-    // Utils
-    // =====================
-    const t = (s)=> ({
-      DISARMED:'Désarmée', EXIT_DELAY:'Sortie', ARMED_STAY:'Armée (présence)', ARMED_AWAY:'Armée (absence)', ENTRY_DELAY:'Entrée', ALARM:'ALERTE',
-    }[s]||s);
+    const textNodes = Array.from(document.querySelectorAll('[data-i18n]'));
+    const ariaNodes = Array.from(document.querySelectorAll('[data-i18n-aria-label]'));
 
-    const nowStr = () => {
-      const d = new Date();
-      return d.toLocaleTimeString('fr-CA', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+    function format(str, params) {
+      if (!params) return str;
+      return str.replace(/{{\s*(\w+)\s*}}/g, (_, key) => (key in params ? String(params[key]) : ''));
     }
 
-    function log(msg){
-      runtime.log.unshift({ ts: Date.now(), msg });
-      if (runtime.log.length > 50) runtime.log.length = 50;
+    function tr(path, params = {}, lang = runtime.lang) {
+      const fallback = 'fr';
+      const resolve = (targetLang) => {
+        const parts = path.split('.');
+        let node = translations[targetLang];
+        for (const part of parts) {
+          if (node && typeof node === 'object' && part in node) {
+            node = node[part];
+          } else {
+            node = undefined;
+            break;
+          }
+        }
+        return typeof node === 'string' ? format(node, params) : undefined;
+      };
+
+      return resolve(lang) ?? resolve(fallback) ?? '';
+    }
+
+    function resolveParams(raw = {}) {
+      const resolved = {};
+      for (const [key, value] of Object.entries(raw)) {
+        if (value && typeof value === 'object') {
+          switch (value.type) {
+            case 'zone':
+              resolved[key] = tr(`zones.${value.id}.label`);
+              break;
+            case 'mode':
+              resolved[key] = tr(`modes.${value.id}`);
+              break;
+            case 'code':
+              resolved[key] = tr(`codes.${value.id}.label`);
+              break;
+            case 'state':
+              resolved[key] = tr(`states.${value.id}`);
+              break;
+            case 'text':
+              resolved[key] = tr(value.key, resolveParams(value.params));
+              break;
+            default:
+              resolved[key] = value.value ?? '';
+          }
+        } else {
+          resolved[key] = value;
+        }
+      }
+      return resolved;
+    }
+
+    function applyTranslations() {
+      document.title = tr('meta.title');
+      document.documentElement.lang = runtime.lang;
+
+      textNodes.forEach(node => {
+        const key = node.getAttribute('data-i18n');
+        if (key) {
+          node.textContent = tr(key, undefined, runtime.lang);
+        }
+      });
+
+      ariaNodes.forEach(node => {
+        const key = node.getAttribute('data-i18n-aria-label');
+        if (key) {
+          node.setAttribute('aria-label', tr(key, undefined, runtime.lang));
+        }
+      });
+
+      el.langButtons.forEach(btn => {
+        const isActive = btn.dataset.lang === runtime.lang;
+        btn.classList.toggle('active', isActive);
+        btn.setAttribute('aria-pressed', String(isActive));
+      });
+
+      setChip(runtime.system);
+    }
+
+    function persist() {
+      const zonesState = Object.fromEntries(runtime.zones.map(z => [z.id, { open: z.open, bypass: z.bypass, fault: z.fault }]));
+      store.save({
+        lang: runtime.lang,
+        timeScale: runtime.timeScale,
+        zones: zonesState,
+        log: runtime.log
+      });
+    }
+
+    function zoneLabel(id) {
+      return tr(`zones.${id}.label`);
+    }
+
+    function modeKey(state) {
+      return state === STATE.ARMED_STAY ? 'stay' : 'away';
+    }
+
+    function setMsg(key, params = {}, cls = '') {
+      runtime.statusMessage = key ? { key, params, cls } : null;
+      el.statusMsg.classList.remove('msg--ok', 'msg--warn', 'msg--err');
+      if (!key) {
+        el.statusMsg.textContent = '';
+        return;
+      }
+      if (cls) {
+        el.statusMsg.classList.add(cls);
+      }
+      const text = tr(key, resolveParams(params));
+      el.statusMsg.textContent = text;
+    }
+
+    function applyStatusMessage() {
+      if (runtime.statusMessage) {
+        setMsg(runtime.statusMessage.key, runtime.statusMessage.params, runtime.statusMessage.cls);
+      } else {
+        setMsg(null);
+      }
+    }
+
+    function setCountdown(key, params = {}) {
+      runtime.countdown = key ? { key, params } : null;
+      el.countdown.textContent = key ? tr(key, resolveParams(params)) : '';
+    }
+
+    function applyCountdown() {
+      if (runtime.countdown) {
+        setCountdown(runtime.countdown.key, runtime.countdown.params);
+      } else {
+        setCountdown(null);
+      }
+    }
+
+    function setChip(state) {
+      const className = state === STATE.DISARMED ? 'status-chip--disarmed'
+        : state === STATE.EXIT_DELAY ? 'status-chip--exit'
+        : state === STATE.ARMED_STAY ? 'status-chip--stay'
+        : state === STATE.ARMED_AWAY ? 'status-chip--away'
+        : state === STATE.ENTRY_DELAY ? 'status-chip--entry'
+        : 'status-chip--alarm';
+
+      el.stateChip.className = `chip status-chip ${className}`;
+      el.stateChip.textContent = tr(`states.${state}`);
+    }
+
+    function displayCode() {
+      el.codeDisplay.textContent = runtime.input ? '•'.repeat(runtime.input.length) : '----';
+    }
+
+    function checkCode() {
+      return CONFIG.codes.find(c => c.code === runtime.input) || null;
+    }
+
+    function clearCode() {
+      runtime.input = '';
+      displayCode();
+    }
+
+    function anyOpenNonBypassed() {
+      return runtime.zones.some(z => z.open && !z.bypass);
+    }
+
+    function log(key, params = {}) {
+      runtime.log.unshift({ ts: Date.now(), key, params });
+      if (runtime.log.length > 100) {
+        runtime.log.length = 100;
+      }
       renderLog();
       persist();
     }
 
-    function persist(){
-      store.save({
-        timeScale: runtime.timeScale,
-        zones: Object.fromEntries(runtime.zones.map(z=>[z.id,{open:z.open, bypass:z.bypass, fault:z.fault}]) ),
-        log: runtime.log,
-      });
-    }
-
-    function setMsg(message, cls){
-      el.statusMsg.textContent = message;
-      el.statusMsg.classList.remove('msg--ok','msg--warn','msg--err');
-      if (cls) el.statusMsg.classList.add(cls);
-    }
-
-    function setChip(state){
-      el.stateChip.textContent = t(state);
-      el.stateChip.className = 'chip status-chip ' + (
-        state===STATE.DISARMED ? 'status-chip--disarmed' :
-        state===STATE.EXIT_DELAY ? 'status-chip--exit' :
-        state===STATE.ARMED_STAY ? 'status-chip--stay' :
-        state===STATE.ARMED_AWAY ? 'status-chip--away' :
-        state===STATE.ENTRY_DELAY ? 'status-chip--entry' :
-        'status-chip--alarm'
-      );
-    }
-
-    function displayCode(){ el.codeDisplay.textContent = runtime.input ? '•'.repeat(runtime.input.length) : '----'; }
-
-    function checkCode(){
-      return CONFIG.codes.find(c => c.code === runtime.input);
-    }
-
-    function clearCode(){ runtime.input=''; displayCode(); }
-
-    function anyOpenPerimeter(){ return runtime.zones.some(z => z.type==='perimeter' && z.open && !z.bypass); }
-    function anyOpenNonBypassed(){ return runtime.zones.some(z => z.open && !z.bypass); }
-
-    function setSystem(state){
-      runtime.system = state;
-      setChip(state);
+    function persistZones() {
       persist();
     }
 
-    function arm(mode){
+    function setSystem(state) {
+      runtime.system = state;
+      setChip(state);
+      persistZones();
+    }
+
+    function arm(targetState) {
       const code = checkCode();
-      if (!code || runtime.input.length<4){ setMsg('Entrez un code valide.', 'msg--warn'); return; }
-      if (anyOpenNonBypassed()){
-        setMsg('Armement impossible: zones ouvertes.', 'msg--err');
-        log(`Blocage armement (zones ouvertes).`);
+      if (!code || runtime.input.length < 4) {
+        setMsg('messages.enterValidCode', {}, 'msg--warn');
+        return;
+      }
+      if (anyOpenNonBypassed()) {
+        setMsg('messages.armBlockedZones', {}, 'msg--err');
+        log('arm.blockedZones');
         return;
       }
       runtime.timers.exit = CONFIG.exitDelay;
+      runtime.pendingArm = targetState;
       setSystem(STATE.EXIT_DELAY);
-      setMsg(`Sortie: ${CONFIG.exitDelay}s`, 'msg--warn');
-      log(`Armement initialisé (${mode===STATE.ARMED_STAY?'présence':'absence'}) – délai sortie ${CONFIG.exitDelay}s.`);
-      runtime.pendingArm = mode; // remember target
+      setMsg('messages.exitDelay', { seconds: CONFIG.exitDelay }, 'msg--warn');
+      log('arm.initiated', { mode: { type: 'mode', id: modeKey(targetState) }, seconds: CONFIG.exitDelay });
       clearCode();
+      setCountdown('countdown.exit', { seconds: CONFIG.exitDelay });
     }
 
-    function disarm({force=false}={}){
+    function disarm({ force = false } = {}) {
       const code = checkCode();
-      if (!force && (!code || runtime.input.length<4)){
-        setMsg('Code invalide.', 'msg--err');
+      if (!force && (!code || runtime.input.length < 4)) {
+        setMsg('messages.invalidCode', {}, 'msg--err');
         return;
       }
       const was = runtime.system;
       setSystem(STATE.DISARMED);
-      runtime.timers = { entry:0, exit:0, alarm:0 };
+      runtime.pendingArm = null;
+      runtime.timers = { entry: 0, exit: 0, alarm: 0 };
       siren(false);
-      setMsg('Système désarmé.', 'msg--ok');
-      log(`Désarment (${code?code.label:'forcé'}) depuis ${t(was)}.`);
+      setMsg('messages.disarmed', {}, 'msg--ok');
+      log('system.disarmed', {
+        code: { type: 'code', id: code ? code.id : 'force' },
+        state: { type: 'state', id: was }
+      });
       clearCode();
+      setCountdown(null);
     }
 
-    function zoneById(id){ return runtime.zones.find(z=>z.id===id); }
-
-    function openZone(id, open=true){
-      const z = zoneById(id); if (!z) return;
-      if (z.open === open) return;
-      z.open = open; persist(); renderZones();
-
-      const label = z.labelFR;
-      log(`${open?'Ouverture':'Fermeture'} zone: ${label}`);
-
-      // 24h zones trigger immediate alarm
-      if (z.type==='24h') return alarm('Alarme 24h: ' + label);
-
-      switch (runtime.system){
-        case STATE.DISARMED:
-          setMsg(open?`Zone ouverte: ${label}`:`Zone refermée: ${label}`);
-          break;
-        case STATE.ARMED_STAY:
-        case STATE.ARMED_AWAY:
-        case STATE.EXIT_DELAY:
-          if (open){
-            if (z.type==='perimeter') startEntryDelay(label);
-            else if (z.type==='instant') alarm(`Zone instantanée: ${label}`);
-            else if (z.type==='interior' && runtime.system===STATE.ARMED_AWAY) alarm(`Mouvement intérieur: ${label}`);
-          }
-          break;
-        case STATE.ENTRY_DELAY:
-          // keep counting; opening more zones has no effect
-          break;
-      }
+    function zoneById(id) {
+      return runtime.zones.find(z => z.id === id);
     }
 
-    function startEntryDelay(label){
+    function startEntryDelay(zoneId) {
       runtime.timers.entry = CONFIG.entryDelay;
       setSystem(STATE.ENTRY_DELAY);
-      setMsg(`Entrée: ${CONFIG.entryDelay}s (zone ${label})`, 'msg--warn');
-      log(`Délai d'entrée déclenché (${label}) ${CONFIG.entryDelay}s.`);
+      setMsg('messages.entryDelay', { seconds: CONFIG.entryDelay, zone: { type: 'zone', id: zoneId } }, 'msg--warn');
+      log('delay.entry', { zone: { type: 'zone', id: zoneId }, seconds: CONFIG.entryDelay });
+      setCountdown('countdown.entry', { seconds: CONFIG.entryDelay });
     }
 
-    function alarm(reason){
+    function alarm(reason, params = {}) {
       setSystem(STATE.ALARM);
       runtime.timers.alarm = CONFIG.alarmDuration;
-      setMsg(`ALERTE: ${reason}`, 'msg--err');
-      log(`ALERTE 🚨 ${reason} (auto-silence ${CONFIG.alarmDuration}s)`);
+      setMsg(`alarmMessages.${reason}`, params, 'msg--err');
+      log(`alarm.${reason}`, params);
       siren(true);
+      setCountdown('countdown.alarm', { seconds: CONFIG.alarmDuration });
     }
 
-    // Simple synth siren (WebAudio), no external asset
-    function siren(on){
-      try{
-        if (on && !runtime.siren.active){
-          const ctx = new (window.AudioContext||window.webkitAudioContext)();
-          const o = ctx.createOscillator();
-          const g = ctx.createGain();
-          o.type='sawtooth'; o.frequency.value=600; g.gain.value=0.001; // low volume
-          o.connect(g).connect(ctx.destination);
-          o.start();
-          let up=true; let f=600;
-          const mod = setInterval(()=>{ f += (up?30:-30); if (f>1200||f<500) up=!up; o.frequency.value=f; }, 60);
-          runtime.siren = { active:true, ctx, node:o, stop:()=>{ clearInterval(mod); o.stop(); ctx.close(); } };
+    function openZone(id, open = true) {
+      const zone = zoneById(id);
+      if (!zone || zone.open === open) return;
+
+      zone.open = open;
+      persistZones();
+      renderZones();
+
+      log(open ? 'zone.opened' : 'zone.closed', { zone: { type: 'zone', id } });
+
+      if (runtime.system === STATE.DISARMED) {
+        setMsg(open ? 'messages.zoneOpened' : 'messages.zoneClosed', { zone: { type: 'zone', id } });
+        return;
+      }
+
+      if (!open) {
+        return;
+      }
+
+      switch (zone.type) {
+        case '24h':
+          alarm('zone24h', { zone: { type: 'zone', id } });
+          break;
+        case 'perimeter':
+          startEntryDelay(id);
+          break;
+        case 'instant':
+          alarm('zoneInstant', { zone: { type: 'zone', id } });
+          break;
+        case 'interior':
+          if (runtime.system === STATE.ARMED_AWAY) {
+            alarm('interior', { zone: { type: 'zone', id } });
+          }
+          break;
+      }
+    }
+
+    function siren(on) {
+      try {
+        if (on && !runtime.siren.active) {
+          const ctx = new (window.AudioContext || window.webkitAudioContext)();
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.value = 600;
+          gain.gain.value = 0.001;
+          osc.connect(gain).connect(ctx.destination);
+          osc.start();
+          let up = true;
+          let freq = 600;
+          const mod = setInterval(() => {
+            freq += up ? 30 : -30;
+            if (freq > 1200 || freq < 500) up = !up;
+            osc.frequency.value = freq;
+          }, 60);
+          runtime.siren = {
+            active: true,
+            ctx,
+            node: osc,
+            stop: () => {
+              clearInterval(mod);
+              osc.stop();
+              ctx.close();
+            }
+          };
         }
-        if (!on && runtime.siren.active){ runtime.siren.stop(); runtime.siren={active:false,node:null,ctx:null,stop:()=>{}}; }
-      }catch(e){ /* ignore audio errors (permissions) */ }
+        if (!on && runtime.siren.active) {
+          runtime.siren.stop();
+          runtime.siren = { active: false, node: null, ctx: null, stop: () => {} };
+        }
+      } catch (error) {
+        console.warn('Siren error', error);
+      }
     }
 
-    // =====================
-    // Ticker
-    // =====================
     let tickHandle = null;
-    function startTicker(){ if (tickHandle) return; tickHandle = setInterval(tick, 250); }
-    function stopTicker(){ clearInterval(tickHandle); tickHandle=null; }
-    function tick(){
+    function startTicker() {
+      if (tickHandle) return;
+      tickHandle = setInterval(tick, 250);
+    }
+
+    function stopTicker() {
+      clearInterval(tickHandle);
+      tickHandle = null;
+    }
+
+    function tick() {
       const scale = runtime.timeScale || 1;
-      const dt = 0.25 * scale; // seconds advanced per tick
-      // countdowns
-      if (runtime.system===STATE.EXIT_DELAY){
+      const dt = 0.25 * scale;
+
+      if (runtime.system === STATE.EXIT_DELAY) {
         runtime.timers.exit = Math.max(0, runtime.timers.exit - dt);
-        el.countdown.textContent = `Sortie: ${Math.ceil(runtime.timers.exit)}s`;
-        if (runtime.timers.exit===0){
-          const target = runtime.pendingArm||STATE.ARMED_AWAY;
+        setCountdown('countdown.exit', { seconds: Math.ceil(runtime.timers.exit) });
+        if (runtime.timers.exit === 0) {
+          const target = runtime.pendingArm || STATE.ARMED_AWAY;
           setSystem(target);
-          setMsg(target===STATE.ARMED_STAY? 'Surveillance périmétrique active.' : 'Toutes les zones sont surveillées.', 'msg--ok');
-          log(`Système armé (${target===STATE.ARMED_STAY?'présence':'absence'}).`);
-          el.countdown.textContent = '';
+          setMsg(target === STATE.ARMED_STAY ? 'messages.armedStay' : 'messages.armedAway', {}, 'msg--ok');
+          log('system.armed', { mode: { type: 'mode', id: modeKey(target) } });
+          runtime.pendingArm = null;
+          setCountdown(null);
         }
       }
-      if (runtime.system===STATE.ENTRY_DELAY){
+
+      if (runtime.system === STATE.ENTRY_DELAY) {
         runtime.timers.entry = Math.max(0, runtime.timers.entry - dt);
-        el.countdown.textContent = `Entrée: ${Math.ceil(runtime.timers.entry)}s`;
-        if (runtime.timers.entry===0){ el.countdown.textContent=''; alarm('Délai d\'entrée expiré'); }
+        setCountdown('countdown.entry', { seconds: Math.ceil(runtime.timers.entry) });
+        if (runtime.timers.entry === 0) {
+          setCountdown(null);
+          alarm('entryExpired');
+        }
       }
-      if (runtime.system===STATE.ALARM){
+
+      if (runtime.system === STATE.ALARM) {
         runtime.timers.alarm = Math.max(0, runtime.timers.alarm - dt);
-        el.countdown.textContent = `Sirène: ${Math.ceil(runtime.timers.alarm)}s`;
-        if (runtime.timers.alarm===0){ siren(false); el.countdown.textContent=''; setMsg('Alarme auto-silencée. Mémoire active.', 'msg--warn'); }
+        setCountdown('countdown.alarm', { seconds: Math.ceil(runtime.timers.alarm) });
+        if (runtime.timers.alarm === 0) {
+          siren(false);
+          setCountdown(null);
+          setMsg('messages.alarmSilenced', {}, 'msg--warn');
+        }
       }
     }
-
-    // =====================
-    // Scénarios
-    // =====================
-    let scenarioTimer = null;
-    function runScenario(name){
-      stopScenario();
-      if (!name || name==='none') return;
-      const s = scenarios[name];
-      if (!s) return;
-      s();
-    }
-
-    function stopScenario(){ if (scenarioTimer){ clearTimeout(scenarioTimer); scenarioTimer=null; } runtime.scenario=null; }
-    function after(ms, fn){ scenarioTimer = setTimeout(fn, ms/ (runtime.timeScale||1)); }
 
     const scenarios = {
-      night(){
-        // Stay arm, then open door → entry delay → disarm
-        runtime.input='1234'; displayCode(); arm(STATE.ARMED_STAY);
-        after(1000, ()=>{ // during exit, keep still
-          after((CONFIG.exitDelay+2)*1000, ()=>{
+      night() {
+        runtime.input = '1234';
+        displayCode();
+        arm(STATE.ARMED_STAY);
+        after(1000, () => {
+          after((CONFIG.exitDelay + 2) * 1000, () => {
             openZone('frontDoor', true);
-            after(2000, ()=>{ runtime.input='1234'; displayCode(); disarm(); openZone('frontDoor', false); });
+            after(2000, () => {
+              runtime.input = '1234';
+              displayCode();
+              disarm();
+              openZone('frontDoor', false);
+            });
           });
         });
       },
-      away(){
-        runtime.input='1234'; displayCode(); arm(STATE.ARMED_AWAY);
-        after((CONFIG.exitDelay+2)*1000, ()=>{
-          openZone('livingRoom', true); // interior causes instant alarm in away
-          after(4000, ()=>{ runtime.input='1234'; displayCode(); disarm(); openZone('livingRoom', false); });
+      away() {
+        runtime.input = '1234';
+        displayCode();
+        arm(STATE.ARMED_AWAY);
+        after((CONFIG.exitDelay + 2) * 1000, () => {
+          openZone('livingRoom', true);
+          after(4000, () => {
+            runtime.input = '1234';
+            displayCode();
+            disarm();
+            openZone('livingRoom', false);
+          });
         });
       },
-      forgetDoor(){
+      forgetDoor() {
         openZone('frontDoor', true);
-        runtime.input='1234'; displayCode(); arm(STATE.ARMED_AWAY); // should block
-        after(2500, ()=> openZone('frontDoor', false));
+        runtime.input = '1234';
+        displayCode();
+        arm(STATE.ARMED_AWAY);
+        after(2500, () => openZone('frontDoor', false));
       },
-      powerDown(){
-        setPower(false); after(10000, ()=> setPower(true));
+      powerDown() {
+        setPower(false);
+        after(10000, () => setPower(true));
       },
-      netFail(){
-        setNet(false); after(15000, ()=> setNet(true));
+      netFail() {
+        setNet(false);
+        after(15000, () => setNet(true));
       },
-      smoke24h(){
-        openZone('smoke', true); after(5000, ()=> openZone('smoke', false));
-      },
+      smoke24h() {
+        openZone('smoke', true);
+        after(5000, () => openZone('smoke', false));
+      }
     };
 
-    // =====================
-    // Power / Net indicators
-    // =====================
-    function setPower(ok){
+    let scenarioTimer = null;
+    function after(ms, fn) {
+      scenarioTimer = setTimeout(fn, ms / (runtime.timeScale || 1));
+    }
+
+    function runScenario(name) {
+      stopScenario();
+      if (!name || name === 'none') return;
+      const scenario = scenarios[name];
+      if (scenario) scenario();
+    }
+
+    function stopScenario() {
+      if (scenarioTimer) {
+        clearTimeout(scenarioTimer);
+        scenarioTimer = null;
+      }
+      runtime.scenario = null;
+    }
+
+    function setPower(ok) {
+      if (runtime.powerOK === ok) return;
       runtime.powerOK = ok;
       if (!ok) {
-        setMsg('Panne secteur détectée.', 'msg--warn');
-        log('Panne secteur');
+        setMsg('messages.powerOutage', {}, 'msg--warn');
+        log('power.outage');
       } else {
-        log('Secteur rétabli');
+        setMsg('messages.powerRestored', {}, 'msg--ok');
+        log('power.restored');
       }
     }
-    function setNet(ok){
+
+    function setNet(ok) {
+      if (runtime.netOK === ok) return;
       runtime.netOK = ok;
       if (!ok) {
-        setMsg('Réseau perdu.', 'msg--warn');
-        log('Perte réseau');
+        setMsg('messages.netDown', {}, 'msg--warn');
+        log('net.down');
       } else {
-        log('Réseau rétabli');
+        setMsg('messages.netUp', {}, 'msg--ok');
+        log('net.up');
       }
     }
 
-    // =====================
-    // Renderers
-    // =====================
-    function renderDigits(){
+    function renderDigits() {
       const frag = document.createDocumentFragment();
-      for (let i=1;i<=9;i++) frag.appendChild(makeDigit(i));
+      for (let i = 1; i <= 9; i++) frag.appendChild(makeDigit(i));
       frag.appendChild(makeDigit(0));
       el.digits.appendChild(frag);
-      function makeDigit(n){ const b=document.createElement('button'); b.className='key'; b.textContent=String(n); b.addEventListener('click',()=>{ if (runtime.input.length<6){ runtime.input+=String(n); displayCode(); } }); return b; }
+
+      function makeDigit(n) {
+        const button = document.createElement('button');
+        button.className = 'key';
+        button.textContent = String(n);
+        button.addEventListener('click', () => {
+          if (runtime.input.length < 6) {
+            runtime.input += String(n);
+            displayCode();
+          }
+        });
+        return button;
+      }
     }
 
-    function renderZones(){
-      el.zoneList.innerHTML='';
-      runtime.zones.forEach(z=>{
-        const row=document.createElement('div'); row.className='zone';
-        const left=document.createElement('div'); left.className='z-left';
-        const dot=document.createElement('span'); dot.className='dot'+(z.open?' open':'');
-        const name=document.createElement('span'); name.textContent=z.labelFR;
-        const badges=document.createElement('div'); badges.className='z-badges';
-        const type=document.createElement('span'); type.className='badge badge--type'; type.textContent=typeLabel(z.type);
+    function renderZones() {
+      el.zoneList.innerHTML = '';
+      runtime.zones.forEach(z => {
+        const row = document.createElement('div');
+        row.className = 'zone';
+
+        const left = document.createElement('div');
+        left.className = 'z-left';
+        const dot = document.createElement('span');
+        dot.className = 'dot' + (z.open ? ' open' : '');
+        const name = document.createElement('span');
+        name.textContent = zoneLabel(z.id);
+        const badges = document.createElement('div');
+        badges.className = 'z-badges';
+        const type = document.createElement('span');
+        type.className = 'badge badge--type';
+        type.textContent = tr(`sections.zones.types.${z.type}`);
         badges.appendChild(type);
-        if (z.bypass){ const b=document.createElement('span'); b.className='badge badge--bypass'; b.textContent='Bypass'; badges.appendChild(b); }
-        if (z.fault){ const b=document.createElement('span'); b.className='badge badge--fault'; b.textContent='Défaut'; badges.appendChild(b); }
-        left.append(dot,name,badges);
+        if (z.bypass) {
+          const badge = document.createElement('span');
+          badge.className = 'badge badge--bypass';
+          badge.textContent = tr('sections.zones.badges.bypass');
+          badges.appendChild(badge);
+        }
+        if (z.fault) {
+          const badge = document.createElement('span');
+          badge.className = 'badge badge--fault';
+          badge.textContent = tr('sections.zones.badges.fault');
+          badges.appendChild(badge);
+        }
+        left.append(dot, name, badges);
 
-        const right=document.createElement('div'); right.className='zone-controls';
-        const state=document.createElement('span'); state.className='zone-state'; state.textContent = z.open?'Ouverte':'Sécurisée';
-        const toggle=document.createElement('button'); toggle.className='action'; toggle.textContent = z.open?'Fermer':'Ouvrir'; toggle.addEventListener('click',()=> openZone(z.id, !z.open));
-        const chk=document.createElement('label'); chk.className='row'; chk.style.gap='.35rem';
-        const cb=document.createElement('input'); cb.type='checkbox'; cb.checked=z.bypass; cb.addEventListener('change',()=>{ z.bypass=cb.checked; persist(); renderZones(); log(`Zone ${z.labelFR} ${z.bypass?'bypassée':'active'}`); });
-        const cbl=document.createElement('span'); cbl.className='muted'; cbl.textContent='Bypass';
-        chk.append(cb,cbl);
+        const right = document.createElement('div');
+        right.className = 'zone-controls';
+        const state = document.createElement('span');
+        state.className = 'zone-state';
+        state.textContent = tr(`sections.zones.state.${z.open ? 'open' : 'closed'}`);
+        const toggle = document.createElement('button');
+        toggle.className = 'action';
+        toggle.textContent = tr(`sections.zones.toggle.${z.open ? 'close' : 'open'}`);
+        toggle.addEventListener('click', () => openZone(z.id, !z.open));
+
+        const chk = document.createElement('label');
+        chk.className = 'row';
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.checked = z.bypass;
+        cb.addEventListener('change', () => {
+          z.bypass = cb.checked;
+          persistZones();
+          renderZones();
+          log(z.bypass ? 'zone.bypass.enabled' : 'zone.bypass.disabled', { zone: { type: 'zone', id: z.id } });
+        });
+        const cbl = document.createElement('span');
+        cbl.textContent = tr('sections.zones.badges.bypass');
+        chk.append(cb, cbl);
+
         right.append(state, toggle, chk);
-
-        row.append(left,right);
+        row.append(left, right);
         el.zoneList.appendChild(row);
       });
-
-      function typeLabel(t){ return ({ perimeter:'Périmètre', interior:'Intérieur', instant:'Instant', '24h':'24h' })[t] || t; }
     }
 
-    function renderLog(){
-      el.log.innerHTML='';
-      if (!runtime.log.length){ el.emptyLog.hidden=false; return; }
-      el.emptyLog.hidden=true;
-      runtime.log.forEach(e=>{
-        const li=document.createElement('li');
-        const ts=document.createElement('span'); ts.className='log-time'; ts.textContent=new Date(e.ts).toLocaleTimeString('fr-CA',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-        const msg=document.createElement('span'); msg.className='log-msg'; msg.textContent=e.msg;
-        li.append(ts,msg); el.log.appendChild(li);
+    function renderLog() {
+      el.log.innerHTML = '';
+      if (!runtime.log.length) {
+        el.emptyLog.hidden = false;
+        return;
+      }
+      el.emptyLog.hidden = true;
+      runtime.log.forEach(entry => {
+        const li = document.createElement('li');
+        const ts = document.createElement('span');
+        ts.className = 'log-time';
+        ts.textContent = new Date(entry.ts).toLocaleTimeString(runtime.lang === 'fr' ? 'fr-CA' : 'en-CA', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        const msg = document.createElement('span');
+        msg.className = 'log-msg';
+        const params = resolveParams(entry.params);
+        msg.textContent = tr(`logs.${entry.key}`, params);
+        li.append(ts, msg);
+        el.log.appendChild(li);
       });
     }
 
-    // =====================
-    // Event wiring
-    // =====================
     renderDigits();
     renderZones();
     renderLog();
-    setChip(runtime.system);
     displayCode();
-    el.timeScale.value = runtime.timeScale;
+    applyTranslations();
+    applyStatusMessage();
+    applyCountdown();
+    el.timeScale.value = String(runtime.timeScale);
 
-    el.btnStay.addEventListener('click', ()=> arm(STATE.ARMED_STAY));
-    el.btnAway.addEventListener('click', ()=> arm(STATE.ARMED_AWAY));
-    el.btnDisarm.addEventListener('click', ()=> disarm());
-    el.btnClear.addEventListener('click', ()=> { clearCode(); setMsg(''); });
+    el.btnStay.addEventListener('click', () => arm(STATE.ARMED_STAY));
+    el.btnAway.addEventListener('click', () => arm(STATE.ARMED_AWAY));
+    el.btnDisarm.addEventListener('click', () => disarm());
+    el.btnClear.addEventListener('click', () => { clearCode(); setMsg(null); });
 
-    el.btnPanic.addEventListener('click', ()=> alarm('PANIC'));
-    el.btnFire.addEventListener('click', ()=> openZone('smoke', true));
-    el.btnMedical.addEventListener('click', ()=> alarm('Médical'));
+    el.btnPanic.addEventListener('click', () => alarm('panic'));
+    el.btnFire.addEventListener('click', () => openZone('smoke', true));
+    el.btnMedical.addEventListener('click', () => alarm('medical'));
 
-    el.timeScale.addEventListener('change', ()=>{ runtime.timeScale=Math.max(0.1, Number(el.timeScale.value)||1); persist(); });
+    el.timeScale.addEventListener('change', () => {
+      runtime.timeScale = Math.max(0.1, Number(el.timeScale.value) || 1);
+      persist();
+    });
 
-    el.runScenario.addEventListener('click', ()=> runScenario(el.scenario.value));
-    el.stopScenario.addEventListener('click', ()=> stopScenario());
+    el.runScenario.addEventListener('click', () => runScenario(el.scenario.value));
+    el.stopScenario.addEventListener('click', () => stopScenario());
+
+    el.langButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const lang = btn.dataset.lang;
+        if (translations[lang]) {
+          runtime.lang = lang;
+          applyTranslations();
+          renderZones();
+          renderLog();
+          applyStatusMessage();
+          applyCountdown();
+          persist();
+        }
+      });
+    });
 
     startTicker();
 
-    // Expose helpers for console testing
-    window.__sim = { openZone, arm, disarm:()=>disarm({force:true}), setPower, setNet, state:()=>runtime };
+    window.__sim = { openZone, arm, disarm: () => disarm({ force: true }), setPower, setNet, state: () => runtime };
   })();
   </script>
 </body>
