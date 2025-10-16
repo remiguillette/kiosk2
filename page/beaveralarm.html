@@ -55,8 +55,11 @@
     @media (max-width:780px){ .grid{ grid-template-columns: 1fr; } }
 
     .section-title { margin:0 0 .8rem; font-size:1.2rem; font-weight:700; }
+    .panel-heading{ display:flex; align-items:center; justify-content:space-between; gap:.8rem; flex-wrap:wrap; margin-bottom:.6rem; }
+    .panel-heading .section-title{ margin:0; }
+    .system-inline{ display:flex; align-items:center; gap:.5rem; }
+    .system-inline .system-label{ font-size:.95rem; color:var(--text-muted); font-weight:600; letter-spacing:.02em; }
 
-    .status-line { display:flex; gap:.6rem; align-items:center; justify-content:space-between; margin-bottom:.8rem; flex-wrap:wrap; }
     .status-chip { composes: chip; }
     .status-chip { display:inline-flex; align-items:center; gap:.45rem; }
     .status-chip--disarmed { background: rgba(71,209,123,.16); color:var(--success); border-color: rgba(71,209,123,.38); }
@@ -66,7 +69,7 @@
     .status-chip--entry { background: rgba(248,148,34,.18); color:var(--warning); border-color: rgba(255,209,102,.45); }
     .status-chip--alarm { background: rgba(255,107,107,.18); color:var(--danger); border-color: rgba(255,107,107,.55); }
 
-    .msg { color:var(--text-muted); min-height:1.5rem; }
+    .msg { color:var(--text-muted); min-height:1.5rem; margin-bottom:.8rem; }
     .msg--ok{ color:var(--success); }
     .msg--warn{ color:var(--accent-strong); }
     .msg--err{ color:var(--danger); }
@@ -123,25 +126,19 @@
           <div class="muted">Simulateur complet (sans serveur)</div>
         </div>
       </div>
-      <div class="toolbar">
-        <span id="partitionChip" class="chip">Partition A</span>
-        <span id="powerChip" class="chip">Secteur OK</span>
-        <span id="netChip" class="chip">Réseau OK</span>
-      </div>
     </header>
-
-    <section class="panel">
-      <div class="status-line">
-        <h2 class="section-title">État du système</h2>
-        <span id="stateChip" class="chip status-chip status-chip--disarmed">Désarmée</span>
-      </div>
-      <div id="statusMsg" class="msg">Système prêt à être armé.</div>
-    </section>
 
     <section class="grid">
       <!-- Keypad / actions -->
       <article class="panel">
-        <h3 class="section-title">Clavier</h3>
+        <div class="panel-heading">
+          <h3 class="section-title">Clavier</h3>
+          <div class="system-inline">
+            <span class="system-label">État du système</span>
+            <span id="stateChip" class="chip status-chip status-chip--disarmed">Désarmée</span>
+          </div>
+        </div>
+        <div id="statusMsg" class="msg">Système prêt à être armé.</div>
         <div id="codeDisplay" class="code">----</div>
         <div class="keygrid" id="digits"></div>
         <div class="action-row">
@@ -286,8 +283,6 @@
       stopScenario: document.getElementById('btnStopScenario'),
       timeScale: document.getElementById('timeScale'),
       countdown: document.getElementById('countdown'),
-      powerChip: document.getElementById('powerChip'),
-      netChip: document.getElementById('netChip'),
     };
 
     // =====================
@@ -533,8 +528,24 @@
     // =====================
     // Power / Net indicators
     // =====================
-    function setPower(ok){ runtime.powerOK = ok; el.powerChip.textContent = ok? 'Secteur OK' : 'Panne secteur'; el.powerChip.style.background = ok? 'rgba(255,255,255,.06)' : 'rgba(255,107,107,.18)'; if(!ok) log('Panne secteur'); else log('Secteur rétabli'); }
-    function setNet(ok){ runtime.netOK = ok; el.netChip.textContent = ok? 'Réseau OK' : 'Réseau perdu'; el.netChip.style.background = ok? 'rgba(255,255,255,.06)' : 'rgba(255,209,102,.18)'; if(!ok) log('Perte réseau'); else log('Réseau rétabli'); }
+    function setPower(ok){
+      runtime.powerOK = ok;
+      if (!ok) {
+        setMsg('Panne secteur détectée.', 'msg--warn');
+        log('Panne secteur');
+      } else {
+        log('Secteur rétabli');
+      }
+    }
+    function setNet(ok){
+      runtime.netOK = ok;
+      if (!ok) {
+        setMsg('Réseau perdu.', 'msg--warn');
+        log('Perte réseau');
+      } else {
+        log('Réseau rétabli');
+      }
+    }
 
     // =====================
     // Renderers
