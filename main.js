@@ -4,9 +4,13 @@ const http = require('http');
 const path = require('path');
 const { URL } = require('url');
 const { randomUUID } = require('crypto');
+const { execFile } = require('child_process');
+const net = require('net');
+const { promisify } = require('util');
 
 const BATTERY_BASE_PATH = '/sys/class/power_supply/battery';
 const COOKIE_STORE_FILENAME = 'session-cookies.json';
+const PORTS_TO_MONITOR = [8000, 9090];
 
 let win;
 const ZOOM_STEP = 0.5;
@@ -19,6 +23,108 @@ let contentServer;
 let taskStorePath;
 let tasksCache;
 let tasksLoaded = false;
+const portStates = new Map();
+const execFileAsync = promisify(execFile);
+let uptimeErrorLogged = false;
+
+function probePort(port) {
+  return new Promise((resolve) => {
+    const socket = new net.Socket();
+    let resolved = false;
+
+    const finalize = (value) => {
+      if (resolved) {
+        return;
+      }
+
+      resolved = true;
+      socket.destroy();
+      resolve(value);
+    };
+
+    socket.setTimeout(750);
+    socket.once('connect', () => finalize(true));
+    socket.once('timeout', () => finalize(false));
+    socket.once('error', () => finalize(false));
+
+    try {
+      socket.connect(port, '127.0.0.1');
+    } catch (error) {
+      finalize(false);
+    }
+  });
+}
+
+async function readPortStatuses(referenceTimeIso) {
+  const nowIso = referenceTimeIso || new Date().toISOString();
+  const statuses = [];
+
+  for (const port of PORTS_TO_MONITOR) {
+    // eslint-disable-next-line no-await-in-loop
+    const isUp = await probePort(port);
+    const existing = portStates.get(port);
+
+    if (!existing || existing.up !== isUp) {
+      portStates.set(port, { up: isUp, since: nowIso });
+    }
+
+    const snapshot = portStates.get(port);
+    statuses.push({ port, up: isUp, since: snapshot?.since, checkedAt: nowIso });
+  }
+
+  return statuses;
+}
+
+async function runUptimeCommand(args = []) {
+  try {
+    const { stdout } = await execFileAsync('uptime', args, { timeout: 2000 });
+    uptimeErrorLogged = false;
+    return stdout.trim();
+  } catch (error) {
+    if (!uptimeErrorLogged) {
+      console.error('Unable to execute uptime command', error);
+      uptimeErrorLogged = true;
+    }
+    return null;
+  }
+}
+
+function parseLoadAverages(rawOutput) {
+  if (!rawOutput) {
+    return null;
+  }
+
+  const match = rawOutput.match(/load averages?:\s*(.+)$/i);
+  if (!match) {
+    return null;
+  }
+
+  return match[1]
+    .split(',')
+    .map((item) => item.trim())
+    .filter((item) => item.length > 0);
+}
+
+async function readSystemUptime() {
+  const [pretty, since, raw] = await Promise.all([
+    runUptimeCommand(['-p']),
+    runUptimeCommand(['-s']),
+    runUptimeCommand(),
+  ]);
+
+  const loadAverages = parseLoadAverages(raw);
+
+  if (!pretty && !since && !raw) {
+    return null;
+  }
+
+  return {
+    pretty,
+    since,
+    raw,
+    loadAverages,
+  };
+}
 
 const CONTENT_SERVER_PORT = Number.parseInt(process.env.PORT, 10) || 5000;
 const CONTENT_ROOT = path.join(__dirname, 'page');
@@ -356,6 +462,54 @@ async function handleTasksApi(req, res, requestUrl) {
   }
 }
 
+async function handleSystemStatusApi(req, res, requestUrl) {
+  if (requestUrl.pathname !== '/api/system/status') {
+    return false;
+  }
+
+  try {
+    if (req.method === 'GET') {
+      const generatedAt = new Date().toISOString();
+      const [uptime, ports] = await Promise.all([
+        readSystemUptime(),
+        readPortStatuses(generatedAt),
+      ]);
+
+      sendJson(res, 200, {
+        uptime,
+        ports,
+        generatedAt,
+      });
+      return true;
+    }
+
+    if (req.method === 'HEAD') {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end();
+      return true;
+    }
+
+    if (req.method === 'OPTIONS') {
+      res.writeHead(204, {
+        'Access-Control-Allow-Methods': 'GET,HEAD,OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+      });
+      res.end();
+      return true;
+    }
+
+    throw createHttpError('Method Not Allowed', 405);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    if (statusCode >= 500) {
+      console.error('System status API error:', error);
+    }
+
+    sendJson(res, statusCode, { error: error.message || 'Internal Server Error' });
+    return true;
+  }
+}
+
 function resolveContentPath(requestUrl) {
   const url = new URL(requestUrl, `http://localhost:${CONTENT_SERVER_PORT}`);
   let relativePath = decodeURIComponent(url.pathname);
@@ -423,7 +577,12 @@ function startContentServer() {
       return;
     }
 
-    const handled = await handleTasksApi(req, res, requestUrl);
+    let handled = await handleTasksApi(req, res, requestUrl);
+    if (handled) {
+      return;
+    }
+
+    handled = await handleSystemStatusApi(req, res, requestUrl);
     if (handled) {
       return;
     }
