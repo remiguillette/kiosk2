@@ -354,36 +354,28 @@
       <h2 class="section-title" data-i18n="sections.status.heading">État du système</h2>
       <div class="status-grid">
         <article class="status-card">
-          <span class="label" data-i18n="sections.status.hostname.label">Nom d'hôte</span>
-          <div class="status-row">
-            <span data-i18n="sections.status.labels.value">Valeur :</span>
-            <span class="status-message" data-i18n="sections.status.hostname.value">debian-prod-01</span>
-          </div>
+          <span class="label" data-i18n="sections.status.wifi.label">Wi-Fi domestique</span>
           <div class="status-row">
             <span data-i18n="sections.status.labels.state">État :</span>
-            <span class="status-chip status-chip--success" data-i18n="sections.status.hostname.state">En ligne</span>
+            <span class="status-chip status-chip--success" data-i18n="sections.status.wifi.connected">Connecté</span>
           </div>
         </article>
         <article class="status-card">
-          <span class="label" data-i18n="sections.status.distribution.label">Distribution</span>
+          <span class="label" data-i18n="sections.status.websocket.label">Serveur WebSocket</span>
           <div class="status-row">
-            <span data-i18n="sections.status.labels.version">Version :</span>
-            <span class="status-message" data-i18n="sections.status.distribution.version">Debian 12.5 (Bookworm)</span>
+            <span data-i18n="sections.status.labels.state">État :</span>
+            <span class="status-chip status-chip--danger" id="wsChip" data-i18n="websocket.status.disconnected">Déconnecté</span>
           </div>
           <div class="status-row">
-            <span data-i18n="sections.status.labels.lastUpdate">Dernière mise à jour :</span>
-            <span class="status-message" data-i18n="sections.status.distribution.updated">Il y a 2 jours</span>
+            <span data-i18n="sections.status.websocket.lastMessage">Dernier message :</span>
+            <span class="status-message" id="wsInfo" data-i18n="websocket.info.idle">Aucun signal</span>
           </div>
         </article>
         <article class="status-card">
-          <span class="label" data-i18n="sections.status.kernel.label">Noyau</span>
+          <span class="label" data-i18n="sections.status.battery.label">Batterie du système</span>
           <div class="status-row">
-            <span data-i18n="sections.status.labels.version">Version :</span>
-            <span class="status-message" data-i18n="sections.status.kernel.version">6.1.0-17-amd64</span>
-          </div>
-          <div class="status-row">
-            <span data-i18n="sections.status.labels.uptime">Uptime :</span>
-            <span class="status-message" data-i18n="sections.status.kernel.uptime">12 jours 4 h</span>
+            <span data-i18n="sections.status.battery.chargeLabel">Charge :</span>
+            <span class="status-chip status-chip--danger" id="batteryChip">--</span>
           </div>
         </article>
       </div>
@@ -393,22 +385,22 @@
       <h2 class="section-title" data-i18n="sections.resources.heading">Utilisation des ressources</h2>
       <div class="resource-grid">
         <article class="resource-card">
-          <h3 data-i18n="sections.resources.cpu.title">Charge CPU</h3>
-          <p data-i18n="sections.resources.cpu.description">Suivi des moyennes de charge et du pic actuel.</p>
-          <div class="metric-chip" data-i18n="sections.resources.cpu.load">Charge 1/5/15 min : 0.62 / 0.71 / 0.65</div>
-          <div class="metric-chip" data-i18n="sections.resources.cpu.usage">Utilisation instantanée : 32 %</div>
+          <h3 data-i18n="sections.resources.wifi.title">Wi-Fi domestique</h3>
+          <p data-i18n="sections.resources.wifi.description">Puissance du signal et qualité du lien.</p>
+          <div class="metric-chip" data-i18n="sections.resources.wifi.signal">Signal : -48 dBm (Excellent)</div>
+          <div class="metric-chip" data-i18n="sections.resources.wifi.throughput">Débit observé : 450 Mbps</div>
         </article>
         <article class="resource-card">
-          <h3 data-i18n="sections.resources.memory.title">Mémoire</h3>
-          <p data-i18n="sections.resources.memory.description">Disponibilité de la RAM et du swap.</p>
-          <div class="metric-chip" data-i18n="sections.resources.memory.usage">Utilisé : 6.2 Go / 16 Go</div>
-          <div class="metric-chip" data-i18n="sections.resources.memory.swap">Swap : 0.5 Go / 4 Go</div>
+          <h3 data-i18n="sections.resources.websocket.title">Canal WebSocket</h3>
+          <p data-i18n="sections.resources.websocket.description">Flux de messages BeaverSystem vers le backend.</p>
+          <div class="metric-chip" data-i18n="sections.resources.websocket.packets">Paquets traités : 128 / min</div>
+          <div class="metric-chip" data-i18n="sections.resources.websocket.uptime">Uptime session : 3 h 12</div>
         </article>
         <article class="resource-card">
-          <h3 data-i18n="sections.resources.storage.title">Stockage</h3>
-          <p data-i18n="sections.resources.storage.description">Volume principal monté sur /.</p>
-          <div class="metric-chip" data-i18n="sections.resources.storage.usage">Utilisation : 68 % (220 Go / 320 Go)</div>
-          <div class="metric-chip" data-i18n="sections.resources.storage.iops">IOPS moyen : 120</div>
+          <h3 data-i18n="sections.resources.battery.title">Batterie</h3>
+          <p data-i18n="sections.resources.battery.description">Autonomie restante du système embarqué.</p>
+          <div class="metric-chip" data-i18n="sections.resources.battery.capacity">Capacité estimée : 82 %</div>
+          <div class="metric-chip" data-i18n="sections.resources.battery.health">Santé : 96 %</div>
         </article>
       </div>
     </section>
@@ -476,47 +468,41 @@
             status: {
               heading: 'État du système',
               labels: {
-                state: 'État :',
-                value: 'Valeur :',
-                version: 'Version :',
-                lastUpdate: 'Dernière mise à jour :',
-                uptime: 'Uptime :'
+                state: 'État :'
               },
-              hostname: {
-                label: 'Nom d\'hôte',
-                value: 'debian-prod-01',
-                state: 'En ligne'
+              wifi: {
+                label: 'Wi-Fi domestique',
+                connected: 'Connecté',
+                disconnected: 'Hors ligne'
               },
-              distribution: {
-                label: 'Distribution',
-                version: 'Debian 12.5 (Bookworm)',
-                updated: 'Il y a 2 jours'
+              websocket: {
+                label: 'Serveur WebSocket',
+                lastMessage: 'Dernier message :'
               },
-              kernel: {
-                label: 'Noyau',
-                version: '6.1.0-17-amd64',
-                uptime: '12 jours 4 h'
+              battery: {
+                label: 'Batterie du système',
+                chargeLabel: 'Charge :'
               }
             },
             resources: {
               heading: 'Utilisation des ressources',
-              cpu: {
-                title: 'Charge CPU',
-                description: 'Suivi des moyennes de charge et du pic actuel.',
-                load: 'Charge 1/5/15 min : 0.62 / 0.71 / 0.65',
-                usage: 'Utilisation instantanée : 32 %'
+              wifi: {
+                title: 'Wi-Fi domestique',
+                description: 'Puissance du signal et qualité du lien.',
+                signal: 'Signal : -48 dBm (Excellent)',
+                throughput: 'Débit observé : 450 Mbps'
               },
-              memory: {
-                title: 'Mémoire',
-                description: 'Disponibilité de la RAM et du swap.',
-                usage: 'Utilisé : 6.2 Go / 16 Go',
-                swap: 'Swap : 0.5 Go / 4 Go'
+              websocket: {
+                title: 'Canal WebSocket',
+                description: 'Flux de messages BeaverSystem vers le backend.',
+                packets: 'Paquets traités : 128 / min',
+                uptime: 'Uptime session : 3 h 12'
               },
-              storage: {
-                title: 'Stockage',
-                description: 'Volume principal monté sur /.',
-                usage: 'Utilisation : 68 % (220 Go / 320 Go)',
-                iops: 'IOPS moyen : 120'
+              battery: {
+                title: 'Batterie',
+                description: 'Autonomie restante du système embarqué.',
+                capacity: 'Capacité estimée : 82 %',
+                health: 'Santé : 96 %'
               }
             },
             services: {
@@ -547,6 +533,26 @@
               }
             }
           },
+          websocket: {
+            status: {
+              connecting: 'Connexion…',
+              connected: 'Connecté',
+              disconnected: 'Hors ligne'
+            },
+            info: {
+              idle: 'Aucun signal',
+              connecting: 'Connexion…',
+              connected: 'Lien établi',
+              closed: 'Connexion fermée',
+              binary: '[charge binaire]'
+            }
+          },
+          battery: {
+            charging: 'En charge',
+            onBattery: 'Sur batterie',
+            unavailable: 'Batterie indisponible',
+            unreadable: 'Lecture impossible'
+          },
           footer: { note: 'Utilisez le bouton menu pour revenir aux autres services.' }
         },
         en: {
@@ -565,47 +571,41 @@
             status: {
               heading: 'System status',
               labels: {
-                state: 'Status:',
-                value: 'Value:',
-                version: 'Version:',
-                lastUpdate: 'Last update:',
-                uptime: 'Uptime:'
+                state: 'Status:'
               },
-              hostname: {
-                label: 'Hostname',
-                value: 'debian-prod-01',
-                state: 'Online'
+              wifi: {
+                label: 'Home Wi-Fi',
+                connected: 'Connected',
+                disconnected: 'Offline'
               },
-              distribution: {
-                label: 'Distribution',
-                version: 'Debian 12.5 (Bookworm)',
-                updated: '2 days ago'
+              websocket: {
+                label: 'WebSocket server',
+                lastMessage: 'Last message:'
               },
-              kernel: {
-                label: 'Kernel',
-                version: '6.1.0-17-amd64',
-                uptime: '12d 4h'
+              battery: {
+                label: 'System battery',
+                chargeLabel: 'Charge:'
               }
             },
             resources: {
               heading: 'Resource usage',
-              cpu: {
-                title: 'CPU load',
-                description: 'Tracks load averages and current peak.',
-                load: 'Load avg 1/5/15: 0.62 / 0.71 / 0.65',
-                usage: 'Instant usage: 32%'
+              wifi: {
+                title: 'Home Wi-Fi',
+                description: 'Signal strength and link quality.',
+                signal: 'Signal: -48 dBm (Excellent)',
+                throughput: 'Observed throughput: 450 Mbps'
               },
-              memory: {
-                title: 'Memory',
-                description: 'Available RAM and swap.',
-                usage: 'Used: 6.2 GiB / 16 GiB',
-                swap: 'Swap: 0.5 GiB / 4 GiB'
+              websocket: {
+                title: 'WebSocket channel',
+                description: 'BeaverSystem message flow to the backend.',
+                packets: 'Packets processed: 128 / min',
+                uptime: 'Session uptime: 3h12'
               },
-              storage: {
-                title: 'Storage',
-                description: 'Primary volume mounted on /.',
-                usage: 'Usage: 68% (220 GiB / 320 GiB)',
-                iops: 'Average IOPS: 120'
+              battery: {
+                title: 'Battery',
+                description: 'Remaining power of the embedded system.',
+                capacity: 'Estimated capacity: 82%',
+                health: 'Health: 96%'
               }
             },
             services: {
@@ -635,6 +635,26 @@
                 alerts: '3 hosts / 24h'
               }
             }
+          },
+          websocket: {
+            status: {
+              connecting: 'Connecting…',
+              connected: 'Connected',
+              disconnected: 'Offline'
+            },
+            info: {
+              idle: 'No signal',
+              connecting: 'Connecting…',
+              connected: 'Link established',
+              closed: 'Connection closed',
+              binary: '[binary payload]'
+            }
+          },
+          battery: {
+            charging: 'Charging',
+            onBattery: 'On battery',
+            unavailable: 'Battery unavailable',
+            unreadable: 'Unable to read'
           },
           footer: { note: 'Use the menu button to return to other services.' }
         }
@@ -769,6 +789,277 @@
       } else {
         setLanguage(state.lang);
       }
+    })();
+  </script>
+  <script>
+    (function () {
+      const chip = document.querySelector('#wsChip');
+      const infoLabel = document.querySelector('#wsInfo');
+      if (!chip || !infoLabel) {
+        return;
+      }
+
+      const locale = window.beaverSystemLocale ?? {};
+      const translate = (key) => {
+        if (typeof locale.translate === 'function') {
+          return locale.translate(key);
+        }
+        return key;
+      };
+
+      chip.setAttribute('role', 'status');
+      chip.setAttribute('aria-live', 'polite');
+      infoLabel.setAttribute('role', 'status');
+      infoLabel.setAttribute('aria-live', 'polite');
+
+      let ws;
+      let wsState = 'disconnected';
+      let infoState = 'idle';
+      let customInfo = null;
+      let reconnectTimer = null;
+
+      const applyWsStatus = () => {
+        const label = translate(`websocket.status.${wsState}`) || wsState;
+        chip.textContent = label;
+        const isConnected = wsState === 'connected';
+        chip.classList.toggle('status-chip--success', isConnected);
+        chip.classList.toggle('status-chip--danger', !isConnected);
+      };
+
+      const applyWsInfo = () => {
+        if (customInfo) {
+          infoLabel.textContent = customInfo;
+          return;
+        }
+        const label = translate(`websocket.info.${infoState}`) || '';
+        infoLabel.textContent = label;
+      };
+
+      const refreshLanguage = () => {
+        applyWsStatus();
+        applyWsInfo();
+      };
+
+      const setWsState = (state) => {
+        wsState = state;
+        applyWsStatus();
+      };
+
+      const setWsInfoState = (state, { custom } = {}) => {
+        infoState = state;
+        customInfo = custom ?? null;
+        applyWsInfo();
+      };
+
+      const scheduleReconnect = () => {
+        clearTimeout(reconnectTimer);
+        reconnectTimer = setTimeout(connect, 5000);
+      };
+
+      const connect = () => {
+        try {
+          if (ws?.readyState === WebSocket.OPEN) {
+            ws.close(1000, 'Reconnecting');
+          }
+
+          setWsState('connecting');
+          setWsInfoState('connecting');
+
+          ws = new WebSocket('ws://localhost:8080');
+
+          ws.addEventListener('open', () => {
+            console.log('✅ WebSocket connecté');
+            setWsState('connected');
+            setWsInfoState('connected');
+          });
+
+          ws.addEventListener('close', () => {
+            console.warn('⚠️ WebSocket fermé');
+            setWsState('disconnected');
+            setWsInfoState('closed');
+            scheduleReconnect();
+          });
+
+          ws.addEventListener('error', (error) => {
+            console.error('❌ Erreur WebSocket', error);
+            setWsState('disconnected');
+            setWsInfoState('closed');
+            ws.close();
+          });
+
+          ws.addEventListener('message', (event) => {
+            const data =
+              typeof event.data === 'string'
+                ? event.data
+                : translate('websocket.info.binary');
+            setWsInfoState('connected', { custom: data });
+          });
+        } catch (error) {
+          console.error('Erreur d\'initialisation WebSocket', error);
+          setWsState('disconnected');
+          setWsInfoState('closed');
+          scheduleReconnect();
+        }
+      };
+
+      if (typeof locale.subscribe === 'function') {
+        locale.subscribe(() => {
+          refreshLanguage();
+        });
+      }
+
+      refreshLanguage();
+      setWsState('disconnected');
+      setWsInfoState('idle');
+      connect();
+    })();
+  </script>
+  <script>
+    (function () {
+      const chip = document.querySelector('#batteryChip');
+      if (!chip) {
+        return;
+      }
+
+      const locale = window.beaverSystemLocale ?? {};
+      const translate = (key) => {
+        if (typeof locale.translate === 'function') {
+          return locale.translate(key);
+        }
+        return key;
+      };
+
+      chip.setAttribute('role', 'status');
+      chip.setAttribute('aria-live', 'polite');
+
+      let lastBatteryState = null;
+
+      const setChipAppearance = (text, { success } = { success: false }) => {
+        chip.textContent = text;
+        chip.classList.toggle('status-chip--success', Boolean(success));
+        chip.classList.toggle('status-chip--danger', !success);
+      };
+
+      const normalizeStatus = (value) => {
+        if (!value) {
+          return null;
+        }
+        if (value === 'charging' || value === 'onBattery') {
+          return value;
+        }
+        const normalized = String(value).toLowerCase();
+        if (normalized.includes('charg')) {
+          return 'charging';
+        }
+        if (normalized.includes('batt') || normalized.includes('décharg')) {
+          return 'onBattery';
+        }
+        return null;
+      };
+
+      const applyBatteryState = () => {
+        if (!lastBatteryState) {
+          setChipAppearance('--', { success: false });
+          return;
+        }
+
+        if (lastBatteryState.type === 'data') {
+          const { capacity, statusKey } = lastBatteryState;
+          const statusLabel = statusKey ? translate(`battery.${statusKey}`) : '';
+          const label = statusLabel ? `${capacity}% – ${statusLabel}` : `${capacity}%`;
+          setChipAppearance(label, { success: true });
+          return;
+        }
+
+        const fallback = translate(lastBatteryState.key) || lastBatteryState.key;
+        setChipAppearance(fallback, { success: false });
+      };
+
+      const formatPayload = (data) => {
+        if (!data) {
+          return null;
+        }
+
+        const capacity = Number.parseInt(data.capacity, 10);
+        if (!Number.isFinite(capacity)) {
+          return null;
+        }
+
+        const statusKey = normalizeStatus(data.status);
+        return { capacity, statusKey };
+      };
+
+      const readElectronBattery = async () => {
+        if (!window.electronAPI?.getBatteryLevel) {
+          return null;
+        }
+
+        try {
+          const payload = await window.electronAPI.getBatteryLevel();
+          return payload ?? null;
+        } catch (error) {
+          console.error('Unable to read battery level from Electron bridge', error);
+          return null;
+        }
+      };
+
+      const readWebBattery = async () => {
+        if (typeof navigator === 'undefined' || typeof navigator.getBattery !== 'function') {
+          return null;
+        }
+
+        try {
+          const battery = await navigator.getBattery();
+          const capacity = Math.round(Number(battery.level) * 100);
+          if (!Number.isFinite(capacity)) {
+            return null;
+          }
+
+          return {
+            capacity,
+            status: battery.charging === true ? 'charging' : battery.charging === false ? 'onBattery' : undefined
+          };
+        } catch (error) {
+          console.error('Unable to read battery level from Web Battery API', error);
+          return null;
+        }
+      };
+
+      const updateBatteryStatus = async () => {
+        const sources = [readElectronBattery, readWebBattery];
+        let hadPayload = false;
+
+        for (const read of sources) {
+          const payload = await read();
+          if (payload) {
+            hadPayload = true;
+            const formatted = formatPayload(payload);
+            if (formatted) {
+              lastBatteryState = { type: 'data', ...formatted };
+              applyBatteryState();
+              return;
+            }
+          }
+        }
+
+        if (!hadPayload) {
+          lastBatteryState = { type: 'fallback', key: 'battery.unavailable' };
+        } else {
+          lastBatteryState = { type: 'fallback', key: 'battery.unreadable' };
+        }
+
+        applyBatteryState();
+      };
+
+      if (typeof locale.subscribe === 'function') {
+        locale.subscribe(() => {
+          applyBatteryState();
+        });
+      }
+
+      applyBatteryState();
+      updateBatteryStatus();
+      setInterval(updateBatteryStatus, 10000);
     })();
   </script>
 </body>
