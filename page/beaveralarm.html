@@ -2,1109 +2,622 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <title>BeaverAlarm - Sécurité domestique</title>
+  <title>BeaverAlarm – Simulateur complet</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     :root {
       color-scheme: dark;
       --bg: #060608;
       --panel: #0f1018;
-      --panel-glow: rgba(248, 148, 34, 0.12);
-      --border: rgba(255, 255, 255, 0.08);
-      --text-main: #ffffff;
-      --text-muted: rgba(255, 255, 255, 0.68);
-      --text-soft: rgba(255, 255, 255, 0.42);
+      --panel-glow: rgba(248,148,34,0.12);
+      --border: rgba(255,255,255,0.08);
+      --text-main: #fff;
+      --text-muted: rgba(255,255,255,0.68);
+      --text-soft: rgba(255,255,255,0.42);
       --accent: #f89422;
       --accent-strong: #ff9f33;
       --success: #47d17b;
       --danger: #ff7b7b;
-      --shadow: 0 28px 40px rgba(0, 0, 0, 0.45);
-      --font: "Inter", "Segoe UI", sans-serif;
+      --warning: #ffd166;
+      --shadow: 0 28px 40px rgba(0,0,0,0.45);
+      --font: "Inter", "Segoe UI", system-ui, sans-serif;
     }
 
-    *,
-    *::before,
-    *::after {
-      box-sizing: border-box;
-    }
-
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin:0; height:100%; }
     body {
-      margin: 0;
       min-height: 100vh;
-      display: flex;
-      justify-content: center;
+      display:flex; justify-content:center;
       font-family: var(--font);
       background:
-        radial-gradient(circle at 15% 20%, rgba(248, 148, 34, 0.12), transparent 55%),
-        radial-gradient(circle at 85% 10%, rgba(248, 148, 34, 0.08), transparent 50%),
+        radial-gradient(circle at 15% 20%, rgba(248,148,34,0.12), transparent 55%),
+        radial-gradient(circle at 85% 10%, rgba(248,148,34,0.08), transparent 50%),
         var(--bg);
       color: var(--text-main);
-      padding: clamp(2.5rem, 5vw + 1rem, 3.5rem) clamp(1.25rem, 4vw, 2.5rem);
+      padding: clamp(1.5rem, 3vw, 2rem);
     }
 
-    main {
-      width: min(1200px, 100%);
-      display: flex;
-      flex-direction: column;
-      gap: 2.4rem;
-    }
-
-    header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-      flex-wrap: wrap;
-    }
-
-    .header-title {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.85rem;
-      flex: 1 1 auto;
-      min-width: min(260px, 100%);
-      justify-content: flex-start;
-    }
-
-    .btn-icon {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .btn-icon svg {
-      width: 24px;
-      height: 24px;
-      stroke-width: 1.8;
-    }
-
-    .menu-return {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 48px;
-      height: 48px;
-      border-radius: 16px;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      background: rgba(255, 255, 255, 0.04);
-      color: var(--text-muted);
-      transition: color 160ms ease, border 160ms ease, background 160ms ease, transform 160ms ease;
-    }
-
-    .menu-return:hover,
-    .menu-return:focus-visible {
-      color: var(--accent);
-      border-color: var(--accent);
-      background: rgba(248, 148, 34, 0.14);
-      transform: translateY(-2px);
-      outline: none;
-    }
-
-    .lang-toggle {
-      display: inline-flex;
-      justify-self: flex-end;
-      gap: 0.5rem;
-      background: rgba(24, 24, 32, 0.6);
-      padding: 0.4rem 0.5rem;
-      border-radius: 999px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
-    }
-
-    .lang-btn {
-      appearance: none;
-      border: none;
-      background: transparent;
-      color: var(--text-soft);
-      font-size: 0.95rem;
-      font-weight: 600;
-      padding: 0.4rem 0.9rem;
-      border-radius: 999px;
-      cursor: pointer;
-      transition: color 150ms ease, background 150ms ease, transform 150ms ease;
-    }
-
-    .lang-btn:hover {
-      color: var(--text-main);
-      transform: translateY(-1px);
-    }
-
-    .lang-btn.active {
-      background: var(--accent);
-      color: #121219;
-      box-shadow: 0 8px 18px rgba(248, 148, 34, 0.35);
-    }
-
-    .hero {
-      display: grid;
-      gap: 0.8rem;
-    }
-
-    .eyebrow {
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      font-size: 1rem;
-      font-weight: 600;
-      color: var(--accent);
-    }
-
-    .hero h1 {
-      font-size: clamp(2.2rem, 4vw, 3rem);
-      font-weight: 700;
-      letter-spacing: 0.02em;
-    }
-
-    .hero p {
-      max-width: 720px;
-      color: var(--text-muted);
-      line-height: 1.6;
-      font-size: 1.05rem;
-    }
-
-    .panel {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 26px;
-      padding: 2.2rem;
-      box-shadow: var(--shadow);
-      position: relative;
-      overflow: hidden;
-      isolation: isolate;
-      display: grid;
-      gap: 1.4rem;
-    }
-
-    .panel::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: var(--panel-glow);
-      opacity: 0;
-      transition: opacity 180ms ease;
-      pointer-events: none;
-      z-index: -1;
-    }
-
-    .panel:hover::after {
-      opacity: 1;
-    }
-
-    .status-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-      flex-wrap: wrap;
-    }
-
-    .status-header h2 {
-      font-size: 1.5rem;
-      font-weight: 600;
-    }
-
-    .status-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      font-size: 0.95rem;
-      font-weight: 600;
-      padding: 0.4rem 0.9rem;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.05);
-      color: var(--text-main);
-    }
-
-    .status-chip--disarmed {
-      background: rgba(71, 209, 123, 0.16);
-      color: var(--success);
-    }
-
-    .status-chip--armedStay {
-      background: rgba(248, 148, 34, 0.18);
-      color: var(--accent-strong);
-    }
-
-    .status-chip--armedAway {
-      background: rgba(255, 107, 107, 0.18);
-      color: var(--danger);
-    }
-
-    .status-message {
-      color: var(--text-muted);
-      font-size: 1rem;
-      min-height: 1.5rem;
-      transition: color 200ms ease;
-    }
-
-    .status-message--success {
-      color: var(--success);
-    }
-
-    .status-message--warning {
-      color: var(--accent-strong);
-    }
-
-    .status-message--alert {
-      color: var(--danger);
-    }
-
-    .layout-grid {
-      display: grid;
-      gap: 2rem;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    }
-
-    .keypad-panel {
-      align-content: start;
-    }
-
-    .code-display {
-      font-size: 2rem;
-      letter-spacing: 0.4rem;
-      font-weight: 600;
-      text-align: center;
-      padding: 0.8rem 1rem;
-      border-radius: 18px;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      background: rgba(255, 255, 255, 0.04);
-    }
-
-    .keypad-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(56px, 1fr));
-      gap: 0.75rem;
-    }
-
-    .key,
-    .keypad-bottom button,
-    .action-btn {
-      appearance: none;
-      border: none;
-      border-radius: 16px;
-      font-weight: 600;
-      font-size: 1.05rem;
-      padding: 0.9rem;
-      cursor: pointer;
-      color: var(--text-main);
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      transition: transform 160ms ease, background 160ms ease, border 160ms ease, box-shadow 160ms ease;
-    }
-
-    .key:hover,
-    .keypad-bottom button:hover,
-    .action-btn:hover,
-    .key:focus-visible,
-    .keypad-bottom button:focus-visible,
-    .action-btn:focus-visible {
-      transform: translateY(-2px);
-      border-color: var(--accent);
-      background: rgba(248, 148, 34, 0.16);
-      outline: none;
-      box-shadow: 0 10px 24px rgba(248, 148, 34, 0.18);
-    }
-
-    .keypad-bottom {
-      display: grid;
-      grid-template-columns: 1.5fr 1fr;
-      gap: 0.75rem;
-    }
-
-    .action-row {
-      display: flex;
-      gap: 0.75rem;
-      justify-content: center;
-      flex-wrap: nowrap;
-      overflow-x: auto;
-      padding-bottom: 0.4rem;
-      scroll-snap-type: x proximity;
-      scrollbar-width: thin;
-    }
-
-    .action-row::-webkit-scrollbar {
-      height: 8px;
-    }
-
-    .action-row::-webkit-scrollbar-track {
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 999px;
-    }
-
-    .action-row::-webkit-scrollbar-thumb {
-      background: rgba(248, 148, 34, 0.45);
-      border-radius: 999px;
-    }
-
-    .action-row > * {
-      flex: 0 0 clamp(160px, 30%, 220px);
-      scroll-snap-align: center;
-    }
-
-    .action-btn--stay {
-      background: rgba(248, 148, 34, 0.16);
-      border-color: rgba(248, 148, 34, 0.4);
-    }
-
-    .action-btn--away {
-      background: rgba(255, 107, 107, 0.16);
-      border-color: rgba(255, 107, 107, 0.38);
-    }
-
-    .action-btn--disarm {
-      background: rgba(71, 209, 123, 0.16);
-      border-color: rgba(71, 209, 123, 0.38);
-      color: var(--success);
-    }
-
-    .zones-panel {
-      align-content: start;
-    }
-
-    .zones-hint {
-      color: var(--text-soft);
-      font-size: 0.95rem;
-    }
-
-    .zone-list {
-      display: grid;
-      gap: 0.9rem;
-    }
-
-    .zone {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-      padding: 1rem 1.2rem;
-      border-radius: 18px;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      color: var(--text-main);
-      cursor: pointer;
-      transition: transform 160ms ease, border 160ms ease, background 160ms ease, box-shadow 160ms ease;
-    }
-
-    .zone:hover,
-    .zone:focus-visible {
-      transform: translateY(-2px);
-      border-color: var(--accent);
-      background: rgba(248, 148, 34, 0.14);
-      outline: none;
-      box-shadow: 0 10px 24px rgba(248, 148, 34, 0.16);
-    }
-
-    .zone--open {
-      border-color: rgba(255, 107, 107, 0.55);
-      background: rgba(255, 107, 107, 0.12);
-    }
-
-    .zone-left {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.75rem;
-      font-weight: 600;
-    }
-
-    .zone-indicator {
-      width: 12px;
-      height: 12px;
-      border-radius: 999px;
-      background: rgba(71, 209, 123, 0.65);
-      box-shadow: 0 0 0 4px rgba(71, 209, 123, 0.14);
-    }
-
-    .zone-indicator--open {
-      background: rgba(255, 107, 107, 0.9);
-      box-shadow: 0 0 0 4px rgba(255, 107, 107, 0.2);
-    }
-
-    .zone-state {
-      font-size: 0.95rem;
-      color: var(--text-muted);
-      font-weight: 500;
-    }
-
-    .log-panel {
-      align-content: start;
-    }
-
-    .log-list {
-      list-style: none;
-      margin: 0;
-      padding: 0;
-      display: grid;
-      gap: 0.8rem;
-    }
-
-    .log-list li {
-      display: flex;
-      justify-content: space-between;
-      gap: 1rem;
-      padding: 0.8rem 1rem;
-      border-radius: 16px;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      font-size: 0.95rem;
-    }
-
-    .log-time {
-      color: var(--text-soft);
-      font-feature-settings: "tnum" 1, "lnum" 1;
-      min-width: 64px;
-    }
-
-    .log-message {
-      flex: 1;
-      text-align: right;
-      color: var(--text-muted);
-    }
-
-    .empty-log {
-      color: var(--text-soft);
-      font-size: 0.95rem;
-    }
-
-    @media (max-width: 960px) {
-      body {
-        padding: 2.4rem 1.6rem;
-      }
-
-      header {
-        gap: 1.4rem;
-      }
-    }
-
-    @media (max-width: 720px) {
-      body {
-        padding: 1.9rem 1.25rem;
-      }
-
-      main {
-        gap: 2rem;
-      }
-
-      header {
-        gap: 0.75rem;
-      }
-
-      .status-header {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
-      .keypad-bottom {
-        grid-template-columns: 1fr;
-      }
-
-      .action-row {
-        justify-content: flex-start;
-      }
-    }
-
-    @media (max-width: 560px) {
-      .hero p {
-        font-size: 0.98rem;
-      }
-
-      .code-display {
-        font-size: 1.6rem;
-        letter-spacing: 0.25rem;
-      }
-
-      .keypad-grid {
-        gap: 0.6rem;
-      }
-
-      .key,
-      .keypad-bottom button,
-      .action-btn {
-        padding: 0.75rem;
-      }
-
-      .action-row > * {
-        flex-basis: min(220px, 80vw);
-      }
-
-      .zone {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
-      .log-list li {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
-      .log-message {
-        text-align: left;
-      }
-    }
+    main { width:min(1220px, 100%); display:grid; gap:1.6rem; }
+
+    header { display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+    .brand { display:flex; gap:.75rem; align-items:center; font-weight:800; letter-spacing:.02em; }
+    .brand-badge { width:40px; height:40px; border-radius:12px; display:grid; place-items:center; background:rgba(248,148,34,.15); border:1px solid rgba(248,148,34,.35); }
+
+    .toolbar { display:flex; gap:.6rem; flex-wrap:wrap; }
+    .chip { padding:.4rem .7rem; border-radius:999px; background:rgba(255,255,255,.06); border:1px solid var(--border); font-weight:600; font-size:.95rem; }
+
+    .panel { background:var(--panel); border:1px solid var(--border); border-radius:26px; padding:1.4rem; box-shadow:var(--shadow); position:relative; overflow:hidden; isolation:isolate; }
+    .panel::after{ content:""; position:absolute; inset:0; background:var(--panel-glow); opacity:0; transition:opacity .18s ease; pointer-events:none; z-index:-1; }
+    .panel:hover::after{ opacity:1; }
+
+    .grid { display:grid; gap:1.2rem; grid-template-columns: 1.2fr 1fr .9fr; }
+    @media (max-width:1100px){ .grid{ grid-template-columns: 1fr 1fr; } }
+    @media (max-width:780px){ .grid{ grid-template-columns: 1fr; } }
+
+    .section-title { margin:0 0 .8rem; font-size:1.2rem; font-weight:700; }
+
+    .status-line { display:flex; gap:.6rem; align-items:center; justify-content:space-between; margin-bottom:.8rem; flex-wrap:wrap; }
+    .status-chip { composes: chip; }
+    .status-chip { display:inline-flex; align-items:center; gap:.45rem; }
+    .status-chip--disarmed { background: rgba(71,209,123,.16); color:var(--success); border-color: rgba(71,209,123,.38); }
+    .status-chip--exit { background: rgba(248,148,34,.18); color:var(--accent-strong); border-color: rgba(248,148,34,.4); }
+    .status-chip--stay { background: rgba(248,148,34,.18); color:var(--accent-strong); border-color: rgba(248,148,34,.4); }
+    .status-chip--away { background: rgba(248,148,34,.18); color:var(--accent-strong); border-color: rgba(248,148,34,.4); }
+    .status-chip--entry { background: rgba(248,148,34,.18); color:var(--warning); border-color: rgba(255,209,102,.45); }
+    .status-chip--alarm { background: rgba(255,107,107,.18); color:var(--danger); border-color: rgba(255,107,107,.55); }
+
+    .msg { color:var(--text-muted); min-height:1.5rem; }
+    .msg--ok{ color:var(--success); }
+    .msg--warn{ color:var(--accent-strong); }
+    .msg--err{ color:var(--danger); }
+
+    /* Keypad */
+    .code { font-size:2rem; letter-spacing:.4rem; font-weight:700; text-align:center; padding:.6rem .9rem; border-radius:18px; border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.04); }
+    .keygrid { display:grid; grid-template-columns: repeat(3, minmax(56px, 1fr)); gap:.6rem; margin-top:.6rem; }
+    .key, .action { appearance:none; border:none; border-radius:16px; font-weight:700; font-size:1.05rem; padding:.85rem; cursor:pointer; color:var(--text-main); background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08); transition: transform .16s, background .16s, border .16s, box-shadow .16s; }
+    .key:hover, .key:focus-visible, .action:hover, .action:focus-visible{ transform: translateY(-2px); border-color:var(--accent); background:rgba(248,148,34,.16); outline:none; box-shadow:0 10px 24px rgba(248,148,34,.18); }
+    .action-row{ display:flex; gap:.6rem; margin-top:.6rem; flex-wrap:wrap; }
+    .action--stay{ background: rgba(248,148,34,.16); border-color: rgba(248,148,34,.4); }
+    .action--away{ background: rgba(255,107,107,.16); border-color: rgba(255,107,107,.38); }
+    .action--disarm{ background: rgba(71,209,123,.16); border-color: rgba(71,209,123,.38); color:var(--success); }
+
+    /* Zones */
+    .zone-list{ display:grid; gap:.6rem; }
+    .zone{ display:grid; grid-template-columns: 1fr auto; gap:.6rem; align-items:center; padding:.8rem 1rem; border-radius:16px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); }
+    .zone:hover{ border-color:var(--accent); background:rgba(248,148,34,.12); }
+    .z-left{ display:flex; align-items:center; gap:.65rem; font-weight:700; }
+    .dot{ width:12px; height:12px; border-radius:999px; background:rgba(71,209,123,.65); box-shadow:0 0 0 4px rgba(71,209,123,.14); }
+    .dot.open{ background:rgba(255,107,107,.9); box-shadow:0 0 0 4px rgba(255,107,107,.2); }
+    .z-badges{ display:flex; gap:.4rem; }
+    .badge{ font-size:.75rem; letter-spacing:.02em; padding:.15rem .45rem; border-radius:999px; border:1px solid rgba(255,255,255,.14); color:var(--text-soft); }
+    .badge--type{ }
+    .badge--bypass{ color:var(--warning); border-color: rgba(255,209,102,.4); background: rgba(255,209,102,.12); }
+    .badge--fault{ color:var(--danger); border-color: rgba(255,107,107,.45); background: rgba(255,107,107,.12); }
+
+    .zone-controls{ display:flex; gap:.5rem; align-items:center; }
+    .zone-controls input[type="checkbox"]{ transform: translateY(1px); }
+    .zone-state{ font-size:.9rem; color:var(--text-muted); }
+
+    /* Log */
+    .log{ list-style:none; margin:0; padding:0; display:grid; gap:.5rem; }
+    .log li{ display:flex; justify-content:space-between; gap:.8rem; padding:.6rem .8rem; border-radius:14px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.06); font-size:.95rem; }
+    .log-time{ color:var(--text-soft); font-feature-settings:"tnum" 1, "lnum" 1; min-width:64px; }
+    .log-msg{ flex:1; text-align:right; color:var(--text-muted); }
+
+    /* Sim controls */
+    .sim-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:.6rem; }
+    @media (max-width:780px){ .sim-grid{ grid-template-columns: 1fr; } }
+    .select, .input { width:100%; padding:.6rem .8rem; border-radius:12px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); color:var(--text-main); }
+    .row{ display:flex; gap:.6rem; align-items:center; }
+
+    .muted{ color:var(--text-soft); font-size:.92rem; }
   </style>
 </head>
 <body>
   <main>
     <header>
-      <div class="header-title">
-        <a class="menu-return" href="menu.html" aria-label="Retour au menu" data-i18n-aria-label="header.menuAria">
-          <span class="btn-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M3 9l9-7 9 7"></path>
-              <path d="M9 22V12h6v10"></path>
-              <path d="M21 10v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V10"></path>
-            </svg>
-          </span>
-        </a>
-        <span class="eyebrow" data-i18n="header.brand">BeaverAlarm</span>
+      <div class="brand">
+        <span class="brand-badge">🦫</span>
+        <div>
+          <div>BeaverAlarm</div>
+          <div class="muted">Simulateur complet (sans serveur)</div>
+        </div>
       </div>
-      <div class="lang-toggle" role="group" aria-label="Sélecteur de langue" data-i18n-aria-label="header.languageLabel">
-        <button type="button" class="lang-btn active" data-lang="fr" aria-pressed="true">FR</button>
-        <button type="button" class="lang-btn" data-lang="en" aria-pressed="false">EN</button>
+      <div class="toolbar">
+        <span id="partitionChip" class="chip">Partition A</span>
+        <span id="powerChip" class="chip">Secteur OK</span>
+        <span id="netChip" class="chip">Réseau OK</span>
       </div>
     </header>
 
-    <section class="panel status-panel">
-      <div class="status-header">
-        <h2 data-i18n="status.heading">État du système</h2>
-        <span id="statusChip" class="status-chip status-chip--disarmed">Désarmée</span>
+    <section class="panel">
+      <div class="status-line">
+        <h2 class="section-title">État du système</h2>
+        <span id="stateChip" class="chip status-chip status-chip--disarmed">Désarmée</span>
       </div>
-      <p id="statusMessage" class="status-message" data-message-key="status.message.disarmed" role="status" aria-live="polite">Système prêt à être armé.</p>
+      <div id="statusMsg" class="msg">Système prêt à être armé.</div>
     </section>
 
-    <section class="layout-grid">
-      <article class="panel keypad-panel">
-        <h2 data-i18n="keypad.heading">Clavier numérique</h2>
-        <div class="code-display" id="codeDisplay">----</div>
-        <div class="keypad-grid">
-          <button type="button" class="key" data-digit="1">1</button>
-          <button type="button" class="key" data-digit="2">2</button>
-          <button type="button" class="key" data-digit="3">3</button>
-          <button type="button" class="key" data-digit="4">4</button>
-          <button type="button" class="key" data-digit="5">5</button>
-          <button type="button" class="key" data-digit="6">6</button>
-          <button type="button" class="key" data-digit="7">7</button>
-          <button type="button" class="key" data-digit="8">8</button>
-          <button type="button" class="key" data-digit="9">9</button>
-        </div>
-        <div class="keypad-bottom">
-          <button type="button" data-action="clear" data-i18n="keypad.clear">Effacer</button>
-          <button type="button" data-digit="0">0</button>
+    <section class="grid">
+      <!-- Keypad / actions -->
+      <article class="panel">
+        <h3 class="section-title">Clavier</h3>
+        <div id="codeDisplay" class="code">----</div>
+        <div class="keygrid" id="digits"></div>
+        <div class="action-row">
+          <button class="action action--stay" id="btnStay">Armement présence</button>
+          <button class="action action--away" id="btnAway">Armement absence</button>
+          <button class="action action--disarm" id="btnDisarm">Désarmer</button>
+          <button class="action" id="btnClear">Effacer</button>
         </div>
         <div class="action-row">
-          <button type="button" class="action-btn action-btn--stay" data-action="armStay" data-i18n="keypad.armStay">Armement présence</button>
-          <button type="button" class="action-btn action-btn--away" data-action="armAway" data-i18n="keypad.armAway">Armement absence</button>
-          <button type="button" class="action-btn action-btn--disarm" data-action="disarm" data-i18n="keypad.disarm">Désarmer</button>
+          <button class="action" id="btnPanic">PANIC 🚨</button>
+          <button class="action" id="btnFire">FEU 🔥 (24h)</button>
+          <button class="action" id="btnMedical">Médical ⛑️ (24h)</button>
         </div>
       </article>
 
-      <article class="panel zones-panel">
-        <h2 data-i18n="zones.heading">Zones surveillées</h2>
-        <p class="zones-hint" data-i18n="zones.toggleHint">Touchez une zone pour simuler son état.</p>
-        <div id="zoneList" class="zone-list"></div>
+      <!-- Zones -->
+      <article class="panel">
+        <h3 class="section-title">Zones surveillées</h3>
+        <div class="zone-list" id="zoneList"></div>
       </article>
 
-      <article class="panel log-panel">
-        <h2 data-i18n="log.heading">Historique des événements</h2>
-        <p id="logEmpty" class="empty-log" data-i18n="log.empty">Aucun événement pour le moment.</p>
-        <ul id="logList" class="log-list"></ul>
+      <!-- Simulation / Scénarios -->
+      <article class="panel">
+        <h3 class="section-title">Simulation & scénarios</h3>
+        <div class="sim-grid">
+          <label>Scénario
+            <select id="scenario" class="select">
+              <option value="none">— manuel —</option>
+              <option value="night">Nuit: arm stay, porte s'ouvre → entrée</option>
+              <option value="away">Absence: arm away, mouvement → alarme</option>
+              <option value="forgetDoor">Oublie porte ouverte → blocage</option>
+              <option value="powerDown">Coupure secteur 10s</option>
+              <option value="netFail">Perte réseau 15s</option>
+              <option value="smoke24h">Détecteur fumée (24h)</option>
+            </select>
+          </label>
+          <label>Vitesse (× temps)
+            <input id="timeScale" class="input" type="number" min="0.1" step="0.1" value="1" />
+          </label>
+        </div>
+        <div class="row" style="margin-top:.6rem">
+          <button class="action" id="btnRunScenario">Lancer</button>
+          <button class="action" id="btnStopScenario">Stop</button>
+          <span class="muted" id="countdown"></span>
+        </div>
+        <hr style="opacity:.15; margin:1rem 0" />
+        <h4 class="section-title">Historique</h4>
+        <p id="emptyLog" class="muted">Aucun événement pour le moment.</p>
+        <ul id="log" class="log"></ul>
       </article>
     </section>
   </main>
+
   <script>
-    (function () {
-      const translations = {
-        fr: {
-          meta: { title: "BeaverAlarm - Sécurité domestique" },
-          header: {
-            brand: "BeaverAlarm",
-            menuAria: "Retour au menu",
-            languageLabel: "Sélecteur de langue"
-          },
-          hero: {
-            eyebrow: "Sécurité domestique connectée",
-            title: "Pilotez votre sécurité domestique",
-            subtitle: "Simulez un panneau d’alarme connecté, entraînez-vous à armer et désarmer le système et vérifiez l’état des zones surveillées."
-          },
-          status: {
-            heading: "État du système",
-            chip: {
-              disarmed: "Désarmée",
-              armedStay: "Armée (présence)",
-              armedAway: "Armée (absence)"
-            },
-            message: {
-              disarmed: "Système prêt à être armé.",
-              armedStay: "Surveillance périmétrique active.",
-              armedAway: "Toutes les zones sont surveillées.",
-              zoneOpened: "Alerte : une zone est ouverte.",
-              zoneClosed: "Zone refermée.",
-              blocked: "Armement impossible : zones ouvertes.",
-              codePrompt: "Entrez un code à 4 chiffres.",
-              codeError: "Code invalide."
-            }
-          },
-          keypad: {
-            heading: "Clavier numérique",
-            clear: "Effacer",
-            armStay: "Armement présence",
-            armAway: "Armement absence",
-            disarm: "Désarmer"
-          },
-          zones: {
-            heading: "Zones surveillées",
-            toggleHint: "Touchez une zone pour simuler son état.",
-            statusClosed: "Sécurisée",
-            statusOpen: "Ouverte",
-            list: {
-              livingRoom: "Salon",
-              frontDoor: "Porte principale",
-              garage: "Garage",
-              basement: "Sous-sol"
-            }
-          },
-          log: {
-            heading: "Historique des événements",
-            empty: "Aucun événement pour le moment.",
-            armedStay: "Système armé (présence).",
-            armedAway: "Système armé (absence).",
-            disarmed: "Système désarmé.",
-            zoneOpened: "Zone ouverte : {{zone}}.",
-            zoneClosed: "Zone sécurisée : {{zone}}."
-          }
-        },
-        en: {
-          meta: { title: "BeaverAlarm - Home security" },
-          header: {
-            brand: "BeaverAlarm",
-            menuAria: "Back to menu",
-            languageLabel: "Language selector"
-          },
-          hero: {
-            eyebrow: "Connected home security",
-            title: "Control your home security",
-            subtitle: "Simulate a connected alarm keypad, practice arming and disarming, and monitor the state of each zone."
-          },
-          status: {
-            heading: "System status",
-            chip: {
-              disarmed: "Disarmed",
-              armedStay: "Armed (stay)",
-              armedAway: "Armed (away)"
-            },
-            message: {
-              disarmed: "System ready to arm.",
-              armedStay: "Perimeter sensors are active.",
-              armedAway: "All zones are being monitored.",
-              zoneOpened: "Alert: a zone is open.",
-              zoneClosed: "Zone restored.",
-              blocked: "Unable to arm: zones are open.",
-              codePrompt: "Enter a 4-digit code.",
-              codeError: "Invalid code."
-            }
-          },
-          keypad: {
-            heading: "Keypad",
-            clear: "Clear",
-            armStay: "Arm stay",
-            armAway: "Arm away",
-            disarm: "Disarm"
-          },
-          zones: {
-            heading: "Monitored zones",
-            toggleHint: "Tap a zone to simulate its state.",
-            statusClosed: "Secured",
-            statusOpen: "Open",
-            list: {
-              livingRoom: "Living room",
-              frontDoor: "Front door",
-              garage: "Garage",
-              basement: "Basement"
-            }
-          },
-          log: {
-            heading: "Event history",
-            empty: "No events yet.",
-            armedStay: "System armed (stay).",
-            armedAway: "System armed (away).",
-            disarmed: "System disarmed.",
-            zoneOpened: "Zone opened: {{zone}}.",
-            zoneClosed: "Zone restored: {{zone}}."
-          }
-        }
-      };
+  (() => {
+    // =====================
+    // Configuration & modèle
+    // =====================
+    const CONFIG = {
+      entryDelay: 30,      // s
+      exitDelay: 45,       // s
+      alarmDuration: 120,  // s (auto-silence)
+      codes: [
+        { label: 'Maître', code: '1234', level: 'master' },
+        { label: 'Utilisateur', code: '4321', level: 'user' },
+      ],
+      zones: [
+        // type: 'perimeter' (retard entrée), 'interior' (suivi), 'instant', '24h'
+        { id: 'frontDoor',  labelFR: 'Porte principale', type: 'perimeter' },
+        { id: 'garage',     labelFR: 'Garage',           type: 'perimeter' },
+        { id: 'livingRoom', labelFR: 'Salon (mouvement)',type: 'interior' },
+        { id: 'basement',   labelFR: 'Sous-sol',         type: 'instant' },
+        { id: 'smoke',      labelFR: 'Fumée (24h)',      type: '24h' },
+      ],
+    };
 
-      const state = {
-        lang: "fr",
-        systemState: "disarmed",
-        inputBuffer: "",
-        zones: [
-          { key: "livingRoom", open: false },
-          { key: "frontDoor", open: false },
-          { key: "garage", open: false },
-          { key: "basement", open: false }
-        ],
-        log: []
-      };
+    const STATE = {
+      DISARMED: 'DISARMED',
+      EXIT_DELAY: 'EXIT_DELAY',
+      ARMED_STAY: 'ARMED_STAY',
+      ARMED_AWAY: 'ARMED_AWAY',
+      ENTRY_DELAY: 'ENTRY_DELAY',
+      ALARM: 'ALARM',
+    };
 
-      const validCode = "1234";
-      const maxCodeLength = 6;
-      let flashTimer;
+    // =====================
+    // Persistant simple (localStorage)
+    // =====================
+    const store = {
+      get k(){ return 'beaveralarm.sim.v1'; },
+      load(){ try{ return JSON.parse(localStorage.getItem(this.k))||{} }catch{ return {} } },
+      save(v){ try{ localStorage.setItem(this.k, JSON.stringify(v)); }catch{} },
+    };
 
-      const langButtons = document.querySelectorAll('.lang-btn');
-      const statusChip = document.getElementById('statusChip');
-      const statusMessage = document.getElementById('statusMessage');
-      const codeDisplay = document.getElementById('codeDisplay');
-      const zoneList = document.getElementById('zoneList');
-      const logEmpty = document.getElementById('logEmpty');
-      const logList = document.getElementById('logList');
-      const clearButton = document.querySelector('[data-action="clear"]');
-      const armStayButton = document.querySelector('[data-action="armStay"]');
-      const armAwayButton = document.querySelector('[data-action="armAway"]');
-      const disarmButton = document.querySelector('[data-action="disarm"]');
+    const persisted = store.load();
 
-      if (!statusMessage.dataset.messageKey) {
-        statusMessage.dataset.messageKey = 'status.message.disarmed';
+    // =====================
+    // Runtime
+    // =====================
+    const runtime = {
+      lang: 'fr',
+      system: STATE.DISARMED,
+      input: '',
+      zones: CONFIG.zones.map(z => ({...z, open:false, bypass:false, fault:false})),
+      timers: { entry:0, exit:0, alarm:0 },
+      powerOK: true,
+      netOK: true,
+      timeScale: Number(persisted.timeScale||1),
+      log: persisted.log || [],
+      scenario: null,
+      siren: { active:false, node:null, ctx:null, stop:()=>{} },
+    };
+
+    // Restore open/bypass from persistence if any
+    if (persisted.zones){
+      runtime.zones.forEach(z => {
+        const p = persisted.zones[z.id];
+        if (p){ z.open=!!p.open; z.bypass=!!p.bypass; z.fault=!!p.fault; }
+      });
+    }
+
+    // =====================
+    // DOM refs
+    // =====================
+    const el = {
+      stateChip: document.getElementById('stateChip'),
+      statusMsg: document.getElementById('statusMsg'),
+      codeDisplay: document.getElementById('codeDisplay'),
+      digits: document.getElementById('digits'),
+      btnStay: document.getElementById('btnStay'),
+      btnAway: document.getElementById('btnAway'),
+      btnDisarm: document.getElementById('btnDisarm'),
+      btnClear: document.getElementById('btnClear'),
+      btnPanic: document.getElementById('btnPanic'),
+      btnFire: document.getElementById('btnFire'),
+      btnMedical: document.getElementById('btnMedical'),
+      zoneList: document.getElementById('zoneList'),
+      log: document.getElementById('log'),
+      emptyLog: document.getElementById('emptyLog'),
+      scenario: document.getElementById('scenario'),
+      runScenario: document.getElementById('btnRunScenario'),
+      stopScenario: document.getElementById('btnStopScenario'),
+      timeScale: document.getElementById('timeScale'),
+      countdown: document.getElementById('countdown'),
+      powerChip: document.getElementById('powerChip'),
+      netChip: document.getElementById('netChip'),
+    };
+
+    // =====================
+    // Utils
+    // =====================
+    const t = (s)=> ({
+      DISARMED:'Désarmée', EXIT_DELAY:'Sortie', ARMED_STAY:'Armée (présence)', ARMED_AWAY:'Armée (absence)', ENTRY_DELAY:'Entrée', ALARM:'ALERTE',
+    }[s]||s);
+
+    const nowStr = () => {
+      const d = new Date();
+      return d.toLocaleTimeString('fr-CA', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+    }
+
+    function log(msg){
+      runtime.log.unshift({ ts: Date.now(), msg });
+      if (runtime.log.length > 50) runtime.log.length = 50;
+      renderLog();
+      persist();
+    }
+
+    function persist(){
+      store.save({
+        timeScale: runtime.timeScale,
+        zones: Object.fromEntries(runtime.zones.map(z=>[z.id,{open:z.open, bypass:z.bypass, fault:z.fault}]) ),
+        log: runtime.log,
+      });
+    }
+
+    function setMsg(message, cls){
+      el.statusMsg.textContent = message;
+      el.statusMsg.classList.remove('msg--ok','msg--warn','msg--err');
+      if (cls) el.statusMsg.classList.add(cls);
+    }
+
+    function setChip(state){
+      el.stateChip.textContent = t(state);
+      el.stateChip.className = 'chip status-chip ' + (
+        state===STATE.DISARMED ? 'status-chip--disarmed' :
+        state===STATE.EXIT_DELAY ? 'status-chip--exit' :
+        state===STATE.ARMED_STAY ? 'status-chip--stay' :
+        state===STATE.ARMED_AWAY ? 'status-chip--away' :
+        state===STATE.ENTRY_DELAY ? 'status-chip--entry' :
+        'status-chip--alarm'
+      );
+    }
+
+    function displayCode(){ el.codeDisplay.textContent = runtime.input ? '•'.repeat(runtime.input.length) : '----'; }
+
+    function checkCode(){
+      return CONFIG.codes.find(c => c.code === runtime.input);
+    }
+
+    function clearCode(){ runtime.input=''; displayCode(); }
+
+    function anyOpenPerimeter(){ return runtime.zones.some(z => z.type==='perimeter' && z.open && !z.bypass); }
+    function anyOpenNonBypassed(){ return runtime.zones.some(z => z.open && !z.bypass); }
+
+    function setSystem(state){
+      runtime.system = state;
+      setChip(state);
+      persist();
+    }
+
+    function arm(mode){
+      const code = checkCode();
+      if (!code || runtime.input.length<4){ setMsg('Entrez un code valide.', 'msg--warn'); return; }
+      if (anyOpenNonBypassed()){
+        setMsg('Armement impossible: zones ouvertes.', 'msg--err');
+        log(`Blocage armement (zones ouvertes).`);
+        return;
       }
+      runtime.timers.exit = CONFIG.exitDelay;
+      setSystem(STATE.EXIT_DELAY);
+      setMsg(`Sortie: ${CONFIG.exitDelay}s`, 'msg--warn');
+      log(`Armement initialisé (${mode===STATE.ARMED_STAY?'présence':'absence'}) – délai sortie ${CONFIG.exitDelay}s.`);
+      runtime.pendingArm = mode; // remember target
+      clearCode();
+    }
 
-      function translate(key) {
-        if (!key) {
-          return '';
-        }
-
-        return key.split('.').reduce((acc, part) => {
-          if (acc && Object.prototype.hasOwnProperty.call(acc, part)) {
-            return acc[part];
-          }
-          return undefined;
-        }, translations[state.lang]) ?? '';
+    function disarm({force=false}={}){
+      const code = checkCode();
+      if (!force && (!code || runtime.input.length<4)){
+        setMsg('Code invalide.', 'msg--err');
+        return;
       }
+      const was = runtime.system;
+      setSystem(STATE.DISARMED);
+      runtime.timers = { entry:0, exit:0, alarm:0 };
+      siren(false);
+      setMsg('Système désarmé.', 'msg--ok');
+      log(`Désarment (${code?code.label:'forcé'}) depuis ${t(was)}.`);
+      clearCode();
+    }
 
-      function formatWithPlaceholders(template, replacements = {}) {
-        return (template || '').replace(/\{\{(\w+)\}\}/g, (_, token) => {
-          return Object.prototype.hasOwnProperty.call(replacements, token) ? replacements[token] : '';
+    function zoneById(id){ return runtime.zones.find(z=>z.id===id); }
+
+    function openZone(id, open=true){
+      const z = zoneById(id); if (!z) return;
+      if (z.open === open) return;
+      z.open = open; persist(); renderZones();
+
+      const label = z.labelFR;
+      log(`${open?'Ouverture':'Fermeture'} zone: ${label}`);
+
+      // 24h zones trigger immediate alarm
+      if (z.type==='24h') return alarm('Alarme 24h: ' + label);
+
+      switch (runtime.system){
+        case STATE.DISARMED:
+          setMsg(open?`Zone ouverte: ${label}`:`Zone refermée: ${label}`);
+          break;
+        case STATE.ARMED_STAY:
+        case STATE.ARMED_AWAY:
+        case STATE.EXIT_DELAY:
+          if (open){
+            if (z.type==='perimeter') startEntryDelay(label);
+            else if (z.type==='instant') alarm(`Zone instantanée: ${label}`);
+            else if (z.type==='interior' && runtime.system===STATE.ARMED_AWAY) alarm(`Mouvement intérieur: ${label}`);
+          }
+          break;
+        case STATE.ENTRY_DELAY:
+          // keep counting; opening more zones has no effect
+          break;
+      }
+    }
+
+    function startEntryDelay(label){
+      runtime.timers.entry = CONFIG.entryDelay;
+      setSystem(STATE.ENTRY_DELAY);
+      setMsg(`Entrée: ${CONFIG.entryDelay}s (zone ${label})`, 'msg--warn');
+      log(`Délai d'entrée déclenché (${label}) ${CONFIG.entryDelay}s.`);
+    }
+
+    function alarm(reason){
+      setSystem(STATE.ALARM);
+      runtime.timers.alarm = CONFIG.alarmDuration;
+      setMsg(`ALERTE: ${reason}`, 'msg--err');
+      log(`ALERTE 🚨 ${reason} (auto-silence ${CONFIG.alarmDuration}s)`);
+      siren(true);
+    }
+
+    // Simple synth siren (WebAudio), no external asset
+    function siren(on){
+      try{
+        if (on && !runtime.siren.active){
+          const ctx = new (window.AudioContext||window.webkitAudioContext)();
+          const o = ctx.createOscillator();
+          const g = ctx.createGain();
+          o.type='sawtooth'; o.frequency.value=600; g.gain.value=0.001; // low volume
+          o.connect(g).connect(ctx.destination);
+          o.start();
+          let up=true; let f=600;
+          const mod = setInterval(()=>{ f += (up?30:-30); if (f>1200||f<500) up=!up; o.frequency.value=f; }, 60);
+          runtime.siren = { active:true, ctx, node:o, stop:()=>{ clearInterval(mod); o.stop(); ctx.close(); } };
+        }
+        if (!on && runtime.siren.active){ runtime.siren.stop(); runtime.siren={active:false,node:null,ctx:null,stop:()=>{}}; }
+      }catch(e){ /* ignore audio errors (permissions) */ }
+    }
+
+    // =====================
+    // Ticker
+    // =====================
+    let tickHandle = null;
+    function startTicker(){ if (tickHandle) return; tickHandle = setInterval(tick, 250); }
+    function stopTicker(){ clearInterval(tickHandle); tickHandle=null; }
+    function tick(){
+      const scale = runtime.timeScale || 1;
+      const dt = 0.25 * scale; // seconds advanced per tick
+      // countdowns
+      if (runtime.system===STATE.EXIT_DELAY){
+        runtime.timers.exit = Math.max(0, runtime.timers.exit - dt);
+        el.countdown.textContent = `Sortie: ${Math.ceil(runtime.timers.exit)}s`;
+        if (runtime.timers.exit===0){
+          const target = runtime.pendingArm||STATE.ARMED_AWAY;
+          setSystem(target);
+          setMsg(target===STATE.ARMED_STAY? 'Surveillance périmétrique active.' : 'Toutes les zones sont surveillées.', 'msg--ok');
+          log(`Système armé (${target===STATE.ARMED_STAY?'présence':'absence'}).`);
+          el.countdown.textContent = '';
+        }
+      }
+      if (runtime.system===STATE.ENTRY_DELAY){
+        runtime.timers.entry = Math.max(0, runtime.timers.entry - dt);
+        el.countdown.textContent = `Entrée: ${Math.ceil(runtime.timers.entry)}s`;
+        if (runtime.timers.entry===0){ el.countdown.textContent=''; alarm('Délai d\'entrée expiré'); }
+      }
+      if (runtime.system===STATE.ALARM){
+        runtime.timers.alarm = Math.max(0, runtime.timers.alarm - dt);
+        el.countdown.textContent = `Sirène: ${Math.ceil(runtime.timers.alarm)}s`;
+        if (runtime.timers.alarm===0){ siren(false); el.countdown.textContent=''; setMsg('Alarme auto-silencée. Mémoire active.', 'msg--warn'); }
+      }
+    }
+
+    // =====================
+    // Scénarios
+    // =====================
+    let scenarioTimer = null;
+    function runScenario(name){
+      stopScenario();
+      if (!name || name==='none') return;
+      const s = scenarios[name];
+      if (!s) return;
+      s();
+    }
+
+    function stopScenario(){ if (scenarioTimer){ clearTimeout(scenarioTimer); scenarioTimer=null; } runtime.scenario=null; }
+    function after(ms, fn){ scenarioTimer = setTimeout(fn, ms/ (runtime.timeScale||1)); }
+
+    const scenarios = {
+      night(){
+        // Stay arm, then open door → entry delay → disarm
+        runtime.input='1234'; displayCode(); arm(STATE.ARMED_STAY);
+        after(1000, ()=>{ // during exit, keep still
+          after((CONFIG.exitDelay+2)*1000, ()=>{
+            openZone('frontDoor', true);
+            after(2000, ()=>{ runtime.input='1234'; displayCode(); disarm(); openZone('frontDoor', false); });
+          });
         });
-      }
-
-      function applyStaticTranslations() {
-        document.querySelectorAll('[data-i18n]').forEach((node) => {
-          const key = node.dataset.i18n;
-          const value = translate(key);
-
-          if (value) {
-            node.innerHTML = value;
-          }
+      },
+      away(){
+        runtime.input='1234'; displayCode(); arm(STATE.ARMED_AWAY);
+        after((CONFIG.exitDelay+2)*1000, ()=>{
+          openZone('livingRoom', true); // interior causes instant alarm in away
+          after(4000, ()=>{ runtime.input='1234'; displayCode(); disarm(); openZone('livingRoom', false); });
         });
+      },
+      forgetDoor(){
+        openZone('frontDoor', true);
+        runtime.input='1234'; displayCode(); arm(STATE.ARMED_AWAY); // should block
+        after(2500, ()=> openZone('frontDoor', false));
+      },
+      powerDown(){
+        setPower(false); after(10000, ()=> setPower(true));
+      },
+      netFail(){
+        setNet(false); after(15000, ()=> setNet(true));
+      },
+      smoke24h(){
+        openZone('smoke', true); after(5000, ()=> openZone('smoke', false));
+      },
+    };
 
-        document.querySelectorAll('[data-i18n-aria-label]').forEach((node) => {
-          const key = node.dataset.i18nAriaLabel;
-          const value = translate(key);
+    // =====================
+    // Power / Net indicators
+    // =====================
+    function setPower(ok){ runtime.powerOK = ok; el.powerChip.textContent = ok? 'Secteur OK' : 'Panne secteur'; el.powerChip.style.background = ok? 'rgba(255,255,255,.06)' : 'rgba(255,107,107,.18)'; if(!ok) log('Panne secteur'); else log('Secteur rétabli'); }
+    function setNet(ok){ runtime.netOK = ok; el.netChip.textContent = ok? 'Réseau OK' : 'Réseau perdu'; el.netChip.style.background = ok? 'rgba(255,255,255,.06)' : 'rgba(255,209,102,.18)'; if(!ok) log('Perte réseau'); else log('Réseau rétabli'); }
 
-          if (value) {
-            node.setAttribute('aria-label', value);
-          }
-        });
+    // =====================
+    // Renderers
+    // =====================
+    function renderDigits(){
+      const frag = document.createDocumentFragment();
+      for (let i=1;i<=9;i++) frag.appendChild(makeDigit(i));
+      frag.appendChild(makeDigit(0));
+      el.digits.appendChild(frag);
+      function makeDigit(n){ const b=document.createElement('button'); b.className='key'; b.textContent=String(n); b.addEventListener('click',()=>{ if (runtime.input.length<6){ runtime.input+=String(n); displayCode(); } }); return b; }
+    }
 
-        document.title = translate('meta.title') || document.title;
-      }
+    function renderZones(){
+      el.zoneList.innerHTML='';
+      runtime.zones.forEach(z=>{
+        const row=document.createElement('div'); row.className='zone';
+        const left=document.createElement('div'); left.className='z-left';
+        const dot=document.createElement('span'); dot.className='dot'+(z.open?' open':'');
+        const name=document.createElement('span'); name.textContent=z.labelFR;
+        const badges=document.createElement('div'); badges.className='z-badges';
+        const type=document.createElement('span'); type.className='badge badge--type'; type.textContent=typeLabel(z.type);
+        badges.appendChild(type);
+        if (z.bypass){ const b=document.createElement('span'); b.className='badge badge--bypass'; b.textContent='Bypass'; badges.appendChild(b); }
+        if (z.fault){ const b=document.createElement('span'); b.className='badge badge--fault'; b.textContent='Défaut'; badges.appendChild(b); }
+        left.append(dot,name,badges);
 
-      function setLanguage(lang) {
-        if (!translations[lang]) {
-          return;
-        }
+        const right=document.createElement('div'); right.className='zone-controls';
+        const state=document.createElement('span'); state.className='zone-state'; state.textContent = z.open?'Ouverte':'Sécurisée';
+        const toggle=document.createElement('button'); toggle.className='action'; toggle.textContent = z.open?'Fermer':'Ouvrir'; toggle.addEventListener('click',()=> openZone(z.id, !z.open));
+        const chk=document.createElement('label'); chk.className='row'; chk.style.gap='.35rem';
+        const cb=document.createElement('input'); cb.type='checkbox'; cb.checked=z.bypass; cb.addEventListener('change',()=>{ z.bypass=cb.checked; persist(); renderZones(); log(`Zone ${z.labelFR} ${z.bypass?'bypassée':'active'}`); });
+        const cbl=document.createElement('span'); cbl.className='muted'; cbl.textContent='Bypass';
+        chk.append(cb,cbl);
+        right.append(state, toggle, chk);
 
-        state.lang = lang;
-        document.documentElement.lang = lang;
+        row.append(left,right);
+        el.zoneList.appendChild(row);
+      });
 
-        langButtons.forEach((button) => {
-          const isActive = button.dataset.lang === lang;
-          button.classList.toggle('active', isActive);
-          button.setAttribute('aria-pressed', String(isActive));
-        });
+      function typeLabel(t){ return ({ perimeter:'Périmètre', interior:'Intérieur', instant:'Instant', '24h':'24h' })[t] || t; }
+    }
 
-        applyStaticTranslations();
-        updateStatusChip();
-        refreshStatusMessage();
-        renderZones();
-        renderLog();
+    function renderLog(){
+      el.log.innerHTML='';
+      if (!runtime.log.length){ el.emptyLog.hidden=false; return; }
+      el.emptyLog.hidden=true;
+      runtime.log.forEach(e=>{
+        const li=document.createElement('li');
+        const ts=document.createElement('span'); ts.className='log-time'; ts.textContent=new Date(e.ts).toLocaleTimeString('fr-CA',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+        const msg=document.createElement('span'); msg.className='log-msg'; msg.textContent=e.msg;
+        li.append(ts,msg); el.log.appendChild(li);
+      });
+    }
 
-        try {
-          localStorage.setItem('preferredLang', lang);
-        } catch (error) {
-          console.warn('Unable to persist language preference', error);
-        }
-      }
+    // =====================
+    // Event wiring
+    // =====================
+    renderDigits();
+    renderZones();
+    renderLog();
+    setChip(runtime.system);
+    displayCode();
+    el.timeScale.value = runtime.timeScale;
 
-      function updateStatusChip() {
-        const label = translate(`status.chip.${state.systemState}`);
-        statusChip.textContent = label || '';
-        statusChip.className = 'status-chip';
-        statusChip.classList.add(`status-chip--${state.systemState}`);
-      }
+    el.btnStay.addEventListener('click', ()=> arm(STATE.ARMED_STAY));
+    el.btnAway.addEventListener('click', ()=> arm(STATE.ARMED_AWAY));
+    el.btnDisarm.addEventListener('click', ()=> disarm());
+    el.btnClear.addEventListener('click', ()=> { clearCode(); setMsg(''); });
 
-      function setStatusMessageKey(key) {
-        statusMessage.dataset.messageKey = key;
-        refreshStatusMessage();
-      }
+    el.btnPanic.addEventListener('click', ()=> alarm('PANIC'));
+    el.btnFire.addEventListener('click', ()=> openZone('smoke', true));
+    el.btnMedical.addEventListener('click', ()=> alarm('Médical'));
 
-      function refreshStatusMessage() {
-        const key = statusMessage.dataset.messageKey || `status.message.${state.systemState}`;
-        statusMessage.textContent = translate(key);
-      }
+    el.timeScale.addEventListener('change', ()=>{ runtime.timeScale=Math.max(0.1, Number(el.timeScale.value)||1); persist(); });
 
-      function flashStatus(type) {
-        clearTimeout(flashTimer);
-        statusMessage.classList.remove('status-message--success', 'status-message--warning', 'status-message--alert');
+    el.runScenario.addEventListener('click', ()=> runScenario(el.scenario.value));
+    el.stopScenario.addEventListener('click', ()=> stopScenario());
 
-        if (type) {
-          statusMessage.classList.add(`status-message--${type}`);
-          flashTimer = setTimeout(() => {
-            statusMessage.classList.remove('status-message--success', 'status-message--warning', 'status-message--alert');
-          }, 1500);
-        }
-      }
+    startTicker();
 
-      function updateSystemState(nextState) {
-        state.systemState = nextState;
-        updateStatusChip();
-        setStatusMessageKey(`status.message.${nextState}`);
-        flashStatus('success');
-      }
-
-      function updateCodeDisplay() {
-        codeDisplay.textContent = state.inputBuffer ? '•'.repeat(state.inputBuffer.length) : '----';
-      }
-
-      function appendDigit(digit) {
-        if (state.inputBuffer.length >= maxCodeLength) {
-          return;
-        }
-
-        state.inputBuffer += digit;
-        updateCodeDisplay();
-      }
-
-      function clearInput() {
-        state.inputBuffer = '';
-        updateCodeDisplay();
-      }
-
-      function requireValidCode() {
-        if (state.inputBuffer.length !== 4) {
-          setStatusMessageKey('status.message.codePrompt');
-          flashStatus('warning');
-          return false;
-        }
-
-        if (state.inputBuffer !== validCode) {
-          setStatusMessageKey('status.message.codeError');
-          flashStatus('alert');
-          return false;
-        }
-
-        return true;
-      }
-
-      function handleArm(mode) {
-        if (!requireValidCode()) {
-          return;
-        }
-
-        if (state.zones.some((zone) => zone.open)) {
-          setStatusMessageKey('status.message.blocked');
-          flashStatus('alert');
-          return;
-        }
-
-        updateSystemState(mode);
-        clearInput();
-        addLog('armed', { mode });
-      }
-
-      function handleDisarm() {
-        if (!requireValidCode()) {
-          return;
-        }
-
-        updateSystemState('disarmed');
-        clearInput();
-        addLog('disarmed');
-      }
-
-      function toggleZone(zone) {
-        zone.open = !zone.open;
-        renderZones();
-        addLog('zone', { zoneKey: zone.key, open: zone.open });
-        setStatusMessageKey(zone.open ? 'status.message.zoneOpened' : 'status.message.zoneClosed');
-        flashStatus(zone.open ? 'alert' : 'success');
-      }
-
-      function createZoneButtons() {
-        zoneList.innerHTML = '';
-
-        state.zones.forEach((zone) => {
-          const button = document.createElement('button');
-          button.type = 'button';
-          button.className = 'zone';
-          button.dataset.zoneKey = zone.key;
-          button.setAttribute('aria-pressed', 'false');
-
-          const left = document.createElement('span');
-          left.className = 'zone-left';
-
-          const indicator = document.createElement('span');
-          indicator.className = 'zone-indicator';
-          indicator.setAttribute('aria-hidden', 'true');
-
-          const name = document.createElement('span');
-          name.className = 'zone-name';
-
-          left.append(indicator, name);
-
-          const status = document.createElement('span');
-          status.className = 'zone-state';
-
-          button.append(left, status);
-
-          button.addEventListener('click', () => toggleZone(zone));
-
-          zone.element = button;
-          zone.nameNode = name;
-          zone.stateNode = status;
-          zone.indicatorNode = indicator;
-
-          zoneList.appendChild(button);
-        });
-
-        renderZones();
-      }
-
-      function renderZones() {
-        state.zones.forEach((zone) => {
-          const zoneName = translate(`zones.list.${zone.key}`);
-          const stateLabel = translate(zone.open ? 'zones.statusOpen' : 'zones.statusClosed');
-
-          if (zone.nameNode) {
-            zone.nameNode.textContent = zoneName;
-          }
-
-          if (zone.stateNode) {
-            zone.stateNode.textContent = stateLabel;
-          }
-
-          if (zone.indicatorNode) {
-            zone.indicatorNode.classList.toggle('zone-indicator--open', zone.open);
-          }
-
-          if (zone.element) {
-            zone.element.classList.toggle('zone--open', zone.open);
-            zone.element.setAttribute('aria-pressed', zone.open ? 'true' : 'false');
-          }
-        });
-      }
-
-      function addLog(type, payload = {}) {
-        state.log.unshift({ type, payload, timestamp: Date.now() });
-        if (state.log.length > 12) {
-          state.log.length = 12;
-        }
-        renderLog();
-      }
-
-      function renderLog() {
-        logList.innerHTML = '';
-
-        if (!state.log.length) {
-          logEmpty.hidden = false;
-          return;
-        }
-
-        logEmpty.hidden = true;
-
-        state.log.forEach((event) => {
-          const item = document.createElement('li');
-          const time = document.createElement('span');
-          time.className = 'log-time';
-          time.textContent = formatTime(event.timestamp);
-
-          const message = document.createElement('span');
-          message.className = 'log-message';
-          message.textContent = formatLog(event);
-
-          item.append(time, message);
-          logList.appendChild(item);
-        });
-      }
-
-      function formatTime(timestamp) {
-        try {
-          return new Intl.DateTimeFormat(state.lang, { hour: '2-digit', minute: '2-digit' }).format(new Date(timestamp));
-        } catch (error) {
-          const date = new Date(timestamp);
-          return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
-        }
-      }
-
-      function formatLog(event) {
-        switch (event.type) {
-          case 'armed': {
-            const key = event.payload.mode === 'armedStay' ? 'log.armedStay' : 'log.armedAway';
-            return translate(key);
-          }
-          case 'disarmed':
-            return translate('log.disarmed');
-          case 'zone': {
-            const zoneName = translate(`zones.list.${event.payload.zoneKey}`);
-            const key = event.payload.open ? 'log.zoneOpened' : 'log.zoneClosed';
-            return formatWithPlaceholders(translate(key), { zone: zoneName });
-          }
-          default:
-            return '';
-        }
-      }
-
-      function handleLanguageButtons() {
-        langButtons.forEach((button) => {
-          button.addEventListener('click', () => setLanguage(button.dataset.lang));
-        });
-      }
-
-      function handleDigits() {
-        document.querySelectorAll('[data-digit]').forEach((button) => {
-          button.addEventListener('click', () => appendDigit(button.dataset.digit));
-        });
-      }
-
-      function handleActions() {
-        clearButton?.addEventListener('click', () => {
-          clearInput();
-          setStatusMessageKey(`status.message.${state.systemState}`);
-        });
-
-        armStayButton?.addEventListener('click', () => handleArm('armedStay'));
-        armAwayButton?.addEventListener('click', () => handleArm('armedAway'));
-        disarmButton?.addEventListener('click', handleDisarm);
-      }
-
-      function initialize() {
-        handleLanguageButtons();
-        handleDigits();
-        handleActions();
-        createZoneButtons();
-        updateStatusChip();
-        updateCodeDisplay();
-
-        const savedLang = (() => {
-          try {
-            return localStorage.getItem('preferredLang');
-          } catch (error) {
-            return null;
-          }
-        })();
-
-        setLanguage(savedLang && translations[savedLang] ? savedLang : 'fr');
-      }
-
-      initialize();
-    })();
+    // Expose helpers for console testing
+    window.__sim = { openZone, arm, disarm:()=>disarm({force:true}), setPower, setNet, state:()=>runtime };
+  })();
   </script>
 </body>
 </html>
