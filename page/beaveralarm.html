@@ -160,35 +160,6 @@
         <div class="zone-list" id="zoneList"></div>
       </article>
 
-      <!-- Simulation / Scénarios -->
-      <article class="panel">
-        <h3 class="section-title">Simulation & scénarios</h3>
-        <div class="sim-grid">
-          <label>Scénario
-            <select id="scenario" class="select">
-              <option value="none">— manuel —</option>
-              <option value="night">Nuit: arm stay, porte s'ouvre → entrée</option>
-              <option value="away">Absence: arm away, mouvement → alarme</option>
-              <option value="forgetDoor">Oublie porte ouverte → blocage</option>
-              <option value="powerDown">Coupure secteur 10s</option>
-              <option value="netFail">Perte réseau 15s</option>
-              <option value="smoke24h">Détecteur fumée (24h)</option>
-            </select>
-          </label>
-          <label>Vitesse (× temps)
-            <input id="timeScale" class="input" type="number" min="0.1" step="0.1" value="1" />
-          </label>
-        </div>
-        <div class="row" style="margin-top:.6rem">
-          <button class="action" id="btnRunScenario">Lancer</button>
-          <button class="action" id="btnStopScenario">Stop</button>
-          <span class="muted" id="countdown"></span>
-        </div>
-        <hr style="opacity:.15; margin:1rem 0" />
-        <h4 class="section-title">Historique</h4>
-        <p id="emptyLog" class="muted">Aucun événement pour le moment.</p>
-        <ul id="log" class="log"></ul>
-      </article>
     </section>
   </main>
 
