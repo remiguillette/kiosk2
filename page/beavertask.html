@@ -822,7 +822,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
     <script>
-      const STORAGE_KEY = "beavertask_tasks";
+      const API_ENDPOINT = '/api/tasks';
 
       const state = {
         tasks: [],
@@ -834,22 +834,81 @@
       const monthNames = ["JAN.", "FEB.", "MAR.", "APR.", "MAY", "JUN.", "JUL.", "AUG.", "SEP.", "OCT.", "NOV.", "DEC."];
       const monthNamesFull = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-      const loadTasks = () => {
+      const requestJson = async (url, options = {}) => {
+        let response;
         try {
-          const stored = localStorage.getItem(STORAGE_KEY);
-          return stored ? JSON.parse(stored) : [];
-        } catch (error) {
-          console.error("Failed to load tasks:", error);
+          response = await fetch(url, {
+            headers: {
+              Accept: 'application/json',
+              ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+              ...(options.headers || {}),
+            },
+            ...options,
+          });
+        } catch (networkError) {
+          throw new Error(networkError?.message || 'Network request failed');
+        }
+
+        const contentType = response.headers.get('content-type') || '';
+        const isJson = contentType.includes('application/json');
+
+        if (!response.ok) {
+          let message = `Request failed with status ${response.status}`;
+
+          if (isJson) {
+            try {
+              const errorPayload = await response.json();
+              if (errorPayload && typeof errorPayload.error === 'string') {
+                message = errorPayload.error;
+              }
+            } catch (jsonError) {
+              console.error('Failed to parse error payload:', jsonError);
+            }
+          } else {
+            try {
+              const text = await response.text();
+              if (text) {
+                message = text;
+              }
+            } catch (textError) {
+              console.error('Failed to read error response:', textError);
+            }
+          }
+
+          throw new Error(message);
+        }
+
+        if (response.status === 204) {
+          return null;
+        }
+
+        if (!isJson) {
+          return null;
+        }
+
+        return response.json();
+      };
+
+      const loadTasks = async () => {
+        try {
+          const payload = await requestJson(API_ENDPOINT);
+          if (payload && Array.isArray(payload.tasks)) {
+            return payload.tasks.map(normalizeTask).filter(Boolean);
+          }
           return [];
+        } catch (error) {
+          console.error('Failed to load tasks from server:', error);
+          return null;
         }
       };
 
-      const saveTasks = () => {
-        try {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(state.tasks));
-        } catch (error) {
-          console.error("Failed to save tasks:", error);
+      const refreshTasks = async () => {
+        const tasks = await loadTasks();
+        if (Array.isArray(tasks)) {
+          state.tasks = tasks;
+          return true;
         }
+        return false;
       };
 
       const normalizeTask = (task) => {
@@ -872,40 +931,62 @@
         };
       };
 
-      const addTask = (taskInput) => {
-        const created = normalizeTask({
-          ...taskInput,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        });
-
-        if (created) {
-          state.tasks.push(created);
-          saveTasks();
-          renderCalendar();
-          renderDetails();
+      const addTask = async (taskInput) => {
+        try {
+          const created = await requestJson(API_ENDPOINT, {
+            method: 'POST',
+            body: JSON.stringify(taskInput),
+          });
+          const normalized = normalizeTask(created);
+          if (normalized) {
+            state.tasks = [...state.tasks.filter((task) => task.id !== normalized.id), normalized];
+          }
+          await refreshTasks();
+          rerenderAll();
+          return true;
+        } catch (error) {
+          console.error('Failed to add task:', error);
+          return false;
         }
       };
 
-      const updateTask = (id, updates) => {
-        const index = state.tasks.findIndex((task) => task.id === id);
-        if (index >= 0) {
-          state.tasks[index] = {
-            ...state.tasks[index],
-            ...updates,
-            updatedAt: new Date().toISOString(),
-          };
-          saveTasks();
-          renderCalendar();
-          renderDetails();
+      const updateTask = async (id, updates) => {
+        try {
+          const updated = await requestJson(`${API_ENDPOINT}/${encodeURIComponent(id)}`, {
+            method: 'PATCH',
+            body: JSON.stringify(updates),
+          });
+          const normalized = normalizeTask(updated);
+          if (normalized) {
+            const index = state.tasks.findIndex((task) => task.id === normalized.id);
+            if (index >= 0) {
+              state.tasks[index] = normalized;
+            } else {
+              state.tasks = [...state.tasks, normalized];
+            }
+          }
+          await refreshTasks();
+          rerenderAll();
+          return true;
+        } catch (error) {
+          console.error('Failed to update task:', error);
+          return false;
         }
       };
 
-      const deleteTask = (id) => {
-        state.tasks = state.tasks.filter((task) => task.id !== id);
-        saveTasks();
-        renderCalendar();
-        renderDetails();
+      const deleteTask = async (id) => {
+        try {
+          await requestJson(`${API_ENDPOINT}/${encodeURIComponent(id)}`, {
+            method: 'DELETE',
+          });
+          state.tasks = state.tasks.filter((task) => task.id !== id);
+          await refreshTasks();
+          rerenderAll();
+          return true;
+        } catch (error) {
+          console.error('Failed to delete task:', error);
+          return false;
+        }
       };
 
       const getDateKey = (date) => {
@@ -1058,21 +1139,21 @@
 
           detailsContent.innerHTML = `<div class="task-list">${taskListHTML}</div>`;
 
-          detailsContent.querySelectorAll('.task-checkbox').forEach(checkbox => {
-            checkbox.addEventListener('click', (e) => {
-              const id = e.target.dataset.id;
-              const task = state.tasks.find(t => t.id === id);
+          detailsContent.querySelectorAll('.task-checkbox').forEach((checkbox) => {
+            checkbox.addEventListener('click', async (event) => {
+              const id = event.currentTarget.dataset.id;
+              const task = state.tasks.find((t) => t.id === id);
               if (task) {
-                updateTask(id, { completed: !task.completed });
+                await updateTask(id, { completed: !task.completed });
               }
             });
           });
 
-          detailsContent.querySelectorAll('.task-action-btn.delete').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-              const id = e.target.dataset.id;
+          detailsContent.querySelectorAll('.task-action-btn.delete').forEach((btn) => {
+            btn.addEventListener('click', async (event) => {
+              const id = event.currentTarget.dataset.id;
               if (confirm('Delete this task?')) {
-                deleteTask(id);
+                await deleteTask(id);
               }
             });
           });
@@ -1147,7 +1228,7 @@
         }
       });
 
-      taskForm?.addEventListener('submit', (event) => {
+      taskForm?.addEventListener('submit', async (event) => {
         event.preventDefault();
 
         const title = taskTitleInput?.value.trim();
@@ -1160,7 +1241,7 @@
         const descriptionValue = taskDescriptionInput?.value.trim() ?? '';
         const tagValue = taskTagInput?.value.trim() ?? '';
 
-        addTask({
+        const success = await addTask({
           title,
           dueDate: getDateKey(state.selectedDate),
           description: descriptionValue,
@@ -1168,7 +1249,9 @@
           completed: false,
         });
 
-        closeTaskModal();
+        if (success) {
+          closeTaskModal();
+        }
       });
 
       document.addEventListener('keydown', (event) => {
@@ -1182,21 +1265,32 @@
       });
 
       const quickAddInput = document.getElementById('event-input');
-      quickAddInput?.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter' && e.target.value.trim()) {
-          const title = e.target.value.trim();
+      quickAddInput?.addEventListener('keypress', async (event) => {
+        if (event.key === 'Enter') {
+          const target = event.target;
+          if (!(target instanceof HTMLInputElement)) {
+            return;
+          }
+
+          const value = target.value.trim();
+          if (!value) {
+            return;
+          }
+
           ensureSelectedDate();
           const dateKey = getDateKey(state.selectedDate);
 
-          addTask({
-            title: title,
+          const success = await addTask({
+            title: value,
             dueDate: dateKey,
             description: '',
             tag: '',
             completed: false,
           });
 
-          e.target.value = '';
+          if (success) {
+            target.value = '';
+          }
         }
       });
 
@@ -1275,7 +1369,7 @@
 
       const renderTaskList = () => {
         const tasklistContent = document.getElementById('tasklist-content');
-        
+
         if (state.tasks.length === 0) {
           tasklistContent.innerHTML = `
             <div class="tasklist-empty">
@@ -1354,30 +1448,34 @@
 
         tasklistContent.innerHTML = html;
 
-        tasklistContent.querySelectorAll('.task-checkbox').forEach(checkbox => {
-          checkbox.addEventListener('click', (e) => {
-            const id = e.target.dataset.id;
-            const task = state.tasks.find(t => t.id === id);
+        tasklistContent.querySelectorAll('.task-checkbox').forEach((checkbox) => {
+          checkbox.addEventListener('click', async (event) => {
+            const id = event.currentTarget.dataset.id;
+            const task = state.tasks.find((t) => t.id === id);
             if (task) {
-              updateTask(id, { completed: !task.completed });
-              renderTaskList();
+              await updateTask(id, { completed: !task.completed });
             }
           });
         });
 
-        tasklistContent.querySelectorAll('.task-action-btn.delete').forEach(btn => {
-          btn.addEventListener('click', (e) => {
-            const id = e.target.dataset.id;
+        tasklistContent.querySelectorAll('.task-action-btn.delete').forEach((btn) => {
+          btn.addEventListener('click', async (event) => {
+            const id = event.currentTarget.dataset.id;
             if (confirm('Delete this task?')) {
-              deleteTask(id);
-              renderTaskList();
+              await deleteTask(id);
             }
           });
         });
       };
 
+      function rerenderAll() {
+        renderCalendar();
+        renderDetails();
+        renderTaskList();
+      }
+
       const renderTaskListItem = (task) => {
-        const formattedDate = task.dueDate 
+        const formattedDate = task.dueDate
           ? new Date(task.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
           : 'No due date';
         
@@ -1400,15 +1498,16 @@
       document.getElementById('calendar-icon').addEventListener('click', showCalendarView);
       document.getElementById('tasklist-icon').addEventListener('click', showTaskListView);
 
-      const init = () => {
-        state.tasks = loadTasks();
+      const init = async () => {
+        await refreshTasks();
         state.selectedDate = new Date();
         updateCurrentDayBadge();
-        renderCalendar();
-        renderDetails();
+        rerenderAll();
       };
 
-      init();
+      init().catch((error) => {
+        console.error('Failed to initialize BeaverTask:', error);
+      });
     </script>
   </body>
 </html>
