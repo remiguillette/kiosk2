@@ -380,22 +380,24 @@
       <h2 class="section-title" data-i18n="sections.resources.heading">Utilisation des ressources</h2>
       <div class="resource-grid">
         <article class="resource-card">
-          <h3 data-i18n="sections.resources.wifi.title">Wi-Fi domestique</h3>
-          <p data-i18n="sections.resources.wifi.description">Puissance du signal et qualité du lien.</p>
-          <div class="metric-chip" data-i18n="sections.resources.wifi.signal">Signal : -48 dBm (Excellent)</div>
-          <div class="metric-chip" data-i18n="sections.resources.wifi.throughput">Débit observé : 450 Mbps</div>
+          <h3 data-i18n="sections.resources.uptime.title">Uptime Debian</h3>
+          <p data-i18n="sections.resources.uptime.description">Mesure directe rapportée par le noyau Debian.</p>
+          <div class="metric-chip" data-i18n="sections.resources.uptime.pretty" data-metric="uptime-pretty">Uptime : --</div>
+          <div class="metric-chip" data-i18n="sections.resources.uptime.since" data-metric="uptime-since">Démarré le : --</div>
+          <div class="metric-chip" data-i18n="sections.resources.uptime.load" data-metric="uptime-load">Charge (1 / 5 / 15 min) : --</div>
         </article>
         <article class="resource-card">
           <h3 data-i18n="sections.resources.websocket.title">Canal WebSocket</h3>
           <p data-i18n="sections.resources.websocket.description">Flux de messages BeaverSystem vers le backend.</p>
           <div class="metric-chip" data-i18n="sections.resources.websocket.packets">Paquets traités : 128 / min</div>
-          <div class="metric-chip" data-i18n="sections.resources.websocket.uptime">Uptime session : 3 h 12</div>
+          <div class="metric-chip" data-i18n="sections.resources.websocket.uptime" data-metric="websocket-uptime">Uptime brut : --</div>
+          <div class="metric-chip" data-i18n="sections.resources.websocket.refresh" data-metric="websocket-refresh">Actualisé : --</div>
         </article>
         <article class="resource-card">
-          <h3 data-i18n="sections.resources.battery.title">Batterie</h3>
-          <p data-i18n="sections.resources.battery.description">Autonomie restante du système embarqué.</p>
-          <div class="metric-chip" data-i18n="sections.resources.battery.capacity">Capacité estimée : 82 %</div>
-          <div class="metric-chip" data-i18n="sections.resources.battery.health">Santé : 96 %</div>
+          <h3 data-i18n="sections.resources.ports.title">Ports réseau</h3>
+          <p data-i18n="sections.resources.ports.description">Surveillance des services exposés localement.</p>
+          <div class="metric-chip" data-i18n="sections.resources.ports.unavailable" data-metric="port-8000">Statut indisponible</div>
+          <div class="metric-chip" data-i18n="sections.resources.ports.unavailable" data-metric="port-9090">Statut indisponible</div>
         </article>
       </div>
     </section>
@@ -481,23 +483,30 @@
             },
             resources: {
               heading: 'Utilisation des ressources',
-              wifi: {
-                title: 'Wi-Fi domestique',
-                description: 'Puissance du signal et qualité du lien.',
-                signal: 'Signal : -48 dBm (Excellent)',
-                throughput: 'Débit observé : 450 Mbps'
+              uptime: {
+                title: 'Uptime Debian',
+                description: 'Mesure directe rapportée par le noyau Debian.',
+                pretty: 'Uptime : {{value}}',
+                since: 'Démarré le : {{value}}',
+                load: 'Charge (1 / 5 / 15 min) : {{value}}'
               },
               websocket: {
                 title: 'Canal WebSocket',
                 description: 'Flux de messages BeaverSystem vers le backend.',
                 packets: 'Paquets traités : 128 / min',
-                uptime: 'Uptime session : 3 h 12'
+                uptime: 'Uptime brut : {{value}}',
+                refresh: 'Actualisé : {{value}}'
               },
-              battery: {
-                title: 'Batterie',
-                description: 'Autonomie restante du système embarqué.',
-                capacity: 'Capacité estimée : 82 %',
-                health: 'Santé : 96 %'
+              ports: {
+                title: 'Ports réseau',
+                description: 'Surveillance des services exposés localement.',
+                entry: 'Port {{port}} : {{status}}',
+                entryDuration: 'Port {{port}} : {{status}} (depuis {{duration}})',
+                status: {
+                  up: 'Oui',
+                  down: 'Non'
+                },
+                unavailable: 'Statut indisponible'
               }
             },
             services: {
@@ -584,23 +593,30 @@
             },
             resources: {
               heading: 'Resource usage',
-              wifi: {
-                title: 'Home Wi-Fi',
-                description: 'Signal strength and link quality.',
-                signal: 'Signal: -48 dBm (Excellent)',
-                throughput: 'Observed throughput: 450 Mbps'
+              uptime: {
+                title: 'Debian uptime',
+                description: 'Direct reading reported by the Debian kernel.',
+                pretty: 'Uptime: {{value}}',
+                since: 'Boot time: {{value}}',
+                load: 'Load (1 / 5 / 15 min): {{value}}'
               },
               websocket: {
                 title: 'WebSocket channel',
                 description: 'BeaverSystem message flow to the backend.',
                 packets: 'Packets processed: 128 / min',
-                uptime: 'Session uptime: 3h12'
+                uptime: 'Raw uptime: {{value}}',
+                refresh: 'Sampled: {{value}}'
               },
-              battery: {
-                title: 'Battery',
-                description: 'Remaining power of the embedded system.',
-                capacity: 'Estimated capacity: 82%',
-                health: 'Health: 96%'
+              ports: {
+                title: 'Network ports',
+                description: 'Monitoring of locally exposed services.',
+                entry: 'Port {{port}}: {{status}}',
+                entryDuration: 'Port {{port}}: {{status}} (since {{duration}})',
+                status: {
+                  up: 'Yes',
+                  down: 'No'
+                },
+                unavailable: 'Status unavailable'
               }
             },
             services: {
@@ -783,6 +799,255 @@
         setLanguage(saved);
       } else {
         setLanguage(state.lang);
+      }
+    })();
+  </script>
+  <script>
+    (function () {
+      const STATUS_ENDPOINT = '/api/system/status';
+      const REFRESH_INTERVAL = 15000;
+      const REFRESH_VIEW_INTERVAL = 5000;
+      const PLACEHOLDER = '—';
+
+      const nodes = {
+        uptimePretty: document.querySelector('[data-metric="uptime-pretty"]'),
+        uptimeSince: document.querySelector('[data-metric="uptime-since"]'),
+        uptimeLoad: document.querySelector('[data-metric="uptime-load"]'),
+        websocketUptime: document.querySelector('[data-metric="websocket-uptime"]'),
+        websocketRefresh: document.querySelector('[data-metric="websocket-refresh"]'),
+        port8000: document.querySelector('[data-metric="port-8000"]'),
+        port9090: document.querySelector('[data-metric="port-9090"]'),
+      };
+
+      if (Object.values(nodes).every((node) => !node)) {
+        return;
+      }
+
+      const locale = window.beaverSystemLocale ?? {};
+      const getLanguage = () => {
+        if (typeof locale.getLanguage === 'function') {
+          return locale.getLanguage();
+        }
+        return document.documentElement.lang || 'en';
+      };
+
+      const translate = (key, replacements) => {
+        if (typeof locale.translate === 'function') {
+          return locale.translate(key, replacements);
+        }
+
+        if (replacements && typeof replacements.value === 'string') {
+          return `${key}: ${replacements.value}`;
+        }
+
+        return key;
+      };
+
+      let lastPayload = null;
+      let fetching = false;
+
+      const setMetric = (node, key, value) => {
+        if (!node) {
+          return;
+        }
+
+        const effectiveValue = value ?? PLACEHOLDER;
+        const label = translate(key, { value: effectiveValue });
+        node.textContent = typeof label === 'string' && label.length > 0 ? label : effectiveValue;
+      };
+
+      const setPortUnavailable = (node) => {
+        if (!node) {
+          return;
+        }
+
+        const label = translate('sections.resources.ports.unavailable');
+        node.textContent = typeof label === 'string' && label.length > 0 ? label : PLACEHOLDER;
+      };
+
+      const formatTimestamp = (isoString) => {
+        if (!isoString) {
+          return null;
+        }
+
+        const date = new Date(isoString);
+        if (Number.isNaN(date.getTime())) {
+          return null;
+        }
+
+        const lang = getLanguage();
+        try {
+          return new Intl.DateTimeFormat(lang, {
+            dateStyle: 'medium',
+            timeStyle: 'medium',
+          }).format(date);
+        } catch (error) {
+          console.warn('Unable to format timestamp', error);
+          return date.toISOString();
+        }
+      };
+
+      const formatDuration = (sinceIso, referenceIso) => {
+        if (!sinceIso) {
+          return null;
+        }
+
+        const since = new Date(sinceIso);
+        const reference = referenceIso ? new Date(referenceIso) : new Date();
+        if (Number.isNaN(since.getTime()) || Number.isNaN(reference.getTime())) {
+          return null;
+        }
+
+        const seconds = Math.max(0, Math.floor((reference.getTime() - since.getTime()) / 1000));
+        const lang = getLanguage();
+        const units = [
+          { size: 86400, labels: { fr: 'j', en: 'd' } },
+          { size: 3600, labels: { fr: 'h', en: 'h' } },
+          { size: 60, labels: { fr: 'min', en: 'min' } },
+          { size: 1, labels: { fr: 's', en: 's' } },
+        ];
+
+        const parts = [];
+        let remaining = seconds;
+
+        for (const unit of units) {
+          const value = Math.floor(remaining / unit.size);
+          if (value > 0 || (unit.size === 1 && parts.length === 0)) {
+            const label = unit.labels[lang] || unit.labels.en;
+            parts.push(`${value}\u00a0${label}`);
+            remaining -= value * unit.size;
+          }
+
+          if (parts.length >= 3) {
+            break;
+          }
+        }
+
+        return parts.join(' ');
+      };
+
+      const applyUptime = (uptime, referenceIso) => {
+        if (!uptime) {
+          setMetric(nodes.uptimePretty, 'sections.resources.uptime.pretty', null);
+          setMetric(nodes.uptimeSince, 'sections.resources.uptime.since', null);
+          setMetric(nodes.uptimeLoad, 'sections.resources.uptime.load', null);
+          setMetric(nodes.websocketUptime, 'sections.resources.websocket.uptime', null);
+          setMetric(nodes.websocketRefresh, 'sections.resources.websocket.refresh', null);
+          return;
+        }
+
+        const pretty = uptime.pretty && uptime.pretty.length > 0 ? uptime.pretty : null;
+        const sinceLabel = formatTimestamp(uptime.since);
+        const loadLabel = Array.isArray(uptime.loadAverages) && uptime.loadAverages.length > 0
+          ? uptime.loadAverages.join(' \u00b7 ')
+          : null;
+        const rawLabel = uptime.raw && uptime.raw.length > 0 ? uptime.raw : pretty;
+        const refreshLabel = formatTimestamp(referenceIso);
+
+        setMetric(nodes.uptimePretty, 'sections.resources.uptime.pretty', pretty);
+        setMetric(nodes.uptimeSince, 'sections.resources.uptime.since', sinceLabel);
+        setMetric(nodes.uptimeLoad, 'sections.resources.uptime.load', loadLabel);
+        setMetric(nodes.websocketUptime, 'sections.resources.websocket.uptime', rawLabel);
+        setMetric(nodes.websocketRefresh, 'sections.resources.websocket.refresh', refreshLabel);
+      };
+
+      const applyPorts = (ports, referenceIso) => {
+        const reference = referenceIso || new Date().toISOString();
+        const entries = new Map();
+
+        if (Array.isArray(ports)) {
+          ports.forEach((entry) => {
+            if (entry && (typeof entry.port === 'number' || typeof entry.port === 'string')) {
+              entries.set(String(entry.port), entry);
+            }
+          });
+        }
+
+        const updatePort = (portNumber, node) => {
+          if (!node) {
+            return;
+          }
+
+          const entry = entries.get(String(portNumber));
+          if (!entry) {
+            setPortUnavailable(node);
+            return;
+          }
+
+          const statusKey = entry.up ? 'up' : 'down';
+          const statusLabel = translate(`sections.resources.ports.status.${statusKey}`);
+          const labelFallback = entry.up ? 'Yes' : 'No';
+          const sinceLabel = formatDuration(entry.since || entry.checkedAt, reference);
+          const templateKey = sinceLabel
+            ? 'sections.resources.ports.entryDuration'
+            : 'sections.resources.ports.entry';
+          const text = translate(templateKey, {
+            port: String(portNumber),
+            status: statusLabel && statusLabel.length > 0 ? statusLabel : labelFallback,
+            duration: sinceLabel ?? '',
+          });
+
+          if (typeof text === 'string' && text.length > 0) {
+            node.textContent = text;
+          } else {
+            const suffix = sinceLabel ? ` (${sinceLabel})` : '';
+            node.textContent = `Port ${portNumber}: ${labelFallback}${suffix}`;
+          }
+        };
+
+        updatePort(8000, nodes.port8000);
+        updatePort(9090, nodes.port9090);
+      };
+
+      const applyPayload = (referenceIso) => {
+        if (!lastPayload) {
+          applyUptime(null, null);
+          applyPorts(null, null);
+          return;
+        }
+
+        const reference = referenceIso || lastPayload.generatedAt || new Date().toISOString();
+        applyUptime(lastPayload.uptime, reference);
+        applyPorts(lastPayload.ports, reference);
+      };
+
+      const fetchStatus = async () => {
+        if (fetching) {
+          return;
+        }
+
+        fetching = true;
+
+        try {
+          const response = await fetch(STATUS_ENDPOINT, { cache: 'no-store' });
+          if (!response.ok) {
+            throw new Error(`Request failed with status ${response.status}`);
+          }
+
+          const payload = await response.json();
+          lastPayload = payload;
+          applyPayload();
+        } catch (error) {
+          console.error('Unable to load system status', error);
+          lastPayload = null;
+          applyPayload();
+        } finally {
+          fetching = false;
+        }
+      };
+
+      fetchStatus();
+      setInterval(fetchStatus, REFRESH_INTERVAL);
+      setInterval(() => {
+        if (lastPayload) {
+          applyPayload(new Date().toISOString());
+        }
+      }, REFRESH_VIEW_INTERVAL);
+
+      if (typeof locale.subscribe === 'function') {
+        locale.subscribe(() => {
+          applyPayload(new Date().toISOString());
+        });
       }
     })();
   </script>
