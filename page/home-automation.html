@@ -378,37 +378,6 @@
       </div>
     </section>
 
-    <!-- === CONTROLLED ZONES === -->
-    <section class="panel">
-      <h2 class="section-title" data-i18n="sections.zones.heading">Zones contrôlées</h2>
-      <div class="device-grid">
-        <article class="device-card">
-          <h3 data-i18n="sections.zones.alarm.title">Alarme domestique</h3>
-          <p data-i18n="sections.zones.alarm.description">Clavier central, capteurs d’ouverture et sirène intérieure.</p>
-          <div class="metric-chip" data-i18n="sections.zones.alarm.metricState">État : armée</div>
-          <div class="metric-chip" data-i18n="sections.zones.alarm.metricMode">Mode : présence</div>
-        </article>
-        <article class="device-card">
-          <h3 data-i18n="sections.zones.kitchen.title">Cuisine</h3>
-          <p data-i18n="sections.zones.kitchen.description">Plan de travail, prises intelligentes et détecteur de fumée.</p>
-          <div class="metric-chip" data-i18n="sections.zones.kitchen.metricLight">Éclairage : éteint</div>
-          <div class="metric-chip" data-i18n="sections.zones.kitchen.metricOutlets">Prises : 1 actif</div>
-        </article>
-        <article class="device-card">
-          <h3 data-i18n="sections.zones.bedroom.title">Chambre</h3>
-          <p data-i18n="sections.zones.bedroom.description">Lampe de chevet et thermostat local.</p>
-          <div class="metric-chip" data-i18n="sections.zones.bedroom.metricLight">Éclairage : tamisé</div>
-          <div class="metric-chip" data-i18n="sections.zones.bedroom.metricSetpoint">Consigne : 21 °C</div>
-        </article>
-        <article class="device-card">
-          <h3 data-i18n="sections.zones.garage.title">Garage</h3>
-          <p data-i18n="sections.zones.garage.description">Porte sectionnelle, lumière automatique et capteur de présence.</p>
-          <div class="metric-chip" data-i18n="sections.zones.garage.metricDoor">Porte : fermée</div>
-          <div class="metric-chip" data-i18n="sections.zones.garage.metricLight">Lumière : auto</div>
-        </article>
-      </div>
-    </section>
-
     <!-- === LIVE SENSORS === -->
     <section class="panel">
       <h2 class="section-title" data-i18n="sections.sensors.heading">Capteurs en direct</h2>
@@ -460,33 +429,6 @@
               battery: {
                 label: 'Batterie du système',
                 chargeLabel: 'Charge :'
-              }
-            },
-            zones: {
-              heading: 'Zones contrôlées',
-              alarm: {
-                title: 'Alarme domestique',
-                description: 'Clavier central, capteurs d’ouverture et sirène intérieure.',
-                metricState: 'État : armée',
-                metricMode: 'Mode : présence'
-              },
-              kitchen: {
-                title: 'Cuisine',
-                description: 'Plan de travail, prises intelligentes et détecteur de fumée.',
-                metricLight: 'Éclairage : éteint',
-                metricOutlets: 'Prises : 1 actif'
-              },
-              bedroom: {
-                title: 'Chambre',
-                description: 'Lampe de chevet et thermostat local.',
-                metricLight: 'Éclairage : tamisé',
-                metricSetpoint: 'Consigne : 21 °C'
-              },
-              garage: {
-                title: 'Garage',
-                description: 'Porte sectionnelle, lumière automatique et capteur de présence.',
-                metricDoor: 'Porte : fermée',
-                metricLight: 'Lumière : auto'
               }
             },
             sensors: {
@@ -554,33 +496,6 @@
               battery: {
                 label: 'System battery',
                 chargeLabel: 'Charge:'
-              }
-            },
-            zones: {
-              heading: 'Controlled zones',
-              alarm: {
-                title: 'Home alarm',
-                description: 'Keypad, entry sensors, and indoor siren.',
-                metricState: 'Status: armed',
-                metricMode: 'Mode: stay'
-              },
-              kitchen: {
-                title: 'Kitchen',
-                description: 'Counter lights, smart outlets, and smoke detector.',
-                metricLight: 'Lighting: off',
-                metricOutlets: 'Outlets: 1 active'
-              },
-              bedroom: {
-                title: 'Bedroom',
-                description: 'Bedside lamp and local thermostat.',
-                metricLight: 'Lighting: dimmed',
-                metricSetpoint: 'Setpoint: 21 °C'
-              },
-              garage: {
-                title: 'Garage',
-                description: 'Sectional door, auto lighting, and presence sensor.',
-                metricDoor: 'Door: closed',
-                metricLight: 'Lighting: auto'
               }
             },
             sensors: {
