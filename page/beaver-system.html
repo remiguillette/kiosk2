@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>BeaverSystem - Surveillance serveur</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #060608;
+      --panel: #0f1018;
+      --panel-glow: rgba(248, 148, 34, 0.12);
+      --border: rgba(255, 255, 255, 0.08);
+      --text-main: #ffffff;
+      --text-muted: rgba(255, 255, 255, 0.64);
+      --text-soft: rgba(255, 255, 255, 0.42);
+      --accent: #f89422;
+      --accent-strong: #ff9f33;
+      --font: "Inter", "Segoe UI", sans-serif;
+      --shadow: 0 28px 40px rgba(0, 0, 0, 0.45);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      font-family: var(--font);
+      background:
+        radial-gradient(circle at 15% 20%, rgba(248, 148, 34, 0.12), transparent 55%),
+        radial-gradient(circle at 85% 10%, rgba(248, 148, 34, 0.08), transparent 50%),
+        var(--bg);
+      color: var(--text-main);
+      padding: clamp(2.5rem, 5vw + 1rem, 3.5rem) clamp(1.25rem, 4vw, 2.5rem);
+    }
+
+    main {
+      width: min(1200px, 100%);
+      display: grid;
+      gap: 2.6rem;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+
+    .header-title {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.85rem;
+      flex: 1 1 auto;
+      min-width: min(260px, 100%);
+      justify-content: flex-start;
+    }
+
+    .btn-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-icon svg {
+      width: 24px;
+      height: 24px;
+      stroke-width: 1.8;
+    }
+
+    .menu-return {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-muted);
+      transition: color 160ms ease, border 160ms ease, background 160ms ease, transform 160ms ease;
+    }
+
+    .menu-return:hover,
+    .menu-return:focus-visible {
+      color: var(--accent);
+      border-color: var(--accent);
+      background: rgba(248, 148, 34, 0.14);
+      transform: translateY(-2px);
+      outline: none;
+    }
+
+    .eyebrow {
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      font-size: clamp(1.6rem, 4vw, 2.3rem);
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .lang-toggle {
+      display: inline-flex;
+      gap: 0.5rem;
+      background: rgba(24, 24, 32, 0.6);
+      padding: 0.4rem 0.5rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(8px);
+    }
+
+    .lang-btn {
+      border: none;
+      background: transparent;
+      color: var(--text-soft);
+      font-weight: 600;
+      font-size: 0.95rem;
+      padding: 0.4rem 0.9rem;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: color 150ms ease, background 150ms ease, transform 150ms ease;
+    }
+
+    .lang-btn:hover {
+      color: var(--text-main);
+      transform: translateY(-1px);
+    }
+
+    .lang-btn.active {
+      background: var(--accent);
+      color: #121219;
+      box-shadow: 0 8px 18px rgba(248, 148, 34, 0.35);
+    }
+
+    .hero {
+      display: grid;
+      gap: 0.8rem;
+    }
+
+    .hero-eyebrow {
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    .hero h1 {
+      font-size: clamp(2.2rem, 4vw, 3rem);
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .hero p {
+      max-width: 720px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      font-size: 1.05rem;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 26px;
+      padding: 2.2rem;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
+    }
+
+    .panel::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: var(--panel-glow);
+      opacity: 0;
+      transition: opacity 180ms ease;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .panel:hover::after { opacity: 1; }
+
+    h2.section-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 1.2rem;
+    }
+
+    .status-grid,
+    .resource-grid,
+    .service-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.6rem;
+    }
+
+    .status-card,
+    .resource-card,
+    .service-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 22px;
+      padding: 1.6rem;
+      display: grid;
+      gap: 0.8rem;
+      transition: border 150ms ease, transform 150ms ease, box-shadow 150ms ease;
+    }
+
+    .status-card:hover,
+    .resource-card:hover,
+    .service-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 26px rgba(248,148,34,0.18);
+    }
+
+    .label {
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-soft);
+    }
+
+    .status-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .status-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 0.35rem 0.7rem;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.06);
+      color: var(--text-main);
+      width: fit-content;
+    }
+
+    .status-message {
+      color: var(--text-muted);
+      font-weight: 500;
+      font-size: 0.95rem;
+    }
+
+    .status-chip--success {
+      background: rgba(71,209,123,0.16);
+      color: #47d17b;
+    }
+
+    .status-chip--danger {
+      background: rgba(255,107,107,0.18);
+      color: #ff7b7b;
+    }
+
+    .metric-chip {
+      background: rgba(255,255,255,0.05);
+      border-radius: 10px;
+      padding: 0.4rem 0.7rem;
+      font-size: 0.9rem;
+      color: var(--text-main);
+    }
+
+    footer {
+      color: var(--text-soft);
+      text-align: center;
+      font-size: 0.9rem;
+      margin-top: 1.4rem;
+    }
+
+    @media (max-width: 960px) {
+      body {
+        padding: 2.4rem 1.6rem;
+      }
+
+      header {
+        gap: 1.4rem;
+      }
+    }
+
+    @media (max-width: 720px) {
+      body {
+        padding: 1.8rem 1.25rem;
+      }
+
+      main {
+        gap: 2rem;
+      }
+
+      header {
+        gap: 0.75rem;
+      }
+
+      .status-row {
+        justify-content: flex-start;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .status-card,
+      .device-card {
+        padding: 1.3rem;
+      }
+
+      .status-chip,
+      .metric-chip {
+        font-size: 0.85rem;
+      }
+
+      footer {
+        font-size: 0.85rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div class="header-title">
+        <a class="menu-return" href="menu.html" aria-label="Retour au menu" data-i18n-aria-label="header.menuAria">
+          <span class="btn-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 9l9-7 9 7"></path>
+              <path d="M9 22V12h6v10"></path>
+              <path d="M21 10v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V10"></path>
+            </svg>
+          </span>
+        </a>
+        <span class="eyebrow" data-i18n="header.brand">BeaverSystem</span>
+      </div>
+      <div class="lang-toggle" role="group" aria-label="Sélecteur de langue" data-i18n-aria-label="header.languageLabel">
+        <button type="button" class="lang-btn active" data-lang="fr" aria-pressed="true">FR</button>
+        <button type="button" class="lang-btn" data-lang="en" aria-pressed="false">EN</button>
+      </div>
+    </header>
+
+    <section class="hero">
+      <span class="hero-eyebrow" data-i18n="hero.eyebrow">Supervision serveur</span>
+      <h1 data-i18n="hero.title">Gardez un œil sur votre infrastructure Debian</h1>
+      <p data-i18n="hero.subtitle">Consultez en un coup d'œil l'état du système, les ressources essentielles et les services critiques.</p>
+    </section>
+
+    <!-- === SYSTEM STATUS PANEL === -->
+    <section class="panel">
+      <h2 class="section-title" data-i18n="sections.status.heading">État du système</h2>
+      <div class="status-grid">
+        <article class="status-card">
+          <span class="label" data-i18n="sections.status.hostname.label">Nom d'hôte</span>
+          <div class="status-row">
+            <span data-i18n="sections.status.labels.value">Valeur :</span>
+            <span class="status-message" data-i18n="sections.status.hostname.value">debian-prod-01</span>
+          </div>
+          <div class="status-row">
+            <span data-i18n="sections.status.labels.state">État :</span>
+            <span class="status-chip status-chip--success" data-i18n="sections.status.hostname.state">En ligne</span>
+          </div>
+        </article>
+        <article class="status-card">
+          <span class="label" data-i18n="sections.status.distribution.label">Distribution</span>
+          <div class="status-row">
+            <span data-i18n="sections.status.labels.version">Version :</span>
+            <span class="status-message" data-i18n="sections.status.distribution.version">Debian 12.5 (Bookworm)</span>
+          </div>
+          <div class="status-row">
+            <span data-i18n="sections.status.labels.lastUpdate">Dernière mise à jour :</span>
+            <span class="status-message" data-i18n="sections.status.distribution.updated">Il y a 2 jours</span>
+          </div>
+        </article>
+        <article class="status-card">
+          <span class="label" data-i18n="sections.status.kernel.label">Noyau</span>
+          <div class="status-row">
+            <span data-i18n="sections.status.labels.version">Version :</span>
+            <span class="status-message" data-i18n="sections.status.kernel.version">6.1.0-17-amd64</span>
+          </div>
+          <div class="status-row">
+            <span data-i18n="sections.status.labels.uptime">Uptime :</span>
+            <span class="status-message" data-i18n="sections.status.kernel.uptime">12 jours 4 h</span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2 class="section-title" data-i18n="sections.resources.heading">Utilisation des ressources</h2>
+      <div class="resource-grid">
+        <article class="resource-card">
+          <h3 data-i18n="sections.resources.cpu.title">Charge CPU</h3>
+          <p data-i18n="sections.resources.cpu.description">Suivi des moyennes de charge et du pic actuel.</p>
+          <div class="metric-chip" data-i18n="sections.resources.cpu.load">Charge 1/5/15 min : 0.62 / 0.71 / 0.65</div>
+          <div class="metric-chip" data-i18n="sections.resources.cpu.usage">Utilisation instantanée : 32 %</div>
+        </article>
+        <article class="resource-card">
+          <h3 data-i18n="sections.resources.memory.title">Mémoire</h3>
+          <p data-i18n="sections.resources.memory.description">Disponibilité de la RAM et du swap.</p>
+          <div class="metric-chip" data-i18n="sections.resources.memory.usage">Utilisé : 6.2 Go / 16 Go</div>
+          <div class="metric-chip" data-i18n="sections.resources.memory.swap">Swap : 0.5 Go / 4 Go</div>
+        </article>
+        <article class="resource-card">
+          <h3 data-i18n="sections.resources.storage.title">Stockage</h3>
+          <p data-i18n="sections.resources.storage.description">Volume principal monté sur /.</p>
+          <div class="metric-chip" data-i18n="sections.resources.storage.usage">Utilisation : 68 % (220 Go / 320 Go)</div>
+          <div class="metric-chip" data-i18n="sections.resources.storage.iops">IOPS moyen : 120</div>
+        </article>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2 class="section-title" data-i18n="sections.services.heading">Services critiques</h2>
+      <div class="service-grid">
+        <article class="service-card">
+          <h3 data-i18n="sections.services.reverseProxy.title">Nginx (reverse proxy)</h3>
+          <p data-i18n="sections.services.reverseProxy.description">Distribue les applications web BeaverNet et termine le TLS.</p>
+          <div class="status-row">
+            <span data-i18n="sections.services.labels.state">État :</span>
+            <span class="status-chip status-chip--success" data-i18n="sections.services.reverseProxy.state">Actif</span>
+          </div>
+          <div class="status-row">
+            <span data-i18n="sections.services.labels.lastRestart">Dernier redémarrage :</span>
+            <span class="status-message" data-i18n="sections.services.reverseProxy.restart">Il y a 5 jours</span>
+          </div>
+        </article>
+        <article class="service-card">
+          <h3 data-i18n="sections.services.database.title">PostgreSQL</h3>
+          <p data-i18n="sections.services.database.description">Base de données principale des services clients.</p>
+          <div class="status-row">
+            <span data-i18n="sections.services.labels.state">État :</span>
+            <span class="status-chip status-chip--success" data-i18n="sections.services.database.state">Actif</span>
+          </div>
+          <div class="status-row">
+            <span data-i18n="sections.services.labels.connections">Connexions :</span>
+            <span class="status-message" data-i18n="sections.services.database.connections">42 / 200</span>
+          </div>
+        </article>
+        <article class="service-card">
+          <h3 data-i18n="sections.services.security.title">Fail2ban</h3>
+          <p data-i18n="sections.services.security.description">Bloque les tentatives d'intrusion SSH et web.</p>
+          <div class="status-row">
+            <span data-i18n="sections.services.labels.state">État :</span>
+            <span class="status-chip status-chip--success" data-i18n="sections.services.security.state">Actif</span>
+          </div>
+          <div class="status-row">
+            <span data-i18n="sections.services.labels.alerts">Derniers bannissements :</span>
+            <span class="status-message" data-i18n="sections.services.security.alerts">3 adresses / 24 h</span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <footer data-i18n="footer.note">Utilisez le bouton menu pour revenir aux autres services.</footer>
+  </main>
+  <script>
+    (function () {
+      const translations = {
+        fr: {
+          meta: { title: 'BeaverSystem - Surveillance serveur' },
+          header: {
+            brand: 'BeaverSystem',
+            menuAria: 'Retour au menu',
+            languageLabel: 'Sélecteur de langue'
+          },
+          hero: {
+            eyebrow: 'Supervision serveur',
+            title: 'Gardez un œil sur votre infrastructure Debian',
+            subtitle: 'Consultez en un coup d\'œil l\'état du système, les ressources essentielles et les services critiques.'
+          },
+          sections: {
+            status: {
+              heading: 'État du système',
+              labels: {
+                state: 'État :',
+                value: 'Valeur :',
+                version: 'Version :',
+                lastUpdate: 'Dernière mise à jour :',
+                uptime: 'Uptime :'
+              },
+              hostname: {
+                label: 'Nom d\'hôte',
+                value: 'debian-prod-01',
+                state: 'En ligne'
+              },
+              distribution: {
+                label: 'Distribution',
+                version: 'Debian 12.5 (Bookworm)',
+                updated: 'Il y a 2 jours'
+              },
+              kernel: {
+                label: 'Noyau',
+                version: '6.1.0-17-amd64',
+                uptime: '12 jours 4 h'
+              }
+            },
+            resources: {
+              heading: 'Utilisation des ressources',
+              cpu: {
+                title: 'Charge CPU',
+                description: 'Suivi des moyennes de charge et du pic actuel.',
+                load: 'Charge 1/5/15 min : 0.62 / 0.71 / 0.65',
+                usage: 'Utilisation instantanée : 32 %'
+              },
+              memory: {
+                title: 'Mémoire',
+                description: 'Disponibilité de la RAM et du swap.',
+                usage: 'Utilisé : 6.2 Go / 16 Go',
+                swap: 'Swap : 0.5 Go / 4 Go'
+              },
+              storage: {
+                title: 'Stockage',
+                description: 'Volume principal monté sur /.',
+                usage: 'Utilisation : 68 % (220 Go / 320 Go)',
+                iops: 'IOPS moyen : 120'
+              }
+            },
+            services: {
+              heading: 'Services critiques',
+              labels: {
+                state: 'État :',
+                lastRestart: 'Dernier redémarrage :',
+                connections: 'Connexions :',
+                alerts: 'Derniers bannissements :'
+              },
+              reverseProxy: {
+                title: 'Nginx (reverse proxy)',
+                description: 'Distribue les applications web BeaverNet et termine le TLS.',
+                state: 'Actif',
+                restart: 'Il y a 5 jours'
+              },
+              database: {
+                title: 'PostgreSQL',
+                description: 'Base de données principale des services clients.',
+                state: 'Actif',
+                connections: '42 / 200'
+              },
+              security: {
+                title: 'Fail2ban',
+                description: 'Bloque les tentatives d\'intrusion SSH et web.',
+                state: 'Actif',
+                alerts: '3 adresses / 24 h'
+              }
+            }
+          },
+          footer: { note: 'Utilisez le bouton menu pour revenir aux autres services.' }
+        },
+        en: {
+          meta: { title: 'BeaverSystem - Server monitoring' },
+          header: {
+            brand: 'BeaverSystem',
+            menuAria: 'Back to menu',
+            languageLabel: 'Language selector'
+          },
+          hero: {
+            eyebrow: 'Server supervision',
+            title: 'Monitor your Debian infrastructure',
+            subtitle: 'Get instant insights into system health, resource usage, and critical services.'
+          },
+          sections: {
+            status: {
+              heading: 'System status',
+              labels: {
+                state: 'Status:',
+                value: 'Value:',
+                version: 'Version:',
+                lastUpdate: 'Last update:',
+                uptime: 'Uptime:'
+              },
+              hostname: {
+                label: 'Hostname',
+                value: 'debian-prod-01',
+                state: 'Online'
+              },
+              distribution: {
+                label: 'Distribution',
+                version: 'Debian 12.5 (Bookworm)',
+                updated: '2 days ago'
+              },
+              kernel: {
+                label: 'Kernel',
+                version: '6.1.0-17-amd64',
+                uptime: '12d 4h'
+              }
+            },
+            resources: {
+              heading: 'Resource usage',
+              cpu: {
+                title: 'CPU load',
+                description: 'Tracks load averages and current peak.',
+                load: 'Load avg 1/5/15: 0.62 / 0.71 / 0.65',
+                usage: 'Instant usage: 32%'
+              },
+              memory: {
+                title: 'Memory',
+                description: 'Available RAM and swap.',
+                usage: 'Used: 6.2 GiB / 16 GiB',
+                swap: 'Swap: 0.5 GiB / 4 GiB'
+              },
+              storage: {
+                title: 'Storage',
+                description: 'Primary volume mounted on /.',
+                usage: 'Usage: 68% (220 GiB / 320 GiB)',
+                iops: 'Average IOPS: 120'
+              }
+            },
+            services: {
+              heading: 'Critical services',
+              labels: {
+                state: 'Status:',
+                lastRestart: 'Last restart:',
+                connections: 'Connections:',
+                alerts: 'Recent bans:'
+              },
+              reverseProxy: {
+                title: 'Nginx (reverse proxy)',
+                description: 'Serves BeaverNet apps and handles TLS termination.',
+                state: 'Active',
+                restart: '5 days ago'
+              },
+              database: {
+                title: 'PostgreSQL',
+                description: 'Primary database for customer services.',
+                state: 'Active',
+                connections: '42 / 200'
+              },
+              security: {
+                title: 'Fail2ban',
+                description: 'Blocks SSH and web intrusion attempts.',
+                state: 'Active',
+                alerts: '3 hosts / 24h'
+              }
+            }
+          },
+          footer: { note: 'Use the menu button to return to other services.' }
+        }
+      };
+
+      const state = { lang: 'fr' };
+      const listeners = new Set();
+      const langButtons = document.querySelectorAll('.lang-btn');
+
+      const getPreferredLanguage = () => {
+        try {
+          return localStorage.getItem('preferredLang');
+        } catch (error) {
+          console.warn('Unable to read preferred language', error);
+          return null;
+        }
+      };
+
+      const format = (template, replacements = {}) => {
+        return (template || '').replace(/\{\{(\w+)\}\}/g, (_, token) => {
+          return Object.prototype.hasOwnProperty.call(replacements, token) ? replacements[token] : '';
+        });
+      };
+
+      const translate = (key, replacements) => {
+        if (!key) {
+          return '';
+        }
+
+        const value = key.split('.').reduce((acc, part) => {
+          if (acc && Object.prototype.hasOwnProperty.call(acc, part)) {
+            return acc[part];
+          }
+          return undefined;
+        }, translations[state.lang]);
+
+        if (typeof value === 'string') {
+          return format(value, replacements);
+        }
+
+        return value === undefined ? '' : value;
+      };
+
+      const applyStaticTranslations = () => {
+        document.querySelectorAll('[data-i18n]').forEach((node) => {
+          const key = node.dataset.i18n;
+          const value = translate(key);
+
+          if (typeof value === 'string') {
+            node.innerHTML = value;
+          }
+        });
+
+        document.querySelectorAll('[data-i18n-aria-label]').forEach((node) => {
+          const key = node.dataset.i18nAriaLabel;
+          const value = translate(key);
+
+          if (typeof value === 'string') {
+            node.setAttribute('aria-label', value);
+          }
+        });
+
+        document.querySelectorAll('[data-i18n-placeholder]').forEach((node) => {
+          const key = node.dataset.i18nPlaceholder;
+          const value = translate(key);
+
+          if (typeof value === 'string') {
+            node.setAttribute('placeholder', value);
+          }
+        });
+
+        document.title = translate('meta.title') || document.title;
+      };
+
+      const setLanguage = (lang) => {
+        if (!translations[lang]) {
+          return;
+        }
+
+        state.lang = lang;
+        document.documentElement.lang = lang;
+
+        langButtons.forEach((button) => {
+          const isActive = button.dataset.lang === lang;
+          button.classList.toggle('active', isActive);
+          button.setAttribute('aria-pressed', String(isActive));
+        });
+
+        applyStaticTranslations();
+
+        listeners.forEach((callback) => {
+          try {
+            callback(lang);
+          } catch (error) {
+            console.error('Language listener failed', error);
+          }
+        });
+
+        try {
+          localStorage.setItem('preferredLang', lang);
+        } catch (error) {
+          console.warn('Unable to persist language preference', error);
+        }
+      };
+
+      const subscribe = (callback) => {
+        if (typeof callback !== 'function') {
+          return () => {};
+        }
+
+        listeners.add(callback);
+        return () => listeners.delete(callback);
+      };
+
+      window.beaverSystemLocale = {
+        translate,
+        setLanguage,
+        subscribe,
+        getLanguage: () => state.lang
+      };
+
+      langButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+          const { lang } = button.dataset;
+          setLanguage(lang);
+        });
+      });
+
+      const saved = getPreferredLanguage();
+      if (saved && translations[saved]) {
+        setLanguage(saved);
+      } else {
+        setLanguage(state.lang);
+      }
+    })();
+  </script>
+</body>
+</html>
