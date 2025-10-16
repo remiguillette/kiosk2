@@ -555,7 +555,20 @@ function scheduleCookiePersist(electronSession) {
 async function restoreCookies(electronSession) {
   try {
     const raw = await fs.promises.readFile(getCookieStorePath(), 'utf8');
-    const storedCookies = JSON.parse(raw);
+    const trimmed = raw.trim();
+
+    if (trimmed.length === 0) {
+      return;
+    }
+
+    let storedCookies;
+
+    try {
+      storedCookies = JSON.parse(trimmed);
+    } catch (parseError) {
+      console.warn('Ignoring invalid cookie store contents:', parseError);
+      return;
+    }
 
     for (const cookie of storedCookies) {
       const {
