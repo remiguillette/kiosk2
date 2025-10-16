@@ -15,6 +15,9 @@ BeaverKiosk est une application kiosque moderne qui regroupe deux services phare
 - `docs/` : notes d'architecture (ex. double canal WebSocket).
 - `icon/` et `contact/` : médias utilisés par les tuiles et les cartes contacts.【F:main.js†L18-L120】【F:docs/double-websocket.md†L1-L36】【F:page/menu.html†L1-L120】
 
+## Liste des applications
+- BeaverPhone (version finale)
+
 ## Scripts clés
 ### main.js
 - Démarre un serveur de contenu qui distribue les fichiers statiques depuis `page/` et les dossiers médias, en sécurisant les accès (GET/HEAD uniquement, interdiction des traversées de répertoires).【F:main.js†L18-L120】
