@@ -123,6 +123,17 @@ createIcons({ icons });
 document.body.append('<i data-lucide="file-text"></i>');
 </code></pre>
 
+<h3>flamet</h3>
+<p>
+  <a href="./flame.svg">flame.svg</a><br />
+  <img src="./flame.svg" alt="Doc" width="48" height="48" />
+</p>
+<pre><code>import { createIcons, icons } from 'lucide';
+
+createIcons({ icons });
+
+document.body.append('<i data-lucide="flame"></i>');
+</code></pre>
 
 
 
