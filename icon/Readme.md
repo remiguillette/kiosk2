@@ -137,7 +137,7 @@ document.body.append('<i data-lucide="flame"></i>');
 
 <h3>siren</h3>
 <p>
-  <a href="./siren.svg">flame.svg</a><br />
+  <a href="./siren.svg">siren.svg</a><br />
   <img src="./siren.svg" alt="Doc" width="48" height="48" />
 </p>
 <pre><code>import { createIcons, icons } from 'lucide';
