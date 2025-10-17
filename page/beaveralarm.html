@@ -139,14 +139,9 @@
     .grid {
       display: grid;
       gap: clamp(1.2rem, 2vw, 1.8rem);
-      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 0.9fr);
+      grid-template-columns: repeat(auto-fit, minmax(320px, 420px));
+      justify-content: center;
       align-items: stretch;
-    }
-
-    @media (max-width: 1100px) {
-      .grid {
-        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-      }
     }
 
     @media (max-width: 820px) {
@@ -432,102 +427,10 @@
       color: var(--text-soft);
     }
 
-    .panel--simulation {
-      gap: 1rem;
-    }
-
-    .sim-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.8rem;
-      flex-wrap: wrap;
-    }
-
     .countdown {
       font-weight: 700;
       color: var(--accent-strong);
       min-height: 1.2rem;
-    }
-
-    .sim-controls {
-      display: flex;
-      flex-direction: column;
-      gap: 0.8rem;
-    }
-
-    .control-group {
-      display: flex;
-      flex-direction: column;
-      gap: 0.4rem;
-    }
-
-    .control-label {
-      font-size: 0.9rem;
-      color: var(--text-soft);
-      font-weight: 600;
-    }
-
-    .select {
-      width: 100%;
-      padding: 0.65rem 0.85rem;
-      border-radius: 12px;
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      color: var(--text-main);
-      font-weight: 600;
-    }
-
-    .sim-actions {
-      display: flex;
-      gap: 0.6rem;
-      flex-wrap: wrap;
-    }
-
-    .log-wrapper {
-      display: flex;
-      flex-direction: column;
-      gap: 0.6rem;
-      max-height: 320px;
-      overflow-y: auto;
-      padding-right: 0.2rem;
-    }
-
-    .log {
-      list-style: none;
-      margin: 0;
-      padding: 0;
-      display: grid;
-      gap: 0.5rem;
-    }
-
-    .log li {
-      display: flex;
-      justify-content: space-between;
-      gap: 0.8rem;
-      padding: 0.6rem 0.8rem;
-      border-radius: 14px;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      font-size: 0.95rem;
-    }
-
-    .log-time {
-      color: var(--text-soft);
-      font-feature-settings: "tnum" 1, "lnum" 1;
-      min-width: 64px;
-    }
-
-    .log-msg {
-      flex: 1;
-      text-align: right;
-      color: var(--text-muted);
-    }
-
-    .empty-log {
-      margin: 0;
-      color: var(--text-soft);
-      font-size: 0.9rem;
     }
 
     @media (max-width: 600px) {
@@ -582,6 +485,7 @@
           </div>
         </div>
         <p id="statusMsg" class="msg" data-i18n="messages.ready">Système prêt à être armé.</p>
+        <div id="countdown" class="countdown" aria-live="polite"></div>
         <div id="codeDisplay" class="code">----</div>
         <div class="keygrid" id="digits" aria-label="Clavier" data-i18n-aria-label="sections.keypad.heading"></div>
         <div class="action-row">
@@ -602,44 +506,6 @@
           <h2 class="section-title" data-i18n="sections.zones.heading">Zones surveillées</h2>
         </div>
         <div class="zone-list" id="zoneList"></div>
-      </article>
-
-      <article class="panel panel--simulation">
-        <div class="panel-heading">
-          <h2 class="section-title" data-i18n="sections.simulation.heading">Simulation & événements</h2>
-          <div class="countdown" id="countdown"></div>
-        </div>
-        <div class="sim-controls">
-          <div class="control-group">
-            <label class="control-label" for="timeScale" data-i18n="sections.simulation.speed">Vitesse</label>
-            <select id="timeScale" class="select">
-              <option value="0.5">0.5×</option>
-              <option value="1">1×</option>
-              <option value="2">2×</option>
-              <option value="4">4×</option>
-            </select>
-          </div>
-          <div class="control-group">
-            <label class="control-label" for="scenario" data-i18n="sections.simulation.scenariosLabel">Scénario automatique</label>
-            <select id="scenario" class="select">
-              <option value="none" data-i18n="sections.simulation.scenarios.none">Choisir...</option>
-              <option value="night" data-i18n="sections.simulation.scenarios.night">Routine soirée</option>
-              <option value="away" data-i18n="sections.simulation.scenarios.away">Départ journée</option>
-              <option value="forgetDoor" data-i18n="sections.simulation.scenarios.forgetDoor">Porte oubliée</option>
-              <option value="powerDown" data-i18n="sections.simulation.scenarios.powerDown">Panne secteur</option>
-              <option value="netFail" data-i18n="sections.simulation.scenarios.netFail">Perte réseau</option>
-              <option value="smoke24h" data-i18n="sections.simulation.scenarios.smoke24h">Détection fumée (24h)</option>
-            </select>
-          </div>
-          <div class="sim-actions">
-            <button class="action" id="btnRunScenario" data-i18n="sections.simulation.run">Lancer</button>
-            <button class="action action--ghost" id="btnStopScenario" data-i18n="sections.simulation.stop">Arrêter</button>
-          </div>
-        </div>
-        <div class="log-wrapper">
-          <p id="emptyLog" class="empty-log" data-i18n="sections.simulation.empty">Aucun événement pour le moment.</p>
-          <ul id="log" class="log" aria-live="polite"></ul>
-        </div>
       </article>
     </section>
   </main>
@@ -675,23 +541,6 @@
             toggle: { open: 'Ouvrir', close: 'Fermer' },
             badges: { bypass: 'Bypass', fault: 'Défaut' },
             types: { perimeter: 'Périmètre', interior: 'Intérieur', instant: 'Instant', '24h': '24h' }
-          },
-          simulation: {
-            heading: 'Simulation & événements',
-            empty: 'Aucun événement pour le moment.',
-            speed: 'Vitesse',
-            scenariosLabel: 'Scénario automatique',
-            scenarios: {
-              none: 'Choisir...',
-              night: 'Routine soirée',
-              away: 'Départ journée',
-              forgetDoor: 'Porte oubliée',
-              powerDown: 'Panne secteur',
-              netFail: 'Perte réseau',
-              smoke24h: 'Détection fumée (24h)'
-            },
-            run: 'Lancer',
-            stop: 'Arrêter'
           }
         },
         states: {
@@ -802,23 +651,6 @@
             toggle: { open: 'Open', close: 'Close' },
             badges: { bypass: 'Bypass', fault: 'Fault' },
             types: { perimeter: 'Perimeter', interior: 'Interior', instant: 'Instant', '24h': '24h' }
-          },
-          simulation: {
-            heading: 'Simulation & events',
-            empty: 'No events yet.',
-            speed: 'Speed',
-            scenariosLabel: 'Automatic scenario',
-            scenarios: {
-              none: 'Choose...',
-              night: 'Evening routine',
-              away: 'Workday departure',
-              forgetDoor: 'Door left open',
-              powerDown: 'Power outage',
-              netFail: 'Network failure',
-              smoke24h: 'Smoke detection (24h)'
-            },
-            run: 'Run',
-            stop: 'Stop'
           }
         },
         states: {
@@ -949,10 +781,8 @@
       input: '',
       zones: CONFIG.zones.map(z => ({ ...z, open: false, bypass: false, fault: false })),
       timers: { entry: 0, exit: 0, alarm: 0 },
-      timeScale: Number(persisted.timeScale || 1),
       log: Array.isArray(persisted.log) ? persisted.log : [],
       pendingArm: null,
-      scenario: null,
       siren: { active: false, node: null, ctx: null, stop: () => {} },
       statusMessage: { key: 'messages.ready', params: {}, cls: '' },
       countdown: null,
@@ -998,12 +828,6 @@
       btnFire: document.getElementById('btnFire'),
       btnMedical: document.getElementById('btnMedical'),
       zoneList: document.getElementById('zoneList'),
-      log: document.getElementById('log'),
-      emptyLog: document.getElementById('emptyLog'),
-      scenario: document.getElementById('scenario'),
-      runScenario: document.getElementById('btnRunScenario'),
-      stopScenario: document.getElementById('btnStopScenario'),
-      timeScale: document.getElementById('timeScale'),
       countdown: document.getElementById('countdown')
     };
 
@@ -1095,7 +919,6 @@
       const zonesState = Object.fromEntries(runtime.zones.map(z => [z.id, { open: z.open, bypass: z.bypass, fault: z.fault }]));
       store.save({
         lang: runtime.lang,
-        timeScale: runtime.timeScale,
         zones: zonesState,
         log: runtime.log
       });
@@ -1178,7 +1001,6 @@
       if (runtime.log.length > 100) {
         runtime.log.length = 100;
       }
-      renderLog();
       persist();
     }
 
@@ -1340,8 +1162,7 @@
     }
 
     function tick() {
-      const scale = runtime.timeScale || 1;
-      const dt = 0.25 * scale;
+      const dt = 0.25;
 
       if (runtime.system === STATE.EXIT_DELAY) {
         runtime.timers.exit = Math.max(0, runtime.timers.exit - dt);
@@ -1374,78 +1195,6 @@
           setMsg('messages.alarmSilenced', {}, 'msg--warn');
         }
       }
-    }
-
-    const scenarios = {
-      night() {
-        runtime.input = '1234';
-        displayCode();
-        arm(STATE.ARMED_STAY);
-        after(1000, () => {
-          after((CONFIG.exitDelay + 2) * 1000, () => {
-            openZone('frontDoor', true);
-            after(2000, () => {
-              runtime.input = '1234';
-              displayCode();
-              disarm();
-              openZone('frontDoor', false);
-            });
-          });
-        });
-      },
-      away() {
-        runtime.input = '1234';
-        displayCode();
-        arm(STATE.ARMED_AWAY);
-        after((CONFIG.exitDelay + 2) * 1000, () => {
-          openZone('livingRoom', true);
-          after(4000, () => {
-            runtime.input = '1234';
-            displayCode();
-            disarm();
-            openZone('livingRoom', false);
-          });
-        });
-      },
-      forgetDoor() {
-        openZone('frontDoor', true);
-        runtime.input = '1234';
-        displayCode();
-        arm(STATE.ARMED_AWAY);
-        after(2500, () => openZone('frontDoor', false));
-      },
-      powerDown() {
-        setPower(false);
-        after(10000, () => setPower(true));
-      },
-      netFail() {
-        setNet(false);
-        after(15000, () => setNet(true));
-      },
-      smoke24h() {
-        openZone('smoke', true);
-        after(5000, () => openZone('smoke', false));
-      }
-    };
-
-    let scenarioTimer = null;
-    function after(ms, fn) {
-      scenarioTimer = setTimeout(fn, ms / (runtime.timeScale || 1));
-    }
-
-    function runScenario(name) {
-      stopScenario();
-      if (!name || name === 'none') return;
-      const scenario = scenarios[name];
-      if (scenario) scenario();
-    }
-
-    function stopScenario() {
-      if (scenarioTimer) {
-        clearTimeout(scenarioTimer);
-        scenarioTimer = null;
-      }
-      runtime.scenario = null;
     }
 
     function setPower(ok) {
@@ -1555,35 +1304,12 @@
       });
     }
 
-    function renderLog() {
-      el.log.innerHTML = '';
-      if (!runtime.log.length) {
-        el.emptyLog.hidden = false;
-        return;
-      }
-      el.emptyLog.hidden = true;
-      runtime.log.forEach(entry => {
-        const li = document.createElement('li');
-        const ts = document.createElement('span');
-        ts.className = 'log-time';
-        ts.textContent = new Date(entry.ts).toLocaleTimeString(runtime.lang === 'fr' ? 'fr-CA' : 'en-CA', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        const msg = document.createElement('span');
-        msg.className = 'log-msg';
-        const params = resolveParams(entry.params);
-        msg.textContent = tr(`logs.${entry.key}`, params);
-        li.append(ts, msg);
-        el.log.appendChild(li);
-      });
-    }
-
     renderDigits();
     renderZones();
-    renderLog();
     displayCode();
     applyTranslations();
     applyStatusMessage();
     applyCountdown();
-    el.timeScale.value = String(runtime.timeScale);
 
     el.btnStay.addEventListener('click', () => arm(STATE.ARMED_STAY));
     el.btnAway.addEventListener('click', () => arm(STATE.ARMED_AWAY));
@@ -1594,14 +1320,6 @@
     el.btnFire.addEventListener('click', () => openZone('smoke', true));
     el.btnMedical.addEventListener('click', () => alarm('medical'));
 
-    el.timeScale.addEventListener('change', () => {
-      runtime.timeScale = Math.max(0.1, Number(el.timeScale.value) || 1);
-      persist();
-    });
-
-    el.runScenario.addEventListener('click', () => runScenario(el.scenario.value));
-    el.stopScenario.addEventListener('click', () => stopScenario());
-
     el.langButtons.forEach(btn => {
       btn.addEventListener('click', () => {
         const lang = btn.dataset.lang;
@@ -1609,7 +1327,6 @@
           runtime.lang = lang;
           applyTranslations();
           renderZones();
-          renderLog();
           applyStatusMessage();
           applyCountdown();
           persist();
