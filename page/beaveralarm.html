@@ -286,27 +286,53 @@
     .key,
     .action {
       appearance: none;
-      border: none;
       border-radius: 16px;
       font-weight: 700;
       font-size: 1.05rem;
       padding: 0.85rem;
       cursor: pointer;
-      color: var(--text-main);
-      background: rgba(255, 255, 255, 0.05);
+      transition: transform 160ms ease, background 160ms ease, border 160ms ease, box-shadow 160ms ease, color 160ms ease;
+    }
+
+    .key {
       border: 1px solid rgba(255, 255, 255, 0.08);
-      transition: transform 160ms ease, background 160ms ease, border 160ms ease, box-shadow 160ms ease;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-main);
+    }
+
+    .action {
+      border: 1px solid var(--action-border, rgba(255, 255, 255, 0.08));
+      background: var(--action-bg, rgba(255, 255, 255, 0.05));
+      color: var(--action-text, var(--text-main));
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.55rem;
+      line-height: 1;
+      padding: 0.85rem 1rem;
+      --action-border-hover: var(--accent);
+      --action-bg-hover: rgba(248, 148, 34, 0.16);
+      --action-shadow: rgba(248, 148, 34, 0.18);
+      --action-icon-bg: rgba(255, 255, 255, 0.08);
+      --action-icon-color: currentColor;
     }
 
     .key:hover,
-    .key:focus-visible,
-    .action:hover,
-    .action:focus-visible {
+    .key:focus-visible {
       transform: translateY(-2px);
       border-color: var(--accent);
       background: rgba(248, 148, 34, 0.16);
       outline: none;
       box-shadow: 0 10px 24px rgba(248, 148, 34, 0.18);
+    }
+
+    .action:hover,
+    .action:focus-visible {
+      transform: translateY(-2px);
+      border-color: var(--action-border-hover);
+      background: var(--action-bg-hover);
+      outline: none;
+      box-shadow: 0 10px 24px var(--action-shadow);
     }
 
     .action-row {
@@ -316,24 +342,109 @@
       flex-wrap: wrap;
     }
 
+    .action-row--alerts .action {
+      flex: 1 1 220px;
+      justify-content: flex-start;
+    }
+
+    .action-row--alerts .action-label {
+      font-size: 0.95rem;
+    }
+
     .action--stay {
-      background: rgba(248, 148, 34, 0.16);
-      border-color: rgba(248, 148, 34, 0.4);
+      --action-bg: rgba(248, 148, 34, 0.16);
+      --action-border: rgba(248, 148, 34, 0.4);
+      --action-bg-hover: rgba(248, 148, 34, 0.24);
+      --action-border-hover: rgba(248, 148, 34, 0.7);
+      --action-shadow: rgba(248, 148, 34, 0.28);
+      --action-icon-bg: rgba(248, 148, 34, 0.22);
+      --action-icon-color: #ffd1a1;
     }
 
     .action--away {
-      background: rgba(255, 107, 107, 0.16);
-      border-color: rgba(255, 107, 107, 0.38);
+      --action-bg: rgba(255, 107, 107, 0.16);
+      --action-border: rgba(255, 107, 107, 0.38);
+      --action-bg-hover: rgba(255, 107, 107, 0.24);
+      --action-border-hover: rgba(255, 107, 107, 0.6);
+      --action-shadow: rgba(255, 107, 107, 0.28);
+      --action-icon-bg: rgba(255, 107, 107, 0.24);
+      --action-icon-color: #ffb3b3;
     }
 
     .action--disarm {
-      background: rgba(71, 209, 123, 0.16);
-      border-color: rgba(71, 209, 123, 0.38);
-      color: var(--success);
+      --action-bg: rgba(71, 209, 123, 0.16);
+      --action-border: rgba(71, 209, 123, 0.38);
+      --action-bg-hover: rgba(71, 209, 123, 0.24);
+      --action-border-hover: rgba(71, 209, 123, 0.6);
+      --action-shadow: rgba(71, 209, 123, 0.25);
+      --action-icon-bg: rgba(71, 209, 123, 0.24);
+      --action-icon-color: #a6f4c5;
+      --action-text: var(--success);
     }
 
     .action--ghost {
-      background: rgba(255, 255, 255, 0.02);
+      --action-bg: rgba(255, 255, 255, 0.02);
+      --action-border: rgba(255, 255, 255, 0.08);
+    }
+
+    .action--panic {
+      --action-bg: rgba(255, 95, 86, 0.16);
+      --action-border: rgba(255, 95, 86, 0.45);
+      --action-bg-hover: rgba(255, 95, 86, 0.24);
+      --action-border-hover: rgba(255, 95, 86, 0.65);
+      --action-shadow: rgba(255, 95, 86, 0.32);
+      --action-icon-bg: rgba(255, 95, 86, 0.22);
+      --action-icon-color: #ffb4ae;
+      letter-spacing: 0.06em;
+    }
+
+    .action--fire {
+      --action-bg: rgba(255, 159, 51, 0.16);
+      --action-border: rgba(255, 159, 51, 0.45);
+      --action-bg-hover: rgba(255, 159, 51, 0.24);
+      --action-border-hover: rgba(255, 159, 51, 0.65);
+      --action-shadow: rgba(255, 159, 51, 0.3);
+      --action-icon-bg: rgba(255, 159, 51, 0.22);
+      --action-icon-color: #ffd3a6;
+    }
+
+    .action--medical {
+      --action-bg: rgba(86, 179, 255, 0.16);
+      --action-border: rgba(86, 179, 255, 0.45);
+      --action-bg-hover: rgba(86, 179, 255, 0.24);
+      --action-border-hover: rgba(86, 179, 255, 0.6);
+      --action-shadow: rgba(86, 179, 255, 0.28);
+      --action-icon-bg: rgba(86, 179, 255, 0.22);
+      --action-icon-color: #cfe9ff;
+    }
+
+    .action-icon {
+      width: 2.25rem;
+      height: 2.25rem;
+      border-radius: 14px;
+      background: var(--action-icon-bg);
+      color: var(--action-icon-color);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 160ms ease, color 160ms ease, transform 160ms ease;
+    }
+
+    .action-icon svg {
+      width: 1.35rem;
+      height: 1.35rem;
+    }
+
+    .action:hover .action-icon,
+    .action:focus-visible .action-icon {
+      transform: translateY(-1px);
+    }
+
+    .action-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      letter-spacing: 0.02em;
     }
 
     .zone-list {
@@ -508,10 +619,43 @@
           <button class="action action--disarm" id="btnDisarm" data-i18n="sections.keypad.buttons.disarm">Désarmer</button>
           <button class="action" id="btnClear" data-i18n="sections.keypad.buttons.clear">Effacer</button>
         </div>
-        <div class="action-row">
-          <button class="action" id="btnPanic" data-i18n="sections.keypad.buttons.panic">PANIC 🚨</button>
-          <button class="action" id="btnFire" data-i18n="sections.keypad.buttons.fire">FEU 🔥 (24h)</button>
-          <button class="action" id="btnMedical" data-i18n="sections.keypad.buttons.medical">Médical ⛑️ (24h)</button>
+        <div class="action-row action-row--alerts">
+          <button class="action action--panic" id="btnPanic">
+            <span class="action-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M7 18v-6a5 5 0 1 1 10 0v6"></path>
+                <path d="M5 21a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-1a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2z"></path>
+                <path d="M21 12h1"></path>
+                <path d="M18.5 4.5 18 5"></path>
+                <path d="M2 12h1"></path>
+                <path d="M12 2v1"></path>
+                <path d="m4.929 4.929.707.707"></path>
+                <path d="M12 12v6"></path>
+              </svg>
+            </span>
+            <span class="action-label" data-i18n="sections.keypad.buttons.panic">PANIC</span>
+          </button>
+          <button class="action action--fire" id="btnFire">
+            <span class="action-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 3q1 4 4 6.5t3 5.5a1 1 0 0 1-14 0 5 5 0 0 1 1-3 1 1 0 0 0 5 0c0-2-1.5-3-1.5-5q0-2 2.5-4"></path>
+              </svg>
+            </span>
+            <span class="action-label" data-i18n="sections.keypad.buttons.fire">FEU (24h)</span>
+          </button>
+          <button class="action action--medical" id="btnMedical">
+            <span class="action-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 11v4"></path>
+                <path d="M14 13h-4"></path>
+                <path d="M16 6V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"></path>
+                <path d="M18 6v14"></path>
+                <path d="M6 6v14"></path>
+                <rect width="20" height="14" x="2" y="6" rx="2"></rect>
+              </svg>
+            </span>
+            <span class="action-label" data-i18n="sections.keypad.buttons.medical">Médical (24h)</span>
+          </button>
         </div>
       </article>
 
@@ -544,9 +688,9 @@
               away: 'Armement absence',
               disarm: 'Désarmer',
               clear: 'Effacer',
-              panic: 'PANIC 🚨',
-              fire: 'FEU 🔥 (24h)',
-              medical: 'Médical ⛑️ (24h)'
+              panic: 'PANIC',
+              fire: 'FEU (24h)',
+              medical: 'Médical (24h)'
             }
           },
           zones: {
@@ -654,9 +798,9 @@
               away: 'Away arming',
               disarm: 'Disarm',
               clear: 'Clear',
-              panic: 'PANIC 🚨',
-              fire: 'FIRE 🔥 (24h)',
-              medical: 'Medical ⛑️ (24h)'
+              panic: 'PANIC',
+              fire: 'FIRE (24h)',
+              medical: 'Medical (24h)'
             }
           },
           zones: {

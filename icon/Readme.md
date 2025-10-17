@@ -7,6 +7,12 @@
   to inject the icon at runtime.
 </p>
 
+<p>
+  Emergency SVGs (panic, fire, medical) expose their strokes via
+  <code>currentColor</code> so BeaverAlarm can tint them through CSS variables and
+  keep the UI consistent with the alert palette.
+</p>
+
 <h2>Menu</h2>
 
 <h3>Phone</h3>
@@ -123,40 +129,51 @@ createIcons({ icons });
 document.body.append('<i data-lucide="file-text"></i>');
 </code></pre>
 
-<h3>flame</h3>
+<h2>BeaverAlarm</h2>
+
 <p>
-  <a href="./flame.svg">flame.svg</a><br />
-  <img src="./flame.svg" alt="Doc" width="48" height="48" />
+  Panic, Fire (24h), and Medical (24h) shortcuts inline their Lucide icons so the
+  stroke inherits the button color tokens. The capsule backgrounds and accent
+  values live beside the markup in <code>page/beaveralarm.html</code>.
 </p>
-<pre><code>import { createIcons, icons } from 'lucide';
 
-createIcons({ icons });
-
-document.body.append('<i data-lucide="flame"></i>');
+<p>
+  Shared skeleton for each emergency action:
+</p>
+<pre><code>&lt;button class="action action--panic"&gt;
+  &lt;span class="action-icon" aria-hidden="true"&gt;
+    &lt;svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"&gt;
+      &amp;hellip; icon paths &amp;hellip;
+    &lt;/svg&gt;
+  &lt;/span&gt;
+  &lt;span class="action-label"&gt;PANIC&lt;/span&gt;
+&lt;/button&gt;
 </code></pre>
 
-<h3>siren</h3>
+<h3>Panic</h3>
 <p>
   <a href="./siren.svg">siren.svg</a><br />
-  <img src="./siren.svg" alt="Doc" width="48" height="48" />
+  <img src="./siren.svg" alt="Siren icon" width="48" height="48" />
 </p>
-<pre><code>import { createIcons, icons } from 'lucide';
+<p>
+  Tinted via <code>.action--panic</code> with a red alert palette.
+</p>
 
-createIcons({ icons });
+<h3>Fire (24h)</h3>
+<p>
+  <a href="./flame.svg">flame.svg</a><br />
+  <img src="./flame.svg" alt="Flame icon" width="48" height="48" />
+</p>
+<p>
+  Uses the amber variant supplied by <code>.action--fire</code>.
+</p>
 
-document.body.append('<i data-lucide="siren"></i>');
-</code></pre>
-
-<h3>briefcase-medical</h3>
+<h3>Medical (24h)</h3>
 <p>
   <a href="./briefcase-medical.svg">briefcase-medical.svg</a><br />
-  <img src="./briefcase-medical.svg" alt="Doc" width="48" height="48" />
+  <img src="./briefcase-medical.svg" alt="Medical briefcase icon" width="48" height="48" />
 </p>
-<pre><code>import { createIcons, icons } from 'lucide';
-
-createIcons({ icons });
-
-document.body.append('<i data-lucide="briefcase-medical"></i>');
-</code></pre>
-
+<p>
+  Styled with the cyan hues from <code>.action--medical</code>.
+</p>
 
