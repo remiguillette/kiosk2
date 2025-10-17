@@ -18,7 +18,8 @@ BeaverKiosk est une application kiosque moderne qui regroupe deux services phare
 ## Liste des applications
 - BeaverPhone (version finale)
 - BeaverSystem (version finale)
-- BeaverAlarm 
+- BeaverAlarm (version finale)
+- BeaverTask (version finale)
 
 ## Scripts clés
 ### main.js
