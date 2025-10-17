@@ -41,6 +41,13 @@
         var(--bg);
       color: var(--text-main);
       padding: clamp(2.5rem, 5vw + 1rem, 3.5rem) clamp(1.25rem, 4vw, 2.5rem);
+      overflow-y: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    body::-webkit-scrollbar {
+      display: none;
     }
 
     .beaverphone {
