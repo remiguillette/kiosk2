@@ -129,6 +129,18 @@ createIcons({ icons });
 document.body.append('<i data-lucide="file-text"></i>');
 </code></pre>
 
+<h3>server-cog</h3>
+<p>
+  <a href="./server-cog.svg">server-cog.svg</a><br />
+  <img src="./server-cog.svg" alt="Doc" width="48" height="48" />
+</p>
+<pre><code>import { createIcons, icons } from 'lucide';
+
+createIcons({ icons });
+
+document.body.append('<i data-lucide="file-text"></i>');
+</code></pre>
+
 <h2>BeaverAlarm</h2>
 
 <p>
