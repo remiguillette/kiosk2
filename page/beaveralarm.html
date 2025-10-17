@@ -359,9 +359,22 @@
 
     .z-left {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       gap: 0.65rem;
+      min-width: 0;
+    }
+
+    .z-content {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      min-width: 0;
+    }
+
+    .zone-name {
       font-weight: 700;
+      font-size: 1rem;
+      line-height: 1.25;
     }
 
     .dot {
@@ -382,6 +395,7 @@
       display: flex;
       gap: 0.4rem;
       flex-wrap: wrap;
+      min-width: 0;
     }
 
     .badge {
@@ -1252,6 +1266,7 @@
         const dot = document.createElement('span');
         dot.className = 'dot' + (z.open ? ' open' : '');
         const name = document.createElement('span');
+        name.className = 'zone-name';
         name.textContent = zoneLabel(z.id);
         const badges = document.createElement('div');
         badges.className = 'z-badges';
@@ -1271,7 +1286,11 @@
           badge.textContent = tr('sections.zones.badges.fault');
           badges.appendChild(badge);
         }
-        left.append(dot, name, badges);
+        const textWrap = document.createElement('div');
+        textWrap.className = 'z-content';
+        textWrap.append(name, badges);
+
+        left.append(dot, textWrap);
 
         const right = document.createElement('div');
         right.className = 'zone-controls';
