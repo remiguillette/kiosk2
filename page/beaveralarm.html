@@ -66,17 +66,6 @@
       justify-content: flex-start;
     }
 
-    .app-title {
-      margin: 0;
-      font-weight: 700;
-      font-size: clamp(1.8rem, 4vw, 2.4rem);
-      color: var(--accent);
-    }
-
-    .app-subtitle {
-      margin: 0.1rem 0 0;
-    }
-
     header .eyebrow {
       letter-spacing: 0.2em;
       text-transform: uppercase;
@@ -575,9 +564,7 @@
             </svg>
           </span>
         </a>
-        <div>
-          <div class="app-title" data-i18n="header.brand">BEAVERALARM</div>
-        </div>
+        <span class="eyebrow" data-i18n="header.brand">BeaverAlarm</span>
       </div>
       <div class="lang-toggle" role="group" aria-label="Sélecteur de langue" data-i18n-aria-label="header.languageLabel">
         <button type="button" class="lang-btn active" data-lang="fr" aria-pressed="true">FR</button>
@@ -663,7 +650,7 @@
       fr: {
         meta: { title: 'BeaverAlarm – Simulateur complet' },
         header: {
-          brand: 'BEAVERALARM',
+          brand: 'BeaverAlarm',
           subtitle: 'Simulateur complet (hors ligne)',
           menuAria: 'Retour au menu',
           languageLabel: 'Sélecteur de langue'
