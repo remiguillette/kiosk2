@@ -147,4 +147,16 @@ createIcons({ icons });
 document.body.append('<i data-lucide="siren"></i>');
 </code></pre>
 
+<h3>briefcase-medical</h3>
+<p>
+  <a href="./briefcase-medical.svg">briefcase-medical.svg</a><br />
+  <img src="./briefcase-medical.svg" alt="Doc" width="48" height="48" />
+</p>
+<pre><code>import { createIcons, icons } from 'lucide';
+
+createIcons({ icons });
+
+document.body.append('<i data-lucide="briefcase-medical"></i>');
+</code></pre>
+
 
