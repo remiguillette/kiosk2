@@ -39,6 +39,16 @@ document.body.append('<i data-lucide="phone"></i>');
   <img src="./check-square.svg" alt="Task icon" width="48" height="48" />
 </p>
 
+<h3>BeaverDebian</h3>
+<p>
+  <a href="./server-cog.svg">server-cog.svg</a><br />
+  <img src="./server-cog.svg" alt="Server icon" width="48" height="48" />
+</p>
+<p>
+  The stroke already uses the Beaver orange (<code>#f89422</code>) so the menu tile
+  ships with the brand color baked in, matching the glow applied on hover.
+</p>
+
 <h2>Beaverphone</h2>
 
 <h3>Return menu</h3>
@@ -132,13 +142,13 @@ document.body.append('<i data-lucide="file-text"></i>');
 <h3>server-cog</h3>
 <p>
   <a href="./server-cog.svg">server-cog.svg</a><br />
-  <img src="./server-cog.svg" alt="Doc" width="48" height="48" />
+  <img src="./server-cog.svg" alt="Server icon" width="48" height="48" />
 </p>
 <pre><code>import { createIcons, icons } from 'lucide';
 
 createIcons({ icons });
 
-document.body.append('<i data-lucide="file-text"></i>');
+document.body.append('<i data-lucide="server-cog"></i>');
 </code></pre>
 
 <h2>BeaverAlarm</h2>
