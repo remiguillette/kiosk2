@@ -53,14 +53,14 @@ document.body.append('<i data-lucide="phone"></i>');
 
 <h3>Return menu</h3>
 <p>
-  <a href="./house.svg">house.svg</a><br />
-  <img src="./house.svg" alt="House icon" width="48" height="48" />
+  <a href="./arrow-left.svg">arrow-left.svg</a><br />
+  <img src="./arrow-left.svg" alt="Arrow left icon" width="48" height="48" />
 </p>
 <pre><code>import { createIcons, icons } from 'lucide';
 
 createIcons({ icons });
 
-document.body.append('<i data-lucide="house"></i>');
+document.body.append('<i data-lucide="arrow-left"></i>');
 </code></pre>
 
 <h2>Dialpad</h2>
