@@ -7,6 +7,7 @@ BeaverKiosk est une application kiosque moderne qui regroupe deux services phare
 1. Installer les dépendances avec `npm install`.
 2. Lancer l'application Electron via `npm start`.
 3. Le processus principal démarre un serveur HTTP sur `http://127.0.0.1:5000` et charge automatiquement la page `page/menu.html` dans la fenêtre Electron.【F:README.md†L13-L27】【F:main.js†L18-L98】
+4. Initialiser la base SQLite (utilisateur par défaut `admin`) avec `npm run setup:db`. Le script installe `better-sqlite3` si nécessaire, crée `data/kiosk.db` et normalise les identifiants dans `data/login-seed.json`.【F:scripts/setup-db.js†L1-L176】
 
 ## Structure des dossiers
 - `page/` : toutes les interfaces utilisateur (menu, BeaverPhone, domotique, etc.).
@@ -22,6 +23,10 @@ BeaverKiosk est une application kiosque moderne qui regroupe deux services phare
 - BeaverTask (version finale)
 
 ## Scripts clés
+### scripts/setup-db.js
+- Automatise la création du dossier `data/`, du fichier `data/login-seed.json` et de la base `data/kiosk.db`.【F:scripts/setup-db.js†L7-L171】
+- Exécute la migration `users` (JSON dans la colonne `metadata`) et synchronise les comptes de connexion en hashant automatiquement les mots de passe définis dans le fichier seed.【F:scripts/setup-db.js†L88-L170】
+
 ### main.js
 - Démarre un serveur de contenu qui distribue les fichiers statiques depuis `page/` et les dossiers médias, en sécurisant les accès (GET/HEAD uniquement, interdiction des traversées de répertoires).【F:main.js†L18-L120】
 - Crée la fenêtre Electron principale, applique des raccourcis globaux et gère la persistance des cookies/sessions utilisateurs pour une expérience continue hors ligne.【F:main.js†L122-L279】
