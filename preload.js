@@ -73,35 +73,31 @@ setInterval(() => {
   }
 }, 30000);
 
-const handleDialpadEvent = (event) => {
-  const { action, number } = event.detail || {};
+connectBeaverphoneWS();
 
-  console.log("[BeaverPhone] 🎛️ Événement dialpad reçu:", { action, number });
-
-  switch (action) {
-    case "dial":
-      sendPayload("dial", { number });
-      break;
-    case "hangup":
-      sendPayload("hangup");
-      break;
-    case "dtmf":
-      sendPayload("dtmf", { digit: number });
-      break;
-    case "clear":
-      sendPayload("clear");
-      break;
-    default:
-      console.warn("[BeaverPhone] ❓ Action inconnue:", action);
-  }
-};
-
-// Initialise la logique BeaverPhone uniquement lorsque la page correspondante est chargée
+// Capture des événements du dialpad
 window.addEventListener("DOMContentLoaded", () => {
-  const app = document.body?.dataset?.app;
-  if (app === "beaverphone") {
-    connectBeaverphoneWS();
-    window.addEventListener("beaverphone:dialpad", handleDialpadEvent);
-  }
+  window.addEventListener("beaverphone:dialpad", (event) => {
+    const { action, number } = event.detail || {};
+
+    console.log("[BeaverPhone] 🎛️ Événement dialpad reçu:", { action, number });
+
+    switch (action) {
+      case "dial":
+        sendPayload("dial", { number });
+        break;
+      case "hangup":
+        sendPayload("hangup");
+        break;
+      case "dtmf":
+        sendPayload("dtmf", { digit: number });
+        break;
+      case "clear":
+        sendPayload("clear");
+        break;
+      default:
+        console.warn("[BeaverPhone] ❓ Action inconnue:", action);
+    }
+  });
 });
 
