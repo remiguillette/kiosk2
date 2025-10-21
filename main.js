@@ -753,6 +753,9 @@ async function restoreCookies(electronSession) {
         value,
       };
 
+      const hasHostPrefix = typeof name === 'string' && name.startsWith('__Host-');
+      const hasSecurePrefix = typeof name === 'string' && name.startsWith('__Secure-');
+
       if (typeof domain === 'string' && domain.length > 0) {
         details.domain = domain;
       }
@@ -779,6 +782,39 @@ async function restoreCookies(electronSession) {
 
       if (typeof priority === 'string' && priority.length > 0) {
         details.priority = priority;
+      }
+
+      if (hasHostPrefix || hasSecurePrefix) {
+        let parsedUrl;
+
+        try {
+          parsedUrl = new URL(url);
+        } catch (parseError) {
+          console.warn('Skipping cookie with invalid URL for secure prefix:', { name, url }, parseError);
+          continue;
+        }
+
+        if (parsedUrl.protocol !== 'https:') {
+          console.warn('Skipping cookie with insecure URL for secure prefix:', { name, url });
+          continue;
+        }
+
+        if (secure !== true) {
+          console.warn('Skipping cookie missing secure flag for secure prefix:', { name, url });
+          continue;
+        }
+
+        if (hasHostPrefix) {
+          if (details.path && details.path !== '/') {
+            console.warn('Skipping __Host- cookie with invalid path:', { name, path: details.path });
+            continue;
+          }
+
+          if (Object.prototype.hasOwnProperty.call(details, 'domain')) {
+            console.warn('Skipping __Host- cookie with domain attribute:', { name, domain: details.domain });
+            continue;
+          }
+        }
       }
 
       try {
