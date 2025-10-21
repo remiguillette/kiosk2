@@ -838,25 +838,75 @@ function createWindow() {
     const script = `(() => {
       const MENU_URL = ${JSON.stringify(menuUrl)};
       const MENU_ORIGIN = ${JSON.stringify(menuOrigin)};
-      const existing = document.getElementById('backToMenu');
+      const WRAPPER_ID = 'backToMenuWrapper';
+      const BUTTON_ID = 'backToMenu';
+      const existingWrapper = document.getElementById(WRAPPER_ID);
       const onLocalOrigin = window.location.origin === MENU_ORIGIN;
 
+      const setInteractivity = (wrapper, btn) => {
+        if (!wrapper || !btn || wrapper.dataset.interactive === 'true') return;
+
+        wrapper.dataset.interactive = 'true';
+
+        let touchHideTimeout;
+
+        const showButton = () => {
+          btn.style.opacity = '1';
+          btn.style.pointerEvents = 'auto';
+          btn.style.transform = 'translateY(0)';
+        };
+
+        const hideButton = () => {
+          btn.style.opacity = '0';
+          btn.style.pointerEvents = 'none';
+          btn.style.transform = 'translateY(-6px)';
+        };
+
+        wrapper.addEventListener('mouseenter', showButton);
+        wrapper.addEventListener('mouseleave', () => {
+          if (!btn.matches(':focus')) hideButton();
+        });
+        wrapper.addEventListener('touchstart', () => {
+          showButton();
+          if (touchHideTimeout) clearTimeout(touchHideTimeout);
+          touchHideTimeout = setTimeout(() => {
+            if (!btn.matches(':focus')) hideButton();
+          }, 2500);
+        }, { passive: true });
+        btn.addEventListener('focus', showButton);
+        btn.addEventListener('blur', hideButton);
+
+        hideButton();
+      };
+
       if (onLocalOrigin) {
-        if (existing) existing.remove();
+        if (existingWrapper) existingWrapper.remove();
         return;
       }
 
-      if (!existing) {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.id = 'backToMenu';
-        btn.setAttribute('aria-label', 'Return to menu');
+      if (!existingWrapper) {
+        const wrapper = document.createElement('div');
+        wrapper.id = WRAPPER_ID;
 
-        Object.assign(btn.style, {
+        Object.assign(wrapper.style, {
           position: 'fixed',
           top: '20px',
           left: '20px',
           zIndex: 9999,
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '4px',
+          borderRadius: '16px',
+          background: 'transparent'
+        });
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.id = BUTTON_ID;
+        btn.setAttribute('aria-label', 'Return to menu');
+
+        Object.assign(btn.style, {
           display: 'inline-flex',
           alignItems: 'center',
           gap: '0.5rem',
@@ -869,16 +919,34 @@ function createWindow() {
           borderRadius: '14px',
           cursor: 'pointer',
           boxShadow: '0 8px 24px rgba(0, 0, 0, 0.35)',
-          backdropFilter: 'blur(12px)'
+          backdropFilter: 'blur(12px)',
+          transition: 'opacity 160ms ease, transform 160ms ease',
+          transform: 'translateY(-6px)'
         });
 
-        const icon = document.createElement('span');
+        const ns = 'http://www.w3.org/2000/svg';
+        const icon = document.createElementNS(ns, 'svg');
         icon.setAttribute('aria-hidden', 'true');
-        icon.textContent = '\\ud83c\\udfe0';
-        Object.assign(icon.style, {
-          fontSize: '1.1rem',
-          lineHeight: '1'
-        });
+        icon.setAttribute('width', '20');
+        icon.setAttribute('height', '20');
+        icon.setAttribute('viewBox', '0 0 24 24');
+        icon.setAttribute('fill', 'none');
+        icon.setAttribute('stroke', 'currentColor');
+        icon.setAttribute('stroke-width', '2');
+        icon.setAttribute('stroke-linecap', 'round');
+        icon.setAttribute('stroke-linejoin', 'round');
+
+        const line = document.createElementNS(ns, 'line');
+        line.setAttribute('x1', '19');
+        line.setAttribute('y1', '12');
+        line.setAttribute('x2', '5');
+        line.setAttribute('y2', '12');
+
+        const polyline = document.createElementNS(ns, 'polyline');
+        polyline.setAttribute('points', '12 19 5 12 12 5');
+
+        icon.appendChild(line);
+        icon.appendChild(polyline);
 
         const text = document.createElement('span');
         text.textContent = 'Menu';
@@ -893,7 +961,19 @@ function createWindow() {
             window.location.href = MENU_URL;
           }
         });
-        document.body.appendChild(btn);
+
+        wrapper.appendChild(btn);
+        document.body.appendChild(wrapper);
+
+        setInteractivity(wrapper, btn);
+      } else {
+        const btn = existingWrapper.querySelector('#' + BUTTON_ID);
+        if (btn) {
+          btn.style.opacity = '0';
+          btn.style.pointerEvents = 'none';
+          btn.style.transform = 'translateY(-6px)';
+        }
+        setInteractivity(existingWrapper, btn);
       }
     })();`;
 
