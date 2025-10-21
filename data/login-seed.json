@@ -1,0 +1,13 @@
+{
+  "users": [
+    {
+      "username": "admin",
+      "password_hash": "69cafefed995c5ae7c528135feca443c:2370c1d9fbdfcf89a8dbdb572892ce2b645c47f7ef8c0d299d96cd75deeb104c",
+      "metadata": {
+        "role": "administrator",
+        "createdAt": "2025-10-21T07:45:49.031Z"
+      }
+    }
+  ],
+  "lastSynchronizedAt": "2025-10-21T07:46:25.206Z"
+}

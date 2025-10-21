@@ -4,11 +4,13 @@
   "description": "Kiosque Electron pour BeaverPhone (local) et BeaverNet.ca (cloud)",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "setup:db": "node scripts/setup-db.js"
   },
   "author": "Rémi Guillette RG Groupe",
   "license": "MIT",
   "dependencies": {
+    "better-sqlite3": "^9.4.0",
     "electron-log": "^5.4.3"
   },
   "devDependencies": {
